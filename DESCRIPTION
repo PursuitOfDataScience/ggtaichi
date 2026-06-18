@@ -14,7 +14,8 @@ Description: A data visualization design that compares two (usually on a par
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
-URL: https://github.com/PursuitOfDataScience/ggtaichi
+URL: https://pursuitofdatascience.github.io/ggtaichi/,
+    https://github.com/PursuitOfDataScience/ggtaichi
 BugReports: https://github.com/PursuitOfDataScience/ggtaichi/issues
 Depends:
     R (>= 3.5.0)

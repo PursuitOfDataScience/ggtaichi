@@ -1,3 +1,4 @@
+url: https://pursuitofdatascience.github.io/ggtaichi/
 template:
   bootstrap: 5
 
@@ -21,3 +22,6 @@ navbar:
     href: reference/index.html
   - text: News
     href: news/index.html
+  right:
+  - icon: fa-github fa-lg
+    href: https://github.com/PursuitOfDataScience/ggtaichi
