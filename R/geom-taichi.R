@@ -15,14 +15,6 @@
 #' @param yang_name The label name (in quotes) for the legend of the yang
 #' rendering. Default is \code{NULL}.
 #' @param yang_colors A color vector, usually as hex codes.
-#' @param eyes Whether to draw the two contrasting "eye" dots, one in the head
-#' of each fish, as in a classic taichi symbol. Default is \code{TRUE}.
-#' @param yin_eye The color of the eye sitting in the yin fish. Default is
-#' \code{"gray95"}.
-#' @param yang_eye The color of the eye sitting in the yang fish. Default is
-#' \code{"gray10"}.
-#' @param eye_ratio The radius of each eye relative to the radius of the whole
-#' taichi symbol. Default is \code{1/6}.
 #' @param ... \code{...} accepts any arguments \code{scale_fill_gradientn()} has
 #' .
 #'
@@ -47,14 +39,6 @@
 #' ggplot(data, aes(x,y)) +
 #' geom_taichi(yin = yin_values,
 #'             yang = yang_values)
-#'
-#'
-#' # Hiding the eyes.
-#'
-#' ggplot(data, aes(x,y)) +
-#' geom_taichi(yin = yin_values,
-#'             yang = yang_values,
-#'             eyes = FALSE)
 #'
 #'
 #' # taichi with numeric variables only
@@ -88,28 +72,18 @@ geom_taichi <- function(yin,
                         yang,
                         yang_name = NULL,
                         yang_colors = c("#FED7D8","#FE8C91", "#F5636B", "#E72D3F","#C20824"),
-                        eyes = TRUE,
-                        yin_eye = "gray95",
-                        yang_eye = "gray10",
-                        eye_ratio = 1/6,
                         ...){
-
-  if (eye_ratio <= 0 || eye_ratio >= 0.5) {
-    rlang::abort(message = "`eye_ratio` has to be between 0 and 0.5.")
-  }
 
   if (is.null(yin_name))  yin_name  <- rlang::as_label(rlang::enexpr(yin))
   if (is.null(yang_name)) yang_name <- rlang::as_label(rlang::enexpr(yang))
 
-  list(geom_yin_fish(ggplot2::aes(fill = {{ yin }}),
-                     eyes = eyes, eye_fill = yin_eye, eye_ratio = eye_ratio),
+  list(geom_yin_fish(ggplot2::aes(fill = {{ yin }})),
 
        ggplot2::scale_fill_gradientn(name = yin_name, colors = yin_colors, ...),
 
        ggnewscale::new_scale_fill(),
 
-       geom_yang_fish(ggplot2::aes(fill = {{ yang }}),
-                      eyes = eyes, eye_fill = yang_eye, eye_ratio = eye_ratio),
+       geom_yang_fish(ggplot2::aes(fill = {{ yang }})),
 
        ggplot2::scale_fill_gradientn(name = yang_name, colors = yang_colors, ...))
 
@@ -153,13 +127,13 @@ taichi_fish <- function(cx, cy, r, fish = c("yin", "yang"), n = 50) {
 }
 
 
-# Build a grob (the fish body plus its optional eye) for every taichi cell.
+# Build the grob (one fish body) for every taichi cell.
 #
 # Each taichi is drawn in its own viewport spanning the cell, with the shape
 # offset in "snpc" units so the symbol stays round regardless of the panel
 # aspect ratio, mirroring how `circleGrob()` keeps the original heatcircle
 # round without needing `coord_fixed()`.
-draw_taichi <- function(coords, fish, eyes, eye_fill, eye_ratio) {
+draw_taichi <- function(coords, fish) {
 
   cx <- (coords$xmin + coords$xmax) / 2
   cy <- (coords$ymin + coords$ymax) / 2
@@ -168,7 +142,6 @@ draw_taichi <- function(coords, fish, eyes, eye_fill, eye_ratio) {
 
   # Unit fish (radius 1, centered at the origin), shared by every cell.
   unit <- taichi_fish(0, 0, 1, fish, n = 50)
-  eye_y <- if (fish == "yang") -0.5 else 0.5
 
   grobs <- lapply(seq_len(nrow(coords)), function(i) {
 
@@ -176,9 +149,10 @@ draw_taichi <- function(coords, fish, eyes, eye_fill, eye_ratio) {
                          width  = grid::unit(2 * hw[i], "npc"),
                          height = grid::unit(2 * hh[i], "npc"))
 
-    body <- grid::polygonGrob(
+    grid::polygonGrob(
       x = grid::unit(0.5, "npc") + grid::unit(0.5 * unit$x, "snpc"),
       y = grid::unit(0.5, "npc") + grid::unit(0.5 * unit$y, "snpc"),
+      vp = vp,
       gp = grid::gpar(
         col = coords$colour[i],
         fill = alpha(coords$fill[i], coords$alpha[i]),
@@ -186,20 +160,6 @@ draw_taichi <- function(coords, fish, eyes, eye_fill, eye_ratio) {
         lty = coords$linetype[i]
       )
     )
-
-    if (!isTRUE(eyes)) {
-      return(grid::grobTree(body, vp = vp))
-    }
-
-    # The eye sits in the head of the fish, half a radius from the center.
-    eye <- grid::circleGrob(
-      x = grid::unit(0.5, "npc"),
-      y = grid::unit(0.5, "npc") + grid::unit(0.5 * eye_y, "snpc"),
-      r = grid::unit(0.5 * eye_ratio, "snpc"),
-      gp = grid::gpar(col = NA, fill = eye_fill)
-    )
-
-    grid::grobTree(body, eye, vp = vp)
   })
 
   grid::gTree(children = do.call(grid::gList, grobs))
@@ -232,10 +192,9 @@ GeomYinFish <- ggplot2::ggproto("GeomYinFish", ggplot2::Geom,
 
   setup_data = function(data, params) taichi_setup_data(data, params),
 
-  draw_panel = function(data, panel_params, coord,
-                        eyes = TRUE, eye_fill = "gray95", eye_ratio = 1/6) {
+  draw_panel = function(data, panel_params, coord) {
     coords <- coord$transform(data, panel_params)
-    draw_taichi(coords, "yin", eyes, eye_fill, eye_ratio)
+    draw_taichi(coords, "yin")
   },
 
   default_aes = ggplot2::aes(fill = "grey20", colour = NA, size = 0.1, linetype = 1,
@@ -278,10 +237,9 @@ geom_yin_fish <- function(mapping = NULL, data = NULL,
 
 GeomYangFish <- ggplot2::ggproto("GeomYangFish", GeomYinFish,
 
-  draw_panel = function(data, panel_params, coord,
-                        eyes = TRUE, eye_fill = "gray10", eye_ratio = 1/6) {
+  draw_panel = function(data, panel_params, coord) {
     coords <- coord$transform(data, panel_params)
-    draw_taichi(coords, "yang", eyes, eye_fill, eye_ratio)
+    draw_taichi(coords, "yang")
   }
 )
 

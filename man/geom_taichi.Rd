@@ -11,10 +11,6 @@ geom_taichi(
   yang,
   yang_name = NULL,
   yang_colors = c("#FED7D8", "#FE8C91", "#F5636B", "#E72D3F", "#C20824"),
-  eyes = TRUE,
-  yin_eye = "gray95",
-  yang_eye = "gray10",
-  eye_ratio = 1/6,
   ...
 )
 }
@@ -32,18 +28,6 @@ rendering. Default is \code{NULL}.}
 rendering. Default is \code{NULL}.}
 
 \item{yang_colors}{A color vector, usually as hex codes.}
-
-\item{eyes}{Whether to draw the two contrasting "eye" dots, one in the head
-of each fish, as in a classic taichi symbol. Default is \code{TRUE}.}
-
-\item{yin_eye}{The color of the eye sitting in the yin fish. Default is
-\code{"gray95"}.}
-
-\item{yang_eye}{The color of the eye sitting in the yang fish. Default is
-\code{"gray10"}.}
-
-\item{eye_ratio}{The radius of each eye relative to the radius of the whole
-taichi symbol. Default is \code{1/6}.}
 
 \item{...}{\code{...} accepts any arguments \code{scale_fill_gradientn()} has
 .}
@@ -73,14 +57,6 @@ data <- data.frame(x = rep(c("a", "b", "c"), 3),
 ggplot(data, aes(x,y)) +
 geom_taichi(yin = yin_values,
             yang = yang_values)
-
-
-# Hiding the eyes.
-
-ggplot(data, aes(x,y)) +
-geom_taichi(yin = yin_values,
-            yang = yang_values,
-            eyes = FALSE)
 
 
 # taichi with numeric variables only

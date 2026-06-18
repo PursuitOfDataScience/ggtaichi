@@ -3,6 +3,9 @@ ggtaichi
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/PursuitOfDataScience/ggtaichi/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/PursuitOfDataScience/ggtaichi/actions/workflows/R-CMD-check.yaml)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/ggtaichi)](https://CRAN.R-project.org/package=ggtaichi)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
@@ -23,28 +26,89 @@ You can install the development version from GitHub with:
 devtools::install_github("PursuitOfDataScience/ggtaichi")
 ```
 
-## Usage
+## Anatomy of a taichi
 
-The built-in `pitts_tg` dataset collects the 30-week COVID-related
-Google & Twitter incidence rates for 9 categories in the Pittsburgh
-Metropolitan Statistical Area (MSA). Every cell becomes a taichi
-diagram: the `yang` (light) fish carries one source and the `yin` (dark)
-fish carries the other, each shaded by luminance.
+Each symbol is a circle split by an S-curve into two interlocking fish.
+The **yang** (light) fish is shaded by one source and the **yin** (dark)
+fish by the other, each on its own gradient. There are no decorative
+dots: every drop of ink is data.
 
 ``` r
 library(ggtaichi)
 library(ggplot2)
 
-ggplot(pitts_tg, aes(x = week, y = category)) +
-  geom_taichi(yin = Twitter, yang = Google) +
-  theme_taichi() +
-  ggtitle("Pittsburgh Google & Twitter Incidence Rate (%) Comparison")
+one <- data.frame(x = 1, y = 1, google = 7, twitter = 3)
+
+ggplot(one, aes(x, y)) +
+  geom_taichi(yin = twitter, yang = google) +
+  coord_fixed() +
+  theme_taichi()
 ```
 
-![](man/figures/README-taichi-1.png)<!-- -->
+<img src="man/figures/README-anatomy-1.png" style="display: block; margin: auto;" />
 
-See `vignette("ggtaichi")` for the full tour, including the eyes, the
-color scales, and the `theme_taichi()` / `remove_padding()` helpers.
+## A clear, small grid
+
+The built-in `pitts_tg` dataset holds the 30-week COVID-related Google
+and Twitter incidence rates for 9 categories in the Pittsburgh
+Metropolitan Statistical Area. With many weeks the symbols shrink, so it
+is often easier to read a slice. Here are the first six weeks, where
+each taichi is big enough to compare the two halves at a glance.
+
+``` r
+pitts_small <- subset(pitts_tg, week <= 6)
+
+ggplot(pitts_small, aes(x = week, y = category)) +
+  geom_taichi(yin = Twitter, yang = Google) +
+  theme_taichi() +
+  ggtitle("Pittsburgh: Google (yang) vs Twitter (yin), weeks 1-6")
+```
+
+<img src="man/figures/README-pitts-small-1.png" style="display: block; margin: auto;" />
+
+The legend titles default to the column names you supply. Note how
+`Covid` and `Masks` lean dark (high Twitter) while staying pink
+(moderate Google).
+
+## Your own palettes
+
+Each fish gets its own gradient, and any extra argument is passed
+straight to `ggplot2::scale_fill_gradientn()`.
+
+``` r
+ggplot(pitts_small, aes(x = week, y = category)) +
+  geom_taichi(
+    yin  = Twitter, yin_name  = "Twitter (%)",
+    yin_colors  = c("#deebf7", "#3182bd", "#08306b"),
+    yang = Google,  yang_name = "Google (%)",
+    yang_colors = c("#fee6ce", "#e6550d", "#7f2704")
+  ) +
+  theme_taichi()
+```
+
+<img src="man/figures/README-palettes-1.png" style="display: block; margin: auto;" />
+
+## Comparing places
+
+Because `geom_taichi()` is an ordinary layer, faceting just works. The
+`states_tg` dataset repeats the same measurements across four states;
+showing two of them over a handful of weeks keeps the glyphs large and
+legible.
+
+``` r
+two_states <- subset(states_tg, state %in% c("New York", "Texas") & week <= 6)
+
+ggplot(two_states, aes(x = week, y = category)) +
+  geom_taichi(yin = Twitter, yang = Google) +
+  facet_wrap(~ state, ncol = 1) +
+  remove_padding(x = "c", y = "d") +
+  theme_taichi() +
+  ggtitle("New York vs Texas, weeks 1-6")
+```
+
+<img src="man/figures/README-states-1.png" style="display: block; margin: auto;" />
+
+See `vignette("ggtaichi")` for the full tour.
 
 ## Acknowledgement
 
@@ -57,13 +121,15 @@ per-cell glyph as a taichi diagram. `ggDoubleHeat` is the foundational
 layer of this package and should be cited when you use `ggtaichi`:
 
 > Yu Y, Buskirk T (2025). *ggDoubleHeat: A Heatmap-Like Visualization
-> Tool*. R package version 0.1.3.
-> <https://CRAN.R-project.org/package=ggDoubleHeat>
+> Tool*. R package version 0.1.3. CRAN:
+> <https://CRAN.R-project.org/package=ggDoubleHeat>, GitHub:
+> <https://github.com/PursuitOfDataScience/ggDoubleHeat>
 
     @Manual{,
       title  = {ggDoubleHeat: A Heatmap-Like Visualization Tool},
       author = {Youzhi Yu and Trent Buskirk},
       year   = {2025},
-      note   = {R package version 0.1.3},
+      note   = {R package version 0.1.3.
+                GitHub: https://github.com/PursuitOfDataScience/ggDoubleHeat},
       url    = {https://CRAN.R-project.org/package=ggDoubleHeat},
     }
