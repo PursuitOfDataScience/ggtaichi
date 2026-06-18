@@ -57,7 +57,7 @@ fish (its bulb at the bottom) carries one source; the yin fish (its bulb at the
 top) carries the other. Each half is filled by its own gradient, so a lighter or
 darker shade is a smaller or larger value.
 
-```{r, fig.width = 4.5, fig.height = 4.5}
+```{r, fig.width = 4.5, fig.height = 4.5, fig.alt="A single large taichi diagram, its red yang fish reading a high value and its grey yin fish a low value."}
 one <- data.frame(x = 1, y = 1, google = 7, twitter = 3)
 
 ggplot(one, aes(x, y)) +
@@ -90,7 +90,7 @@ The two value columns are passed to the `yin` and `yang` arguments. Everything
 else -- the `x`/`y` mapping, faceting, titles -- is plain `ggplot2`. The legend
 titles default to the column names you supplied (`Twitter` and `Google` here).
 
-```{r, fig.height = 6}
+```{r, fig.height = 6, fig.alt="A full 30-week by 9-category grid of taichi diagrams for Pittsburgh, red yang fish for Google and grey yin fish for Twitter."}
 ggplot(pitts_tg, aes(x = week, y = category)) +
   geom_taichi(yin = Twitter, yang = Google) +
   theme_taichi() +
@@ -107,7 +107,7 @@ Thirty weeks across nine categories is a lot of ink in one panel. When the goal
 is to *read* individual symbols rather than scan an overall texture, subset the
 data: fewer cells means each taichi is drawn larger.
 
-```{r, fig.height = 8}
+```{r, fig.height = 8, fig.alt="A six-week Pittsburgh grid of taichi diagrams drawn large enough to read each fish clearly."}
 pitts_small <- subset(pitts_tg, week <= 6)
 
 ggplot(pitts_small, aes(x = week, y = category)) +
@@ -131,7 +131,7 @@ Any extra argument is forwarded to `ggplot2::scale_fill_gradientn()`, so you can
 for example, set common `limits` so both legends share a scale, or pass an
 `na.value`.
 
-```{r, fig.height = 8}
+```{r, fig.height = 8, fig.alt="The six-week Pittsburgh grid of taichi diagrams with a blue gradient for Twitter and an orange gradient for Google."}
 ggplot(pitts_small, aes(x = week, y = category)) +
   geom_taichi(
     yin = Twitter,  yin_name = "Twitter (%)",
@@ -148,7 +148,7 @@ ggplot(pitts_small, aes(x = week, y = category)) +
 a taichi grid look like it is floating. `remove_padding()` trims it; tell it
 whether each axis is continuous (`"c"`) or discrete (`"d"`).
 
-```{r, fig.height = 8}
+```{r, fig.height = 8, fig.alt="The six-week Pittsburgh taichi grid with the surrounding panel padding removed so the symbols reach the plot edges."}
 ggplot(pitts_small, aes(x = week, y = category)) +
   geom_taichi(yin = Twitter, yang = Google) +
   remove_padding(x = "c", y = "d") +
@@ -161,7 +161,7 @@ Because `geom_taichi()` is an ordinary layer, faceting works out of the box. The
 `states_tg` data set carries the same measurements across four states; pairing
 two of them over a few weeks keeps every glyph large and legible.
 
-```{r, fig.height = 8}
+```{r, fig.height = 8, fig.alt="Two faceted taichi grids comparing New York and Texas over six weeks, red yang fish for Google and grey yin fish for Twitter."}
 two_states <- subset(states_tg, state %in% c("New York", "Texas") & week <= 6)
 
 ggplot(two_states, aes(x = week, y = category)) +
@@ -179,7 +179,7 @@ drops the panel grid and ticks, and emphasizes the axis labels. It is a normal
 `ggplot2` theme, so you can override any element afterwards, or skip it entirely
 and bring your own.
 
-```{r, fig.height = 6}
+```{r, fig.height = 6, fig.alt="The six-week Pittsburgh taichi grid using theme_taichi() with its off-white background overridden to plain white."}
 ggplot(pitts_small, aes(x = week, y = category)) +
   geom_taichi(yin = Twitter, yang = Google) +
   theme_taichi() +

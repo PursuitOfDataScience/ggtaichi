@@ -45,7 +45,7 @@ ggplot(one, aes(x, y)) +
   theme_taichi()
 ```
 
-<img src="man/figures/README-anatomy-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-anatomy-1.png" alt="A single large taichi diagram whose red (yang) half encodes one data source and grey (yin) half the other." style="display: block; margin: auto;" />
 
 ## A clear, small grid
 
@@ -64,7 +64,7 @@ ggplot(pitts_small, aes(x = week, y = category)) +
   ggtitle("Pittsburgh: Google (yang) vs Twitter (yin), weeks 1-6")
 ```
 
-<img src="man/figures/README-pitts-small-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-pitts-small-1.png" alt="A six-week grid of taichi diagrams for nine Pittsburgh COVID categories, the yang fish shaded red by Google and the yin fish grey by Twitter." style="display: block; margin: auto;" />
 
 The legend titles default to the column names you supply. Note how
 `Covid` and `Masks` lean dark (high Twitter) while staying pink
@@ -86,7 +86,7 @@ ggplot(pitts_small, aes(x = week, y = category)) +
   theme_taichi()
 ```
 
-<img src="man/figures/README-palettes-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-palettes-1.png" alt="The same six-week Pittsburgh grid of taichi diagrams drawn with a blue gradient for Twitter and an orange gradient for Google." style="display: block; margin: auto;" />
 
 ## Comparing places
 
@@ -106,7 +106,7 @@ ggplot(two_states, aes(x = week, y = category)) +
   ggtitle("New York vs Texas, weeks 1-6")
 ```
 
-<img src="man/figures/README-states-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-states-1.png" alt="Two faceted taichi grids comparing New York and Texas over six weeks, the yang fish red for Google and the yin fish grey for Twitter." style="display: block; margin: auto;" />
 
 See `vignette("ggtaichi")` for the full tour.
 

@@ -41,7 +41,7 @@ Each symbol is a circle split by an S-curve into two interlocking fish. The
 other, each on its own gradient. There are no decorative dots: every drop of ink
 is data.
 
-```{r anatomy, fig.width=4.5, fig.height=4.5}
+```{r anatomy, fig.width=4.5, fig.height=4.5, fig.alt="A single large taichi diagram whose red (yang) half encodes one data source and grey (yin) half the other."}
 library(ggtaichi)
 library(ggplot2)
 
@@ -61,7 +61,7 @@ Statistical Area. With many weeks the symbols shrink, so it is often easier to
 read a slice. Here are the first six weeks, where each taichi is big enough to
 compare the two halves at a glance.
 
-```{r pitts-small, fig.width=7, fig.height=8}
+```{r pitts-small, fig.width=7, fig.height=8, fig.alt="A six-week grid of taichi diagrams for nine Pittsburgh COVID categories, the yang fish shaded red by Google and the yin fish grey by Twitter."}
 pitts_small <- subset(pitts_tg, week <= 6)
 
 ggplot(pitts_small, aes(x = week, y = category)) +
@@ -78,7 +78,7 @@ The legend titles default to the column names you supply. Note how `Covid` and
 Each fish gets its own gradient, and any extra argument is passed straight to
 `ggplot2::scale_fill_gradientn()`.
 
-```{r palettes, fig.width=7, fig.height=8}
+```{r palettes, fig.width=7, fig.height=8, fig.alt="The same six-week Pittsburgh grid of taichi diagrams drawn with a blue gradient for Twitter and an orange gradient for Google."}
 ggplot(pitts_small, aes(x = week, y = category)) +
   geom_taichi(
     yin  = Twitter, yin_name  = "Twitter (%)",
@@ -95,7 +95,7 @@ Because `geom_taichi()` is an ordinary layer, faceting just works. The
 `states_tg` dataset repeats the same measurements across four states; showing two
 of them over a handful of weeks keeps the glyphs large and legible.
 
-```{r states, fig.width=7, fig.height=8}
+```{r states, fig.width=7, fig.height=8, fig.alt="Two faceted taichi grids comparing New York and Texas over six weeks, the yang fish red for Google and the yin fish grey for Twitter."}
 two_states <- subset(states_tg, state %in% c("New York", "Texas") & week <= 6)
 
 ggplot(two_states, aes(x = week, y = category)) +
