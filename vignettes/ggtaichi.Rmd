@@ -1,0 +1,166 @@
+---
+title: "Introduction to ggtaichi"
+author: |
+  Youzhi Yu
+  <br><span style="font-size: 0.8em;">University of Chicago</span>
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to ggtaichi}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 9,
+  fig.height = 6,
+  fig.align = "center"
+)
+```
+
+## Why taichi?
+
+A heat map drawn with `ggplot2::geom_tile()` carries three dimensions of
+information: the `x` position, the `y` position, and a single value mapped to
+fill. That is plenty when there is one number per cell, but it forces you to
+*facet* (or to draw two separate maps) the moment you want to compare two data
+sources on the same footing.
+
+`ggtaichi` removes that limitation by replacing each cell with a **taichi**
+(yin-yang) diagram. The symbol is a circle split by an S-curve into two
+interlocking "fish":
+
+- the **yang** (light) fish is shaded by one data source, and
+- the **yin** (dark) fish is shaded by the other.
+
+Because both fish live in the same cell, a single `geom_taichi()` layer encodes
+**four** dimensions at once: `x`, `y`, `yin`, and `yang`. The two sources keep
+their own color scales and legends, so they can be read independently while
+still being compared side by side.
+
+```{r}
+library(ggtaichi)
+library(ggplot2)
+```
+
+## The example data
+
+`ggtaichi` ships with the same data sets used by its foundational package
+`ggDoubleHeat`. `pitts_tg` records the 30-week COVID-related Google and Twitter
+incidence rates for 9 categories in the Pittsburgh Metropolitan Statistical
+Area (MSA).
+
+```{r}
+head(pitts_tg)
+```
+
+`states_tg` is the larger sibling, repeating the same measurements across four
+states, and `pitts_emojis` holds the most popular weekly emoji per category.
+See `?pitts_tg`, `?states_tg`, and `?pitts_emojis` for the full descriptions.
+
+## A first taichi grid
+
+The two value columns are passed to the `yin` and `yang` arguments. Everything
+else — the `x`/`y` mapping, faceting, titles — is plain `ggplot2`.
+
+```{r}
+ggplot(pitts_tg, aes(x = week, y = category)) +
+  geom_taichi(yin = Twitter, yang = Google) +
+  theme_taichi() +
+  ggtitle("Pittsburgh Google & Twitter Incidence Rate (%)")
+```
+
+Each symbol stays round regardless of the panel's aspect ratio, so you do **not**
+need `coord_fixed()`. The legend titles default to the column names you supplied
+(`Twitter` and `Google` here).
+
+## Reading a single symbol
+
+It is worth zooming in on one cell to see the anatomy of the glyph. The yang
+fish (its head at the bottom) carries one source; the yin fish (its head at the
+top) carries the other. Each fish holds a small contrasting **eye**, exactly as
+in a classic taichi symbol.
+
+```{r, fig.width = 4.5, fig.height = 4.5}
+one <- data.frame(x = 1, y = 1, a = 7, b = 3)
+
+ggplot(one, aes(x, y)) +
+  geom_taichi(yin = b, yang = a) +
+  coord_fixed() +
+  theme_taichi()
+```
+
+## Controlling the eyes
+
+The eyes are decorative markers. Turn them off with `eyes = FALSE`, resize them
+relative to the symbol with `eye_ratio`, and recolor them with `yin_eye` /
+`yang_eye`.
+
+```{r}
+ggplot(pitts_tg, aes(x = week, y = category)) +
+  geom_taichi(yin = Twitter, yang = Google, eyes = FALSE) +
+  theme_taichi() +
+  ggtitle("Same grid, without the eyes")
+```
+
+## Customizing the color scales
+
+Each fish gets its own gradient. `yang_colors` and `yin_colors` accept any color
+vector (usually hex codes), and `yang_name` / `yin_name` relabel the legends.
+Any extra argument is forwarded to `ggplot2::scale_fill_gradientn()`, so you can,
+for example, set a common `limits` for both sources.
+
+```{r}
+ggplot(pitts_tg, aes(x = week, y = category)) +
+  geom_taichi(
+    yin = Twitter,  yin_name = "Twitter (%)",
+    yin_colors = c("#deebf7", "#3182bd", "#08306b"),
+    yang = Google, yang_name = "Google (%)",
+    yang_colors = c("#fee6ce", "#e6550d", "#7f2704")
+  ) +
+  theme_taichi() +
+  ggtitle("Custom palettes for each source")
+```
+
+## Removing the panel padding
+
+`ggplot2` leaves a margin around discrete and continuous scales, which can make
+a taichi grid look like it is floating. `remove_padding()` trims it; tell it
+whether each axis is continuous (`"c"`) or discrete (`"d"`).
+
+```{r}
+ggplot(pitts_tg, aes(x = week, y = category)) +
+  geom_taichi(yin = Twitter, yang = Google) +
+  remove_padding(x = "c", y = "d") +
+  theme_taichi()
+```
+
+## Scaling up with `states_tg`
+
+Because `geom_taichi()` is an ordinary layer, faceting works out of the box. The
+`states_tg` data set carries the same measurements across four states.
+
+```{r, fig.height = 9}
+ggplot(states_tg, aes(x = week, y = category)) +
+  geom_taichi(yin = Twitter, yang = Google) +
+  facet_wrap(~ state, ncol = 1) +
+  remove_padding(x = "c", y = "d") +
+  theme_taichi() +
+  ggtitle("Google & Twitter incidence rate by state")
+```
+
+## Acknowledgement
+
+`ggtaichi` stands on the shoulders of the
+[`ggDoubleHeat`](https://CRAN.R-project.org/package=ggDoubleHeat) package, which
+pioneered the two-source "double" heat map through its `geom_heat_*()` family
+and supplies the example data used throughout this vignette. Please cite it
+alongside `ggtaichi`:
+
+> Yu Y, Buskirk T (2025). *ggDoubleHeat: A Heatmap-Like Visualization Tool*.
+> R package version 0.1.3. <https://CRAN.R-project.org/package=ggDoubleHeat>

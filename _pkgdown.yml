@@ -1,0 +1,23 @@
+template:
+  bootstrap: 5
+
+development:
+  mode: release
+
+authors:
+  footer:
+    text: "Crafted by"
+  sidebar:
+    roles: [aut, cre]
+
+home:
+  sidebar:
+    structure: [links, license, community, citation, authors, dev]
+
+navbar:
+  type: default
+  left:
+  - text: Reference
+    href: reference/index.html
+  - text: News
+    href: news/index.html

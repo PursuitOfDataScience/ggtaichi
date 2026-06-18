@@ -1,0 +1,33 @@
+Package: ggtaichi
+Type: Package
+Title: Taichi-Diagram Visualization for Two Data Sources
+Version: 0.1.0
+Authors@R:
+    person(given = "Youzhi",
+           family = "Yu",
+           role = c("aut", "cre"),
+           email = "yuyouzhi666@icloud.com")
+Description: A data visualization design that compares two (usually on a par
+    with each other) data sources on one grid of taichi (yin-yang) diagrams,
+    where the two interlocking fish of every symbol are filled by the two
+    sources, while inheriting 'ggplot2' features.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+URL: https://github.com/PursuitOfDataScience/ggtaichi
+BugReports: https://github.com/PursuitOfDataScience/ggtaichi/issues
+Depends:
+    R (>= 3.5.0)
+Imports:
+    rlang,
+    grid,
+    ggplot2 (>= 3.0.0),
+    ggnewscale (>= 0.4.5)
+RoxygenNote: 7.3.2
+Suggests:
+    rmarkdown,
+    knitr,
+    dplyr,
+    scales,
+    tidyr
+VignetteBuilder: knitr
