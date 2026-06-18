@@ -103,7 +103,7 @@ gradient, so a lighter or darker shade is a smaller or larger value.</p>
 <span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">twitter</span>, yang <span class="op">=</span> <span class="va">google</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ggtaichi_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="540" style="display: block; margin: auto;"></p>
+<p><img src="ggtaichi_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="A single large taichi diagram, its red yang fish reading a high value and its grey yin fish a low value." width="540" style="display: block; margin: auto;"></p>
 <p>Here the yang (red) fish reads <code>7</code> and the yin (grey) fish
 reads <code>3</code>; the deeper the ink, the larger the number relative
 to the rest of the data.</p>
@@ -145,7 +145,7 @@ supplied (<code>Twitter</code> and <code>Google</code> here).</p>
 <span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">Twitter</span>, yang <span class="op">=</span> <span class="va">Google</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Pittsburgh Google &amp; Twitter Incidence Rate (%)"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ggtaichi_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="840" style="display: block; margin: auto;"></p>
+<p><img src="ggtaichi_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="A full 30-week by 9-category grid of taichi diagrams for Pittsburgh, red yang fish for Google and grey yin fish for Twitter." width="840" style="display: block; margin: auto;"></p>
 <p>Each symbol stays round regardless of the panel’s aspect ratio, so
 you do <strong>not</strong> need <code><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed()</a></code>. The shape
 is sized in square units, like the radius of a
@@ -165,7 +165,7 @@ larger.</p>
 <span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">Twitter</span>, yang <span class="op">=</span> <span class="va">Google</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"The first six weeks, drawn large"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ggtaichi_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="840" style="display: block; margin: auto;"></p>
+<p><img src="ggtaichi_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="A six-week Pittsburgh grid of taichi diagrams drawn large enough to read each fish clearly." width="840" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
 <h2 id="which-source-should-be-yin">Which source should be yin?<a class="anchor" aria-label="anchor" href="#which-source-should-be-yin"></a>
@@ -196,7 +196,7 @@ set common <code>limits</code> so both legends share a scale, or pass an
 <span>    yang_colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#fee6ce"</span>, <span class="st">"#e6550d"</span>, <span class="st">"#7f2704"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ggtaichi_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="840" style="display: block; margin: auto;"></p>
+<p><img src="ggtaichi_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="The six-week Pittsburgh grid of taichi diagrams with a blue gradient for Twitter and an orange gradient for Google." width="840" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
 <h2 id="removing-the-panel-padding">Removing the panel padding<a class="anchor" aria-label="anchor" href="#removing-the-panel-padding"></a>
@@ -210,7 +210,7 @@ continuous (<code>"c"</code>) or discrete (<code>"d"</code>).</p>
 <span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">Twitter</span>, yang <span class="op">=</span> <span class="va">Google</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/remove_padding.html">remove_padding</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"c"</span>, y <span class="op">=</span> <span class="st">"d"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ggtaichi_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="840" style="display: block; margin: auto;"></p>
+<p><img src="ggtaichi_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="The six-week Pittsburgh taichi grid with the surrounding panel padding removed so the symbols reach the plot edges." width="840" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
 <h2 id="comparing-places-with-facets">Comparing places with facets<a class="anchor" aria-label="anchor" href="#comparing-places-with-facets"></a>
@@ -228,7 +228,7 @@ weeks keeps every glyph large and legible.</p>
 <span>  <span class="fu"><a href="../reference/remove_padding.html">remove_padding</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"c"</span>, y <span class="op">=</span> <span class="st">"d"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"New York vs Texas, weeks 1-6"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ggtaichi_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="840" style="display: block; margin: auto;"></p>
+<p><img src="ggtaichi_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="Two faceted taichi grids comparing New York and Texas over six weeks, red yang fish for Google and grey yin fish for Twitter." width="840" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
 <h2 id="theming">Theming<a class="anchor" aria-label="anchor" href="#theming"></a>
@@ -244,7 +244,7 @@ own.</p>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>plot.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"theme_taichi(), then tweaked"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ggtaichi_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="840" style="display: block; margin: auto;"></p>
+<p><img src="ggtaichi_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="The six-week Pittsburgh taichi grid using theme_taichi() with its off-white background overridden to plain white." width="840" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
 <h2 id="acknowledgement">Acknowledgement<a class="anchor" aria-label="anchor" href="#acknowledgement"></a>

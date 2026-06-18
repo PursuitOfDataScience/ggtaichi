@@ -48,7 +48,9 @@ ggplot(one, aes(x, y)) +
   theme_taichi()
 ```
 
-![](ggtaichi_files/figure-html/unnamed-chunk-2-1.png)
+![A single large taichi diagram, its red yang fish reading a high value
+and its grey yin fish a low
+value.](ggtaichi_files/figure-html/unnamed-chunk-2-1.png)
 
 Here the yang (red) fish reads `7` and the yin (grey) fish reads `3`;
 the deeper the ink, the larger the number relative to the rest of the
@@ -99,7 +101,9 @@ ggplot(pitts_tg, aes(x = week, y = category)) +
   ggtitle("Pittsburgh Google & Twitter Incidence Rate (%)")
 ```
 
-![](ggtaichi_files/figure-html/unnamed-chunk-4-1.png)
+![A full 30-week by 9-category grid of taichi diagrams for Pittsburgh,
+red yang fish for Google and grey yin fish for
+Twitter.](ggtaichi_files/figure-html/unnamed-chunk-4-1.png)
 
 Each symbol stays round regardless of the panel’s aspect ratio, so you
 do **not** need
@@ -123,7 +127,9 @@ ggplot(pitts_small, aes(x = week, y = category)) +
   ggtitle("The first six weeks, drawn large")
 ```
 
-![](ggtaichi_files/figure-html/unnamed-chunk-5-1.png)
+![A six-week Pittsburgh grid of taichi diagrams drawn large enough to
+read each fish
+clearly.](ggtaichi_files/figure-html/unnamed-chunk-5-1.png)
 
 ## Which source should be yin?
 
@@ -154,7 +160,9 @@ ggplot(pitts_small, aes(x = week, y = category)) +
   theme_taichi()
 ```
 
-![](ggtaichi_files/figure-html/unnamed-chunk-6-1.png)
+![The six-week Pittsburgh grid of taichi diagrams with a blue gradient
+for Twitter and an orange gradient for
+Google.](ggtaichi_files/figure-html/unnamed-chunk-6-1.png)
 
 ## Removing the panel padding
 
@@ -172,7 +180,9 @@ ggplot(pitts_small, aes(x = week, y = category)) +
   theme_taichi()
 ```
 
-![](ggtaichi_files/figure-html/unnamed-chunk-7-1.png)
+![The six-week Pittsburgh taichi grid with the surrounding panel padding
+removed so the symbols reach the plot
+edges.](ggtaichi_files/figure-html/unnamed-chunk-7-1.png)
 
 ## Comparing places with facets
 
@@ -194,7 +204,9 @@ ggplot(two_states, aes(x = week, y = category)) +
   ggtitle("New York vs Texas, weeks 1-6")
 ```
 
-![](ggtaichi_files/figure-html/unnamed-chunk-8-1.png)
+![Two faceted taichi grids comparing New York and Texas over six weeks,
+red yang fish for Google and grey yin fish for
+Twitter.](ggtaichi_files/figure-html/unnamed-chunk-8-1.png)
 
 ## Theming
 
@@ -213,7 +225,9 @@ ggplot(pitts_small, aes(x = week, y = category)) +
   ggtitle("theme_taichi(), then tweaked")
 ```
 
-![](ggtaichi_files/figure-html/unnamed-chunk-9-1.png)
+![The six-week Pittsburgh taichi grid using theme_taichi() with its
+off-white background overridden to plain
+white.](ggtaichi_files/figure-html/unnamed-chunk-9-1.png)
 
 ## Acknowledgement
 
