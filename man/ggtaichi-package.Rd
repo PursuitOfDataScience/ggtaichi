@@ -25,6 +25,7 @@ the help files when trying to understand what each argument means visually.
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://pursuitofdatascience.github.io/ggtaichi/}
   \item \url{https://github.com/PursuitOfDataScience/ggtaichi}
   \item Report bugs at \url{https://github.com/PursuitOfDataScience/ggtaichi/issues}
 }

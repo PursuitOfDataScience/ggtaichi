@@ -5,3 +5,9 @@
 inst/doc
 cran-comments.md
 docs
+*.Rcheck/
+ggtaichi_*.tar.gz
+Rplots.pdf
+r-lib/
+r-lib-43/
+tmp_lib/

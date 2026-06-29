@@ -8,3 +8,10 @@
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^r-lib$
+^r-lib-43$
+^next_release\.md$
+^ggtaichi\.Rcheck$
+^ggtaichi_.*\.tar\.gz$
+^tmp_lib$
+^Rplots\.pdf$

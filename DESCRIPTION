@@ -1,12 +1,10 @@
 Package: ggtaichi
 Type: Package
 Title: Taichi-Diagram Visualization for Two Data Sources
-Version: 0.1.0
-Authors@R:
-    person(given = "Youzhi",
-           family = "Yu",
-           role = c("aut", "cre"),
-           email = "yuyouzhi666@icloud.com")
+Version: 0.2.0
+Authors@R: person(given = "Youzhi", family = "Yu", role = c("aut", "cre"), email = "yuyouzhi666@icloud.com")
+Author: Youzhi Yu
+Maintainer: Youzhi Yu <yuyouzhi666@icloud.com>
 Description: A data visualization design that compares two (usually on a par
     with each other) data sources on one grid of taichi (yin-yang) diagrams,
     where the two interlocking fish of every symbol are filled by the two
@@ -30,5 +28,8 @@ Suggests:
     knitr,
     dplyr,
     scales,
-    tidyr
+    tidyr,
+    testthat (>= 3.0.0),
+    vdiffr,
+    gganimate
 VignetteBuilder: knitr

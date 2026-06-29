@@ -6,31 +6,84 @@
 \usage{
 geom_taichi(
   yin,
-  yin_name = NULL,
-  yin_colors = c("gray100", "gray85", "gray50", "gray35", "gray0"),
   yang,
+  yin_name = NULL,
   yang_name = NULL,
+  yin_colors = c("gray100", "gray85", "gray50", "gray35", "gray0"),
   yang_colors = c("#FED7D8", "#FE8C91", "#F5636B", "#E72D3F", "#C20824"),
+  yin_scale = NULL,
+  yang_scale = NULL,
+  angle = NULL,
+  eyes = FALSE,
+  yin_eye_size = 0.15,
+  yang_eye_size = 0.15,
+  yin_eye_colour = "white",
+  yang_eye_colour = "black",
+  width = NULL,
+  height = NULL,
+  alpha = NA,
+  na.rm = FALSE,
+  colour = NA,
+  linewidth = 0.1,
+  linetype = 1,
+  show.legend = NA,
   ...
 )
 }
 \arguments{
 \item{yin}{The column name for the yin (dark) fish of the taichi symbol.}
 
-\item{yin_name}{The label name (in quotes) for the legend of the yin
-rendering. Default is \code{NULL}.}
-
-\item{yin_colors}{A color vector, usually as hex codes.}
-
 \item{yang}{The column name for the yang (light) fish of the taichi symbol.}
 
+\item{yin_name}{The label name (in quotes) for the legend of the yin
+rendering. Default is \code{NULL} (uses the column name).}
+
 \item{yang_name}{The label name (in quotes) for the legend of the yang
-rendering. Default is \code{NULL}.}
+rendering. Default is \code{NULL} (uses the column name).}
 
-\item{yang_colors}{A color vector, usually as hex codes.}
+\item{yin_colors}{A color vector, usually as hex codes, for the yin fish
+fill gradient. Ignored if \code{yin_scale} is provided or the data is
+discrete.}
 
-\item{...}{\code{...} accepts any arguments \code{scale_fill_gradientn()} has
-.}
+\item{yang_colors}{A color vector, usually as hex codes, for the yang fish
+fill gradient. Ignored if \code{yang_scale} is provided or the data is
+discrete.}
+
+\item{yin_scale}{An optional scale object or constructor function (e.g.,
+\code{scale_fill_viridis_d}) for the yin fish. Overrides auto-detection.}
+
+\item{yang_scale}{An optional scale object or constructor function (e.g.,
+\code{scale_fill_viridis_d}) for the yang fish. Overrides auto-detection.}
+
+\item{angle}{Optional column name for rotating each glyph (in degrees).}
+
+\item{eyes}{Logical. If \code{TRUE}, draws the classic taichi eyes (dots)
+at the center of each fish. Default \code{FALSE}.}
+
+\item{yin_eye_size}{Size of the yin eye as a proportion of the fish radius.}
+
+\item{yang_eye_size}{Size of the yang eye as a proportion of the fish radius.}
+
+\item{yin_eye_colour}{Colour of the yin eye dot.}
+
+\item{yang_eye_colour}{Colour of the yang eye dot.}
+
+\item{width, height}{Width and height of each cell. Typically omitted.}
+
+\item{alpha}{Alpha transparency for the fish fills.}
+
+\item{na.rm}{If \code{TRUE}, silently removes rows with missing values.}
+
+\item{colour}{Outline colour of the fish.}
+
+\item{linewidth}{Outline width of the fish (in mm).}
+
+\item{linetype}{Outline linetype of the fish.}
+
+\item{show.legend}{Logical. Should the layer be included in the legend?}
+
+\item{...}{Additional arguments passed to the fill scales (e.g.,
+\code{limits}, \code{na.value}).}
 }
 \value{
 A taichi diagram comparing two data sources.

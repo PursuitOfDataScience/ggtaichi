@@ -1,0 +1,130 @@
+---
+title: "Animating taichi diagrams"
+author: |
+  Youzhi Yu
+  <br><span style="font-size: 0.8em;">University of Chicago</span>
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Animating taichi diagrams}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 7,
+  fig.height = 5,
+  fig.align = "center",
+  dpi = 120
+)
+
+# The gganimate package is in Suggests.  When it is not available the code
+# chunks below are still displayed (so the recipe is readable) but not
+# evaluated, so this vignette builds on systems without gganimate.
+has_gganimate <- requireNamespace("gganimate", quietly = TRUE)
+knitr::opts_chunk$set(eval = has_gganimate)
+```
+
+## Why animate?
+
+A taichi (yin-yang) symbol is *cyclical*, so motion is unusually on-brand for
+this geom.  Instead of forcing a third variable (e.g. `week`) onto the x-axis
+and shrinking every glyph, we can turn it into an **animation frame**.  Each
+frame is then a clean `category` x `state` grid of large, readable taichi.
+
+This vignette shows how to combine `geom_taichi()` with
+[gganimate](https://gganimate.org).  `gganimate` is a *Suggested* dependency;
+install it with `install.packages("gganimate")` if you have not already.
+
+```r
+library(ggplot2)
+library(ggtaichi)
+library(gganimate)
+```
+
+## How `geom_taichi()` composes with gganimate
+
+`geom_taichi()` returns a pair of layers separated by
+`ggnewscale::new_scale_fill()`, so each fish keeps its own fill scale and
+legend.  gganimate works at the *layer* level --- it splits every layer's data
+by the transition variable and builds one frame per state.  Because the two
+fish layers are ordinary `ggplot2` layers, gganimate treats them independently
+and the two fill scales continue to apply frame-by-frame.  In short: **the
+ggnewscale layer stack composes cleanly with gganimate**, so no special wrapper
+is needed.
+
+## Animating over a third variable
+
+Use `transition_states()` when the frame variable is discrete (e.g. week
+number), or `transition_time()` when it is a continuous time.  Both drive the
+underlying `GeomYinFish` / `GeomYangFish` layers.
+
+```{r}
+data <- data.frame(
+  week    = rep(1:4, each = 9),
+  state   = rep(rep(c("FL", "MO", "NY"), each = 3), 4),
+  yin     = sample(1:10, 36, replace = TRUE),
+  yang    = sample(1:10, 36, replace = TRUE)
+)
+
+p <- ggplot(data, aes(x = week, y = state)) +
+  geom_taichi(yin = yin, yang = yang) +
+  theme_taichi() +
+  labs(title = "Week {closest_state}") +
+  transition_states(week, transition_length = 1, state_length = 1)
+
+# Render to a GIF (requires the gifski package)
+# animate(p, renderer = gifski_renderer())
+# anim_save("taichi.gif", p)
+```
+
+## Keeping glyphs round
+
+Taichi symbols look best when they are circular.  Add `coord_fixed()` so the
+aspect ratio is preserved, and match the animation dimensions to the grid:
+
+```{r}
+p_fixed <- ggplot(data, aes(x = week, y = state)) +
+  geom_taichi(yin = yin, yang = yang) +
+  coord_fixed() +
+  theme_taichi() +
+  transition_states(week, transition_length = 1, state_length = 1)
+
+# animate(p_fixed, width = 800, height = 600, fps = 10)
+```
+
+## Spin animation
+
+With the `angle` aesthetic (see `?geom_taichi`) you can rotate each glyph.
+Mapping `angle` to the frame variable and animating produces the iconic
+"turning taichi":
+
+```{r}
+spin <- data.frame(
+  x = 1, y = 1, yin = 5, yang = 5,
+  frame = 1:36
+)
+
+p_spin <- ggplot(spin, aes(x, y)) +
+  geom_taichi(yin = yin, yang = yang, angle = frame * 10,
+              eyes = TRUE) +
+  coord_fixed() +
+  theme_taichi() +
+  transition_states(frame, transition_length = 0, state_length = 0) +
+  enter_grow() + exit_shrink()
+
+# animate(p_spin, width = 300, height = 300, fps = 12)
+```
+
+## Export helpers
+
+`gganimate::anim_save()` writes the animation to a file.  For MP4 output use
+`ffmpeg_renderer()` (requires a system `ffmpeg`); for GIF use
+`gifski_renderer()` (requires the `gifski` package).  Aim for 10--15 fps and
+enough frames that the motion is smooth; `coord_fixed()` keeps every glyph
+round in the rendered video.

@@ -187,6 +187,95 @@ ggplot(pitts_small, aes(x = week, y = category)) +
   ggtitle("theme_taichi(), then tweaked")
 ```
 
+## New in v0.2.0
+
+### Rotation
+
+The `angle` argument rotates each glyph by the given number of degrees.
+It can be a constant (same angle for every cell) or a column name (one
+angle per cell), encoding a directional or temporal variable as orientation.
+
+```{r, fig.height = 4, fig.alt="Four taichi diagrams with rotation angles 0, 45, 90, and 180 drawn from a data column."}
+one_rot <- data.frame(
+  x = c(1, 2, 1, 2),
+  y = c(2, 2, 1, 1),
+  yin = c(3, 5, 7, 9),
+  yang = c(9, 7, 5, 3),
+  rot = c(0, 45, 90, 180)
+)
+
+ggplot(one_rot, aes(x, y)) +
+  geom_taichi(yin = yin, yang = yang, angle = rot) +
+  coord_fixed() +
+  theme_taichi()
+```
+
+### Data-driven eyes
+
+Setting `eyes = TRUE` draws the classic taichi dots. Their colour and
+size are fully customizable through `yin_eye_colour`, `yang_eye_colour`,
+`yin_eye_size`, and `yang_eye_size`.
+
+```{r, fig.height = 4, fig.alt="Four taichi diagrams with eyes enabled."}
+one_eye <- data.frame(
+  x = c(1, 2, 1, 2),
+  y = c(2, 2, 1, 1),
+  yin = c(3, 5, 7, 9),
+  yang = c(9, 7, 5, 3)
+)
+
+ggplot(one_eye, aes(x, y)) +
+  geom_taichi(yin = yin, yang = yang,
+              eyes = TRUE,
+              yin_eye_colour = "blue",
+              yang_eye_colour = "orange") +
+  coord_fixed() +
+  theme_taichi()
+```
+
+### Categorical fills
+
+`geom_taichi()` now automatically detects whether the `yin` / `yang`
+columns are numeric or discrete (factor / character) and picks the
+appropriate scale.  You can also supply a custom scale constructor
+via `yin_scale` / `yang_scale`:
+
+```{r, fig.height = 4, fig.alt="Taichi grid with discrete category fills."}
+disc <- data.frame(
+  x = c(1, 2, 1, 2),
+  y = c(2, 2, 1, 1),
+  method = factor(c("A", "B", "C", "A")),
+  outcome = factor(c("win", "loss", "win", "loss"))
+)
+
+ggplot(disc, aes(x, y)) +
+  geom_taichi(yin = method, yang = outcome) +
+  coord_fixed() +
+  theme_taichi()
+```
+
+### Geom parameter routing
+
+All standard geom parameters (`alpha`, `colour`, `linewidth`, `linetype`,
+`width`, `height`, `na.rm`, `show.legend`) are now properly accepted by
+`geom_taichi()` and forwarded to the underlying fish geoms.  The deprecated
+`size` aesthetic has been replaced with `linewidth`.
+
+```{r, fig.height = 4, fig.alt="Taichi diagrams with custom linewidth, alpha, and colour."}
+one_lwd <- data.frame(
+  x = c(1, 2, 1, 2),
+  y = c(2, 2, 1, 1),
+  yin = c(3, 5, 7, 9),
+  yang = c(9, 7, 5, 3)
+)
+
+ggplot(one_lwd, aes(x, y)) +
+  geom_taichi(yin = yin, yang = yang,
+              alpha = 0.7, linewidth = 1.5, colour = "#333333") +
+  coord_fixed() +
+  theme_taichi()
+```
+
 ## Acknowledgement
 
 `ggtaichi` stands on the shoulders of the
