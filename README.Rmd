@@ -1,7 +1,8 @@
 ---
-title: "ggtaichi"
 output: github_document
 ---
+
+# ggtaichi <img src="man/figures/logo.png" align="right" height="139" alt="ggtaichi hex logo: a taichi diagram with an ink yin fish and a seal-red yang fish inside a hexagon" />
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/PursuitOfDataScience/ggtaichi/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/PursuitOfDataScience/ggtaichi/actions/workflows/R-CMD-check.yaml)

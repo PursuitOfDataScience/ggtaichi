@@ -1,5 +1,5 @@
-ggtaichi
-================
+
+# ggtaichi <img src="man/figures/logo.png" align="right" height="139" alt="ggtaichi hex logo: a taichi diagram with an ink yin fish and a seal-red yang fish inside a hexagon" />
 
 <!-- badges: start -->
 
