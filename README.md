@@ -197,7 +197,7 @@ v0.2.0 also fixes the parameter routing of `geom_taichi()`: `alpha`,
 error immediately with a clear message, and the geometry is guarded by a
 testthat + vdiffr suite.
 
-## New in 0.3.0: one legend, two fish
+## New in 0.2.0: one legend, two fish
 
 When both sources share units, `shared_legend = TRUE` puts them on a
 single scale and a single legend (`shared_limits = TRUE` aligns limits
@@ -217,12 +217,12 @@ ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
 
 <img src="man/figures/README-shared-1.png" alt="A 12-week by 8-neighbourhood grid of taichi diagrams comparing espresso and matcha orders on one shared grey scale with a single legend." style="display: block; margin: auto;" />
 
-v0.3.0 also exports the building blocks `geom_yin_fish()` /
+v0.2.0 also exports the building blocks `geom_yin_fish()` /
 `geom_yang_fish()` for fully manual scale control, lets
 `remove_padding()` auto-detect the axis types (no more `"c"` / `"d"`
-guessing), and rewrites the renderer to draw each layer as one batched
-polygon – a 1200-cell grid renders about 15x faster than in 0.2.0,
-pixel-for-pixel identically.
+guessing), and draws each layer as one batched polygon – a 1200-cell
+grid renders about 15x faster than with the per-cell grob building of
+v0.1.0, pixel-for-pixel identically.
 
 ## Animation
 

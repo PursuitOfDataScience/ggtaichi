@@ -418,7 +418,7 @@ test_that("alpha, colour, linewidth, linetype appear in built layer data", {
 })
 
 # ------------------------------------------------------------------
-# Shared limits / shared legend (v0.3.0, §4b)
+# Shared limits / shared legend (§4b)
 # ------------------------------------------------------------------
 
 test_that("shared_limits aligns both continuous fill scales", {
@@ -498,7 +498,7 @@ test_that("explicit limits in ... beat shared_limits", {
 })
 
 # ------------------------------------------------------------------
-# Exported fish geoms (v0.3.0, §4d)
+# Exported fish geoms (§4d)
 # ------------------------------------------------------------------
 
 test_that("geom_yin_fish / geom_yang_fish are exported and work standalone", {
@@ -517,7 +517,7 @@ test_that("geom_yin_fish / geom_yang_fish are exported and work standalone", {
 })
 
 # ------------------------------------------------------------------
-# print method (v0.3.0)
+# print method
 # ------------------------------------------------------------------
 
 test_that("printing the geom_taichi() object is human-readable", {

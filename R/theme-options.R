@@ -30,7 +30,13 @@ theme_taichi <- function(base_size = 11, base_family = "", base_line_size = base
           axis.title.y = element_blank(),
           panel.grid = element_blank(),
           plot.background = element_rect(fill = "#f3efe6"),
-          plot.title = element_text(size = 18, vjust = 1, hjust = 0, color = "#222222", face = "bold",
+          # Leave room at the right edge so a tick label landing on the panel
+          # boundary (common with remove_padding()) is not cut off.
+          plot.margin = margin(6, 14, 6, 6),
+          # Align the title with the whole plot (not the panel) and keep it a
+          # size that long titles survive without running off the right edge.
+          plot.title.position = "plot",
+          plot.title = element_text(size = 15, vjust = 1, hjust = 0, color = "#222222", face = "bold",
                                     margin=margin(10,0,10,0)))
 
 }
