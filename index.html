@@ -13,6 +13,7 @@
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Taichi-Diagram Visualization for Two Data Sources">
 <meta name="description" content="A data visualization design that compares two (usually on a par with each other) data sources on one grid of taichi (yin-yang) diagrams, where the two interlocking fish of every symbol are filled by the two sources, while inheriting ggplot2 features.">
 <meta property="og:description" content="A data visualization design that compares two (usually on a par with each other) data sources on one grid of taichi (yin-yang) diagrams, where the two interlocking fish of every symbol are filled by the two sources, while inheriting ggplot2 features.">
+<meta property="og:image" content="https://pursuitofdatascience.github.io/ggtaichi/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -47,8 +48,10 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="ggtaichi">ggtaichi<a class="anchor" aria-label="anchor" href="#ggtaichi"></a>
-</h1></div>
+<div class="page-header">
+<img src="logo.png" class="logo" alt=""><h1 id="ggtaichi-">ggtaichi <a class="anchor" aria-label="anchor" href="#ggtaichi-"></a>
+</h1>
+</div>
 <!-- badges: start -->
 
 <p><code>ggtaichi</code> is a <code>ggplot2</code> extension that compares data from two sources on a single grid of taichi (yin-yang) diagrams. A regular heat map made with <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile()</a></code> encodes three dimensions (the <code>x</code>, <code>y</code> position and one value); <code><a href="reference/geom_taichi.html">geom_taichi()</a></code> turns every cell into a taichi symbol whose two interlocking fish are filled by <strong>two</strong> sources at once, so four dimensions are expressed on one plot – and with the optional data-driven eyes of v0.2.0, up to <strong>six</strong>.</p>
