@@ -2,8 +2,13 @@
 
 ## All functions
 
+- [`cafes_tg`](https://pursuitofdatascience.github.io/ggtaichi/reference/cafes_tg.md)
+  : Synthetic café orders: espresso vs. matcha
 - [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
   : Taichi
+- [`geom_yin_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
+  [`geom_yang_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
+  : The individual taichi fish layers
 - [`pitts_emojis`](https://pursuitofdatascience.github.io/ggtaichi/reference/pitts_emojis.md)
   : Popular Emojis
 - [`pitts_tg`](https://pursuitofdatascience.github.io/ggtaichi/reference/pitts_tg.md)

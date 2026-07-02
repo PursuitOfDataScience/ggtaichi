@@ -21,7 +21,7 @@ can carry up to six dimensions.'></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ggtaichi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,7 @@ can carry up to six dimensions.'></head><body>
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/ggtaichi.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../articles/animations.html">Animations</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/gallery.html">Gallery</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/PursuitOfDataScience/ggtaichi" aria-label="GitHub"><span class="fa fa-github fa-lg"></span></a></li>
@@ -75,6 +76,8 @@ can carry up to six dimensions.</p>
 <span>  yang_eye_size <span class="op">=</span> <span class="fl">0.15</span>,</span>
 <span>  yin_eye_colour <span class="op">=</span> <span class="st">"white"</span>,</span>
 <span>  yang_eye_colour <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>  shared_limits <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  shared_legend <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  height <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="cn">NA</span>,</span>
@@ -155,6 +158,23 @@ encode a variable (see the Eyes section for the rescaling rule).</p></dd>
 <dd><p>Colour of each eye dot: a constant
 (defaults "white" and "black") or an unquoted data column containing
 colour strings.</p></dd>
+
+
+<dt id="arg-shared-limits">shared_limits<a class="anchor" aria-label="anchor" href="#arg-shared-limits"></a></dt>
+<dd><p>If <code>TRUE</code> and both sources are of the same type
+(both continuous, or both discrete), the two auto-built fill scales share
+common limits — the union range (or union of levels) of <code>yin</code> and
+<code>yang</code> — so equal values read as equal ink. Explicit <code>limits</code>
+passed through <code>...</code> take precedence. Default <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-shared-legend">shared_legend<a class="anchor" aria-label="anchor" href="#arg-shared-legend"></a></dt>
+<dd><p>If <code>TRUE</code>, treats the two sources as directly
+comparable: implies <code>shared_limits = TRUE</code>, paints both fish with
+<code>yin_colors</code>, and shows a single legend (the yang guide is
+dropped). Unless <code>yin_name</code> is supplied, the legend is titled
+"<code>yin</code> / <code>yang</code>". Ignored when custom <code>yin_scale</code> /
+<code>yang_scale</code> are given. Default <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-width-height">width, height<a class="anchor" aria-label="anchor" href="#arg-width-height"></a></dt>

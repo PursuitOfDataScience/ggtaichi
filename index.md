@@ -216,6 +216,40 @@ to `linewidth` with a warning, missing or misspelled `yin` / `yang`
 columns error immediately with a clear message, and the geometry is
 guarded by a testthat + vdiffr suite.
 
+## New in 0.3.0: one legend, two fish
+
+When both sources share units, `shared_legend = TRUE` puts them on a
+single scale and a single legend (`shared_limits = TRUE` aligns limits
+while keeping separate palettes). The bundled synthetic `cafes_tg` data
+– espresso vs matcha orders across eight neighbourhoods – is made for
+it:
+
+``` r
+
+ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
+  geom_taichi(yin = matcha, yang = espresso,
+              shared_legend = TRUE,
+              yin_name = "orders / 100 customers") +
+  remove_padding() +
+  theme_taichi() +
+  ggtitle("Espresso (yang) vs matcha (yin)")
+```
+
+![A 12-week by 8-neighbourhood grid of taichi diagrams comparing
+espresso and matcha orders on one shared grey scale with a single
+legend.](reference/figures/README-shared-1.png)
+
+v0.3.0 also exports the building blocks
+[`geom_yin_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
+/
+[`geom_yang_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
+for fully manual scale control, lets
+[`remove_padding()`](https://pursuitofdatascience.github.io/ggtaichi/reference/remove_padding.md)
+auto-detect the axis types (no more `"c"` / `"d"` guessing), and
+rewrites the renderer to draw each layer as one batched polygon – a
+1200-cell grid renders about 15x faster than in 0.2.0, pixel-for-pixel
+identically.
+
 ## Animation
 
 The taichi is a cyclical symbol, so motion suits it:
@@ -227,7 +261,9 @@ live in
 
 See
 [`vignette("ggtaichi")`](https://pursuitofdatascience.github.io/ggtaichi/articles/ggtaichi.md)
-for the full tour.
+for the full tour, and the
+[gallery](https://pursuitofdatascience.github.io/ggtaichi/articles/gallery.html)
+for more looks.
 
 ## Acknowledgement
 

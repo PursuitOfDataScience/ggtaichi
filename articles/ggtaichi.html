@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ggtaichi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,7 @@
       <ul class="navbar-nav me-auto">
 <li class="active nav-item"><a class="nav-link" href="../articles/ggtaichi.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../articles/animations.html">Animations</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/gallery.html">Gallery</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
       </ul>
@@ -132,8 +133,12 @@ records the 30-week COVID-related Google and Twitter incidence rates for
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Pittsburgh     1 2020-06-01 Symptoms           0.045<span style="text-decoration: underline;">7</span> 0.077<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
 <p><code>states_tg</code> is the larger sibling, repeating the same
 measurements across four states, and <code>pitts_emojis</code> holds the
-most popular weekly emoji per category. See <code><a href="../reference/pitts_tg.html">?pitts_tg</a></code>,
-<code><a href="../reference/states_tg.html">?states_tg</a></code>, and <code><a href="../reference/pitts_emojis.html">?pitts_emojis</a></code> for the full
+most popular weekly emoji per category. Since v0.3.0 the package also
+bundles <code>cafes_tg</code>, a small <em>synthetic</em>
+espresso-vs-matcha dataset whose two columns share the same units —
+handy for the shared-scale features shown later. See
+<code><a href="../reference/pitts_tg.html">?pitts_tg</a></code>, <code><a href="../reference/states_tg.html">?states_tg</a></code>,
+<code><a href="../reference/pitts_emojis.html">?pitts_emojis</a></code>, and <code><a href="../reference/cafes_tg.html">?cafes_tg</a></code> for the full
 descriptions.</p>
 </div>
 <div class="section level2">
@@ -184,13 +189,16 @@ want to read as <em>warmth</em> on <code>yang</code>.</p>
 <div class="section level2">
 <h2 id="customizing-the-color-scales">Customizing the color scales<a class="anchor" aria-label="anchor" href="#customizing-the-color-scales"></a>
 </h2>
-<p>Each fish gets its own gradient. <code>yang_colors</code> and
+<p>Each fish gets its own scale. <code>yang_colors</code> and
 <code>yin_colors</code> accept any color vector (usually hex codes), and
 <code>yang_name</code> / <code>yin_name</code> relabel the legends. Any
-extra argument is forwarded to
-<code><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">ggplot2::scale_fill_gradientn()</a></code>, so you can, for example,
-set common <code>limits</code> so both legends share a scale, or pass an
-<code>na.value</code>.</p>
+extra argument in <code>...</code> is forwarded to <em>both</em>
+auto-built fill scales, so you can, for example, set common
+<code>limits</code> so the two legends share a range, or pass an
+<code>na.value</code>. When the two fish need <em>different</em> scale
+options – or an entirely different scale type – hand a scale object or
+constructor to <code>yin_scale</code> / <code>yang_scale</code> and it
+is used verbatim.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">pitts_small</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">category</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span></span>
@@ -207,12 +215,14 @@ set common <code>limits</code> so both legends share a scale, or pass an
 </h2>
 <p><code>ggplot2</code> leaves a margin around discrete and continuous
 scales, which can make a taichi grid look like it is floating.
-<code><a href="../reference/remove_padding.html">remove_padding()</a></code> trims it; tell it whether each axis is
-continuous (<code>"c"</code>) or discrete (<code>"d"</code>).</p>
+<code><a href="../reference/remove_padding.html">remove_padding()</a></code> trims it — since v0.3.0 it detects each
+axis’s scale type by itself, and you can still spell it out with
+<code>"c"</code> (continuous) / <code>"d"</code> (discrete) when you
+want to override the detection.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">pitts_small</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">category</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">Twitter</span>, yang <span class="op">=</span> <span class="va">Google</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="../reference/remove_padding.html">remove_padding</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"c"</span>, y <span class="op">=</span> <span class="st">"d"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/remove_padding.html">remove_padding</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="ggtaichi_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="The six-week Pittsburgh taichi grid with the surrounding panel padding removed so the symbols reach the plot edges." width="840" style="display: block; margin: auto;"></p>
 </div>
@@ -325,9 +335,10 @@ already between 0 and 0.5 are used as exact proportions, and an
 </h3>
 <p><code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> now automatically detects whether the
 <code>yin</code> / <code>yang</code> columns are numeric or discrete
-(factor / character) and picks the appropriate scale. You can also
-supply a custom scale constructor via <code>yin_scale</code> /
-<code>yang_scale</code>:</p>
+(factor / character / logical) and picks the appropriate scale –
+computed expressions such as <code>factor(week)</code> work too. With
+the default palettes the discrete colors are sampled from the ramp
+skipping its palest end, so every category stays visible.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">disc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
@@ -340,7 +351,31 @@ supply a custom scale constructor via <code>yin_scale</code> /
 <span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">method</span>, yang <span class="op">=</span> <span class="va">outcome</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ggtaichi_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="Taichi grid with discrete category fills." width="840" style="display: block; margin: auto;"></p>
+<p><img src="ggtaichi_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="Taichi grid with discrete category fills: methods A to C on the yin fish and win or loss on the yang fish." width="840" style="display: block; margin: auto;"></p>
+<p>For full control, hand any fill scale – an object or a constructor
+function – to <code>yin_scale</code> / <code>yang_scale</code>; it
+overrides the auto-detection and the <code>*_colors</code> vectors
+entirely:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">disc</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">method</span>, yang <span class="op">=</span> <span class="va">outcome</span>,</span>
+<span>              yin_scale <span class="op">=</span> <span class="va">scale_fill_viridis_d</span>,</span>
+<span>              yang_scale <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_d</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"outcome"</span>, option <span class="op">=</span> <span class="st">"rocket"</span>,</span>
+<span>                                                begin <span class="op">=</span> <span class="fl">0.4</span>, end <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="ggtaichi_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="The same discrete taichi grid drawn with viridis palettes supplied through yin_scale and yang_scale." width="840" style="display: block; margin: auto;"></p>
+</div>
+<div class="section level3">
+<h3 id="missing-values">Missing values<a class="anchor" aria-label="anchor" href="#missing-values"></a>
+</h3>
+<p>A fish whose fill value is <code>NA</code> is painted in its scale’s
+<code>na.value</code> colour (grey by default; pass
+e.g. <code>na.value = "transparent"</code> through <code>...</code> to
+hide it), so one missing source never suppresses the other fish.
+<code>na.rm = TRUE</code> additionally drops rows with missing
+positions, and an <code>NA</code> eye size simply skips that cell’s
+eye.</p>
 </div>
 <div class="section level3">
 <h3 id="geom-parameter-routing">Geom parameter routing<a class="anchor" aria-label="anchor" href="#geom-parameter-routing"></a>
@@ -352,7 +387,7 @@ supply a custom scale constructor via <code>yin_scale</code> /
 <code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> and forwarded to the underlying fish geoms.
 The deprecated <code>size</code> aesthetic has been replaced with
 <code>linewidth</code>.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">one_lwd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
 <span>  y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
@@ -365,8 +400,85 @@ The deprecated <code>size</code> aesthetic has been replaced with
 <span>              alpha <span class="op">=</span> <span class="fl">0.7</span>, linewidth <span class="op">=</span> <span class="fl">1.5</span>, colour <span class="op">=</span> <span class="st">"#333333"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ggtaichi_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="Taichi diagrams with custom linewidth, alpha, and colour." width="840" style="display: block; margin: auto;"></p>
+<p><img src="ggtaichi_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="Taichi diagrams with custom linewidth, alpha, and colour." width="840" style="display: block; margin: auto;"></p>
 </div>
+</div>
+<div class="section level2">
+<h2 id="new-in-v0-3-0">New in v0.3.0<a class="anchor" aria-label="anchor" href="#new-in-v0-3-0"></a>
+</h2>
+<div class="section level3">
+<h3 id="shared-limits-and-a-single-legend">Shared limits and a single legend<a class="anchor" aria-label="anchor" href="#shared-limits-and-a-single-legend"></a>
+</h3>
+<p>When the two sources are measured in the same units, two separate
+legends are noise. <code>shared_limits = TRUE</code> aligns the limits
+of both fill scales (the union range of the two columns, or the union of
+levels for two discrete sources), so equal values carry equal ink.
+<code>shared_legend = TRUE</code> goes further: both fish use the yin
+palette and only one legend is shown. The synthetic
+<code>cafes_tg</code> data is the natural demo — espresso and matcha
+orders per 100 customers:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>,</span>
+<span>              shared_legend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>              yin_name <span class="op">=</span> <span class="st">"orders / 100 customers"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/remove_padding.html">remove_padding</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Espresso (yang) vs matcha (yin)"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="ggtaichi_files/figure-html/unnamed-chunk-16-1.png" class="r-plt" alt="A 12-week by 8-neighbourhood taichi grid of espresso versus matcha orders sharing one grey fill scale and a single legend." width="840" style="display: block; margin: auto;"></p>
+<p>For diverging data (values around 0), pass a diverging palette to
+both color arguments and symmetric limits through <code>...</code>, e.g.
+<code>limits = c(-5, 5)</code> — both fish then hinge on the same
+midpoint.</p>
+</div>
+<div class="section level3">
+<h3 id="the-fish-geoms-are-exported">The fish geoms are exported<a class="anchor" aria-label="anchor" href="#the-fish-geoms-are-exported"></a>
+</h3>
+<p><code><a href="../reference/geom_yin_fish.html">geom_yin_fish()</a></code> and <code><a href="../reference/geom_yin_fish.html">geom_yang_fish()</a></code> — the
+layers <code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> is built from — are now exported and
+documented. Reach for them when you want one fish only, or full manual
+control over scales and <code><a href="https://eliocamp.github.io/ggnewscale/reference/new_scale.html" class="external-link">ggnewscale::new_scale_fill()</a></code>
+stacking. See <code><a href="../reference/geom_yin_fish.html">?geom_yin_fish</a></code>.</p>
+</div>
+<div class="section level3">
+<h3 id="faster-rendering">Faster rendering<a class="anchor" aria-label="anchor" href="#faster-rendering"></a>
+</h3>
+<p>All cells of a layer are now drawn as one batched polygon (and one
+batch of eye dots) resolved at draw time, instead of one grob stack per
+cell. Large grids and animation frames render several times faster, and
+glyphs stay perfectly round when you resize the device.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="when-not-to-use-taichi">When (not) to use taichi<a class="anchor" aria-label="anchor" href="#when-not-to-use-taichi"></a>
+</h2>
+<p>A taichi grid is at its best when <em>comparing two sources cell by
+cell</em> is the question — the interlocking fish put both numbers in
+one glance. A few honest caveats:</p>
+<ul>
+<li>
+<strong>Dense grids become texture.</strong> Past roughly a thousand
+cells you stop reading symbols and start reading fields; that is still
+useful for spotting bands and regime changes, but for precise lookup,
+subset (as done above) or facet.</li>
+<li>
+<strong>Luminance is a coarse channel.</strong> Small differences in
+a fish’s shade are hard to judge; when exact comparison matters, add
+shared limits (<code>shared_limits = TRUE</code>) so at least the two
+fish are on the same footing, and consider printing the numbers
+alongside.</li>
+<li>
+<strong>Color-vision deficiency.</strong> The default grey ramp is
+luminance-only and safe, and the default red ramp varies strongly in
+luminance as well. For fully colorblind-safe plots, supply viridis
+scales: <code>yin_scale = ggplot2::scale_fill_viridis_c</code> (and a
+second option like <code>"magma"</code> for yang) — every figure in this
+vignette can be redrawn that way with one argument per fish.</li>
+<li>
+<strong>One source missing?</strong> An <code>NA</code> fish keeps
+its place (painted in <code>na.value</code>), so absence is visible
+rather than silently dropped.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="acknowledgement">Acknowledgement<a class="anchor" aria-label="anchor" href="#acknowledgement"></a>

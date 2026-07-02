@@ -27,6 +27,8 @@ geom_taichi(
   yang_eye_size = 0.15,
   yin_eye_colour = "white",
   yang_eye_colour = "black",
+  shared_limits = FALSE,
+  shared_legend = FALSE,
   width = NULL,
   height = NULL,
   alpha = NA,
@@ -104,6 +106,22 @@ geom_taichi(
 
   Colour of each eye dot: a constant (defaults "white" and "black") or
   an unquoted data column containing colour strings.
+
+- shared_limits:
+
+  If `TRUE` and both sources are of the same type (both continuous, or
+  both discrete), the two auto-built fill scales share common limits —
+  the union range (or union of levels) of `yin` and `yang` — so equal
+  values read as equal ink. Explicit `limits` passed through `...` take
+  precedence. Default `FALSE`.
+
+- shared_legend:
+
+  If `TRUE`, treats the two sources as directly comparable: implies
+  `shared_limits = TRUE`, paints both fish with `yin_colors`, and shows
+  a single legend (the yang guide is dropped). Unless `yin_name` is
+  supplied, the legend is titled "`yin` / `yang`". Ignored when custom
+  `yin_scale` / `yang_scale` are given. Default `FALSE`.
 
 - width, height:
 

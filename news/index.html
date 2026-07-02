@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ggtaichi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,6 +17,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/ggtaichi.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../articles/animations.html">Animations</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/gallery.html">Gallery</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/PursuitOfDataScience/ggtaichi" aria-label="GitHub"><span class="fa fa-github fa-lg"></span></a></li>
@@ -33,6 +34,37 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="ggtaichi-030">ggtaichi 0.3.0<a class="anchor" aria-label="anchor" href="#ggtaichi-030"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-3-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-3-0"></a></h3>
+<ul><li>
+<strong>Shared scales</strong> for directly comparable sources (§4b of the roadmap):
+<ul><li>
+<code>shared_limits = TRUE</code> gives both auto-built fill scales common limits — the union range of the two sources (or the union of levels when both are discrete) — so equal values read as equal ink. Explicit <code>limits</code> passed through <code>...</code> still win, and mixing a discrete with a continuous source warns and ignores the flag.</li>
+<li>
+<code>shared_legend = TRUE</code> treats the sources as one measure: it implies shared limits, paints both fish with <code>yin_colors</code>, drops the duplicate yang guide, and titles the single legend “<code>yin</code> / <code>yang</code>” unless <code>yin_name</code> is supplied.</li>
+</ul></li>
+<li>
+<strong>The fish geoms are exported</strong> (§4d): <code><a href="../reference/geom_yin_fish.html">geom_yin_fish()</a></code> and <code><a href="../reference/geom_yin_fish.html">geom_yang_fish()</a></code> are now documented exports (with the <code>GeomYinFish</code> / <code>GeomYangFish</code> ggproto objects available for extension packages), for users who want a single fish or full manual control over scale stacking.</li>
+<li>
+<strong><code><a href="../reference/remove_padding.html">remove_padding()</a></code> auto mode</strong>: called with no arguments it now detects each axis’s scale type from the plot it is added to; the explicit <code>"c"</code> / <code>"d"</code> arguments remain as overrides.</li>
+<li>
+<strong>New dataset <code>cafes_tg</code></strong>: a small, clearly synthetic (seeded) espresso vs. matcha dataset whose two columns share units — an evergreen demo for the shared-scale features and a break from the COVID-era examples. The generating script ships in <code>data-raw/</code>.</li>
+<li>
+<code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> now returns an object with a friendly <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> method instead of dumping raw list internals at the console.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="performance-0-3-0">Performance<a class="anchor" aria-label="anchor" href="#performance-0-3-0"></a></h3>
+<ul><li>
+<strong>Vectorized rendering</strong>: each layer now draws all of its cells as one id-batched polygon (plus one batched circle grob for the eyes), resolved against the physical panel size at draw time via <code>makeContent()</code>. Glyphs stay perfectly round under resize, and large grids render an order of magnitude faster: a 1200-cell grid with eyes takes 0.24 s to build and draw versus 3.5 s in 0.2.0 (~15x, same machine). The drawn output is pixel-identical to 0.2.0 (verified on rotated, eyed, outlined, and faceted-discrete test plots).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-3-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-3-0"></a></h3>
+<ul><li>New pkgdown-only <strong>gallery</strong> article showing palettes, data-driven eyes, rotation, categorical fills, shared scales, and dense-grid texture.</li>
+<li>New <strong>“When (not) to use taichi”</strong> section in the intro vignette: honest guidance on dense grids, luminance precision, colorblind-safe palettes (viridis via <code>yin_scale</code> / <code>yang_scale</code>), and NA visibility.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="ggtaichi-020">ggtaichi 0.2.0<a class="anchor" aria-label="anchor" href="#ggtaichi-020"></a></h2>
 <div class="section level3">
 <h3 id="new-features-0-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
@@ -41,7 +73,7 @@
 <li>
 <strong>Rotation</strong> (<code>angle</code>): rotate each glyph by a constant number of degrees or by a data column, encoding a directional or temporal variable as orientation, and unlocking spin animations (<a href="https://github.com/PursuitOfDataScience/ggtaichi/issues/3" class="external-link">#3</a>a).</li>
 <li>
-<strong>Categorical fill support</strong>: <code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> inspects the plot data at <code>+</code> time and auto-selects <code><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual()</a></code> for discrete (factor / character / logical) <code>yin</code> / <code>yang</code> values — including computed expressions such as <code>factor(week)</code> — and <code><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_fill_gradientn()</a></code> for continuous ones. Custom scales (objects or constructors) can be supplied via <code>yin_scale</code> / <code>yang_scale</code> (<a href="https://github.com/PursuitOfDataScience/ggtaichi/issues/4" class="external-link">#4</a>a, BUG-4).</li>
+<strong>Categorical fill support</strong>: <code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> inspects the plot data at <code>+</code> time and auto-selects <code><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual()</a></code> for discrete (factor / character / logical) <code>yin</code> / <code>yang</code> values — including computed expressions such as <code>factor(week)</code> — and <code><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_fill_gradientn()</a></code> for continuous ones. With the default color vectors, discrete categories sample the ramp evenly while skipping its palest end, so no category is invisible on a white panel. Custom scales (objects or constructors) can be supplied via <code>yin_scale</code> / <code>yang_scale</code> (<a href="https://github.com/PursuitOfDataScience/ggtaichi/issues/4" class="external-link">#4</a>a, BUG-4).</li>
 <li>
 <code>yin</code> and <code>yang</code> also accept strings naming a column (<code>yin = "Twitter"</code>), which previously produced a meaningless constant fill.</li>
 <li>
@@ -52,7 +84,7 @@
 <ul><li>
 <strong><code>...</code> routing (BUG-1)</strong>: geom parameters (<code>alpha</code>, <code>colour</code>, <code>linewidth</code>, <code>linetype</code>, <code>width</code>, <code>height</code>, <code>na.rm</code>, <code>show.legend</code>) are now real, documented arguments of <code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> and are forwarded to the underlying fish layers. <code>...</code> is reserved for options applied to both fill scales (e.g. shared <code>limits</code>); per-fish scale control goes through <code>yin_scale</code> / <code>yang_scale</code>.</li>
 <li>
-<strong><code>linewidth</code> aesthetic (BUG-2)</strong>: the outline width now uses the modern <code>linewidth</code> aesthetic. The deprecated <code>size</code> spelling still works via ggplot2’s built-in renaming path (with a deprecation message). ggtaichi now requires ggplot2 &gt;= 3.4.0.</li>
+<strong><code>linewidth</code> aesthetic (BUG-2)</strong>: the outline width now uses the modern <code>linewidth</code> aesthetic. Passing <code>size</code> to <code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> still works but warns and is routed to <code>linewidth</code>, and an inherited <code>aes(size = ...)</code> mapping is renamed through ggplot2’s built-in deprecation path. ggtaichi now requires ggplot2 &gt;= 3.4.0.</li>
 <li>
 <strong>Missing-argument validation (BUG-3)</strong>: omitting <code>yin</code> or <code>yang</code> errors immediately with a clear message instead of silently producing a degenerate grey plot, and a <code>yin</code> / <code>yang</code> column that does not exist in the plot data errors at <code>+</code> time with the offending name.</li>
 <li>

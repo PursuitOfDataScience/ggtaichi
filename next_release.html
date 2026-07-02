@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ggtaichi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,6 +17,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="articles/ggtaichi.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="articles/animations.html">Animations</a></li>
+<li class="nav-item"><a class="nav-link" href="articles/gallery.html">Gallery</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">News</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/PursuitOfDataScience/ggtaichi" aria-label="GitHub"><span class="fa fa-github fa-lg"></span></a></li>
@@ -31,6 +32,7 @@
       <h1>ggtaichi — Next Release Brainstorm</h1>
       <small class="dont-index">Source: <a href="https://github.com/PursuitOfDataScience/ggtaichi/blob/main/next_release.md" class="external-link"><code>next_release.md</code></a></small>
     </div>
+
 
 <div id="ggtaichi--next-release-brainstorm" class="section level1">
 
@@ -147,7 +149,7 @@
 </ul></div>
 <div class="section level3">
 <h3 id="id_4d-decouple-geom-from-scales-p2-design-decision">4d. Decouple geom from scales [P2, design decision]<a class="anchor" aria-label="anchor" href="#id_4d-decouple-geom-from-scales-p2-design-decision"></a></h3>
-<ul><li>A lower-level <code>geom_yin_fish()</code> / <code>geom_yang_fish()</code> exported pair (they exist internally) would let power users bring any scale, faceting, or new_scale arrangement. Keep <code><a href="reference/geom_taichi.html">geom_taichi()</a></code> as the friendly all-in-one wrapper.</li>
+<ul><li>A lower-level <code><a href="reference/geom_yin_fish.html">geom_yin_fish()</a></code> / <code><a href="reference/geom_yin_fish.html">geom_yang_fish()</a></code> exported pair (they exist internally) would let power users bring any scale, faceting, or new_scale arrangement. Keep <code><a href="reference/geom_taichi.html">geom_taichi()</a></code> as the friendly all-in-one wrapper.</li>
 <li>Trade-off: more surface area to document and support.</li>
 </ul></div>
 <div class="section level3">
@@ -216,7 +218,7 @@
 <div class="section level3">
 <h3 id="minor--housekeeping">Minor / housekeeping<a class="anchor" aria-label="anchor" href="#minor--housekeeping"></a></h3>
 <ul><li>
-<code>geom_yin_fish()</code> / <code>geom_yang_fish()</code> are <strong>not exported</strong> (confirmed via <code>getNamespaceExports</code>), so the §4d decoupling genuinely needs new exports.</li>
+<code><a href="reference/geom_yin_fish.html">geom_yin_fish()</a></code> / <code><a href="reference/geom_yin_fish.html">geom_yang_fish()</a></code> are <strong>not exported</strong> (confirmed via <code>getNamespaceExports</code>), so the §4d decoupling genuinely needs new exports.</li>
 <li>Running examples leaves a stray <code>Rplots.pdf</code> in the working dir when a device isn’t open — worth a note in dev docs / <code>.Rbuildignore</code> hygiene.</li>
 </ul><hr></div>
 </div>
@@ -280,8 +282,69 @@
 <code>R CMD INSTALL ggtaichi</code> into that lib, then drive plots with <code><a href="https://ggplot2.tidyverse.org/reference/ggplot_build.html" class="external-link">ggplot2::ggplot_build()</a></code> / <code>ggplotGrob()</code> and <code><a href="https://rdrr.io/r/base/conditions.html" class="external-link">withCallingHandlers()</a></code> to capture warnings, rather than rendering to a device.</li>
 <li>Geometry check: sample ~20k points inside the unit circle and ray-cast them against <code>ggtaichi:::taichi_fish(..., "yin")</code> and <code>"yang"</code> to confirm exact, gap-free, overlap-free 50/50 tiling.</li>
 </ul><p>First task of v0.2.0 (per scope item 1) is to fold these probes into a real <code>testthat</code> + <code>vdiffr</code> suite so they run in CI instead of by hand.</p>
+<hr></div>
 </div>
+<div class="section level1">
+<h1 id="addendum--post-v020-status--v030-planning-added-2026-07-01">Addendum — post-v0.2.0 status &amp; v0.3.0 planning (added 2026-07-01)<a class="anchor" aria-label="anchor" href="#addendum--post-v020-status--v030-planning-added-2026-07-01"></a></h1>
+<p>Everything above is kept verbatim as the historical plan. This addendum records what v0.2.0 actually shipped and lays out the v0.3.0 scope.</p>
+<div class="section level2">
+<h2 id="what-v020-shipped-all-four-bugs--scope-items-05">What v0.2.0 shipped (all four bugs + scope items 0–5)<a class="anchor" aria-label="anchor" href="#what-v020-shipped-all-four-bugs--scope-items-05"></a></h2>
+<ul><li>BUG-1..4 fixed as planned; <code>...</code> now targets both fill scales, geom params are explicit arguments, and <code>size</code> is soft-deprecated into <code>linewidth</code> (both as a parameter and, via <code>rename_size</code>, as an inherited aesthetic).</li>
+<li>Rotation (<code>angle</code>, constant or column) and <strong>data-driven eyes</strong> (size and colour per fish, constant or column; mapped sizes rescaled to [0.05, 0.3], values in (0, 0.5] taken as literal proportions, <code>NA</code> suppresses the eye).</li>
+<li>Discrete fill detection via tidy evaluation (handles <code>factor(week)</code> and friends), <code>yin_scale</code> / <code>yang_scale</code> overrides, string column names, and clear <code>+</code>-time errors for missing columns.</li>
+<li>Discovered &amp; fixed along the way (not in the original list):
+<ul><li>the taichi <strong>eyes were swapped</strong> into the opposite fish’s head, and the yang polygon over-painted the yin eye — each eye now sits in its own fish’s bulb (yin top, yang bottom);</li>
+<li>the default discrete palette sampled <code>gray100</code> first, drawing invisible white fish — default discrete palettes now skip the palest ramp end;</li>
+<li>vdiffr snapshots must be generated against the same ggplot2 minor version CI installs (a 3.5.2-era snapshot failed under 4.0.3) — see CI notes below.</li>
+</ul></li>
+<li>testthat + vdiffr suite (geometry Monte-Carlo, routing, eyes, rotation, scale selection, rendering-level grob checks) runs green on all 5 CI platforms, macOS/Windows included.</li>
+<li>The gganimate spike <strong>succeeded</strong>: recipes verified frame-by-frame against gganimate 1.0.11 / ggplot2 4.0.3 — no wrapper needed; animation vignette shipped.</li>
+</ul></div>
+<div class="section level2">
+<h2 id="proposed-v030-scope">Proposed v0.3.0 scope<a class="anchor" aria-label="anchor" href="#proposed-v030-scope"></a></h2>
+<ol style="list-style-type: decimal"><li>
+<strong>[P1] Shared &amp; diverging scales (§4b).</strong>
+<ul><li>
+<code>shared_limits = TRUE</code>: compute the union range of <code>yin</code> and <code>yang</code> at <code>+</code> time (both continuous) and apply it to both fill scales, so equal values read as equal ink.</li>
+<li>
+<code>shared_legend = TRUE</code>: for directly comparable sources — implies shared limits, paints both fish with the <em>yin</em> palette, and shows a single legend (the yang guide is dropped). Legend title falls back to “yin / yang” names unless <code>yin_name</code> is given.</li>
+<li>Diverging data: document the symmetric-limits recipe (<code>limits = c(-m, m)</code> with a diverging <code>yin_colors</code>/<code>yang_colors</code>).</li>
+</ul></li>
+<li>
+<strong>[P1] Export the fish geoms (§4d).</strong> <code><a href="reference/geom_yin_fish.html">geom_yin_fish()</a></code> / <code><a href="reference/geom_yin_fish.html">geom_yang_fish()</a></code> become documented exports for power users who want their own scale / ggnewscale arrangements; <code><a href="reference/geom_taichi.html">geom_taichi()</a></code> remains the friendly wrapper.</li>
+<li>
+<strong>[P1] Vectorized rendering (§5 performance).</strong> Replace the per-cell <code>lapply</code> + per-cell viewport with a draw-time <code>makeContent()</code> gTree that emits one id-batched <code>polygonGrob</code> (and one <code>circleGrob</code> for eyes) per layer. Keeps glyphs round under resize (radius resolved at draw time), cuts grob count from O(cells) to O(1) per layer — matters for large grids and animation frames. Rendering must stay visually identical (guarded by the vdiffr suite + a pixel-level before/after comparison).</li>
+<li>
+<strong>[P1] Fresh evergreen dataset (§7).</strong> <code>cafes_tg</code>: a small, clearly synthetic (seeded) two-source dataset — weekly espresso vs. matcha orders across city neighbourhoods — so demos stop leaning on COVID-era data.</li>
+<li>
+<strong>[P1] Gallery (§7).</strong> A pkgdown-only article (vignettes/articles/) showing palettes, eyes, rotation, categorical fills, shared scales, and the new dataset side by side.</li>
+<li>
+<strong>[P2] <code><a href="reference/remove_padding.html">remove_padding()</a></code> auto mode (§5 polish).</strong> Calling it with no arguments now auto-detects each axis’s scale type from the plot data at <code>+</code> time; the explicit <code>"c"</code> / <code>"d"</code> API stays for overrides.</li>
+<li>
+<strong>[P2] Console <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> method</strong> for the object <code><a href="reference/geom_taichi.html">geom_taichi()</a></code> returns, so typing it bare no longer dumps raw list internals.</li>
+<li>
+<strong>[P1 docs] “When (not) to use taichi” + accessibility.</strong> Honest readability guidance (dense grids, luminance-vs-luminance comparisons, colorblind-safe palettes via <code>yin_scale = scale_fill_viridis_*</code>) in the intro vignette.</li>
+</ol></div>
+<div class="section level2">
+<h2 id="deferred-to-v04-sharpened-not-dropped">Deferred to v0.4+ (sharpened, not dropped)<a class="anchor" aria-label="anchor" href="#deferred-to-v04-sharpened-not-dropped"></a></h2>
+<ul><li>
+<strong>ggiraph interactivity (§2a).</strong> Implementation sketch after the 0.3 rendering rework: the vectorized <code>makeContent()</code> path makes it natural to emit <code>ggiraph::interactive_polygon_grob()</code> with per-cell <code>tooltip</code> / <code>data_id</code> when an <code>interactive</code> flag is set; test via girafe htmlwidget snapshots. Deferred so 0.3 stays dependency-light and CI-green.</li>
+<li>
+<strong>Maps / <code>coord_sf</code> demo (§6).</strong> Works in principle (bbox-based cells); needs an sf-heavy vignette and system deps on CI — pair it with the ggiraph release.</li>
+<li>
+<strong>Eye-size legend (open question).</strong> Mapped eye sizes currently have no guide; decide between a custom legend grob or documenting them as a annotation channel only.</li>
+<li>
+<strong>Lifecycle badge.</strong> Keep <code>experimental</code> through 0.3.0 (API grew again); revisit <code>stable</code> for 0.4.0 once the exported-geom API has survived a cycle.</li>
+</ul></div>
+<div class="section level2">
+<h2 id="ci--testing-notes-learned-the-hard-way-keep-in-mind">CI / testing notes (learned the hard way, keep in mind)<a class="anchor" aria-label="anchor" href="#ci--testing-notes-learned-the-hard-way-keep-in-mind"></a></h2>
+<ul><li>vdiffr snapshots are coupled to the <strong>ggplot2 minor version</strong> on CRAN (CI installs current CRAN). Regenerate snapshots whenever CRAN’s ggplot2 minor bumps; generate them on a stack matching CI (ggplot2 4.0.x as of now). They <em>are</em> stable across OSes (macOS/Windows/Linux all pass).</li>
+<li>The animations vignette evaluates its chunks whenever gganimate is installed (as on CI) — any chunk must attach its own packages in setup and keep <code>animate()</code> calls commented (no gifski on CI).</li>
+<li>
+<code>transition_states()</code> needs at least one positive length; <code>(0, 0)</code> errors.</li>
+</ul></div>
 </div>
+
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
