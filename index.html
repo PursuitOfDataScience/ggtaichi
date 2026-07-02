@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ggtaichi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,11 +31,13 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="articles/ggtaichi.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="articles/animations.html">Animations</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">News</a></li>
       </ul>
 <ul class="navbar-nav">
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/PursuitOfDataScience/ggtaichi"><span class="fa fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/PursuitOfDataScience/ggtaichi" aria-label="GitHub"><span class="fa fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -48,20 +50,23 @@
 </h1></div>
 <!-- badges: start -->
 
-<p><code>ggtaichi</code> is a <code>ggplot2</code> extension that compares data from two sources on a single grid of taichi (yin-yang) diagrams. A regular heat map made with <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile()</a></code> encodes three dimensions (the <code>x</code>, <code>y</code> position and one value); <code><a href="reference/geom_taichi.html">geom_taichi()</a></code> turns every cell into a taichi symbol whose two interlocking fish are filled by <strong>two</strong> sources at once, so four dimensions are expressed on one plot.</p>
+<p><code>ggtaichi</code> is a <code>ggplot2</code> extension that compares data from two sources on a single grid of taichi (yin-yang) diagrams. A regular heat map made with <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile()</a></code> encodes three dimensions (the <code>x</code>, <code>y</code> position and one value); <code><a href="reference/geom_taichi.html">geom_taichi()</a></code> turns every cell into a taichi symbol whose two interlocking fish are filled by <strong>two</strong> sources at once, so four dimensions are expressed on one plot – and with the optional data-driven eyes of v0.2.0, up to <strong>six</strong>.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version from GitHub with:</p>
+<p>Install the released version from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"ggtaichi"</span><span class="op">)</span></span></code></pre></div>
+<p>Or the development version from GitHub with:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"PursuitOfDataScience/ggtaichi"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="anatomy-of-a-taichi">Anatomy of a taichi<a class="anchor" aria-label="anchor" href="#anatomy-of-a-taichi"></a>
 </h2>
-<p>Each symbol is a circle split by an S-curve into two interlocking fish. The <strong>yang</strong> (light) fish is shaded by one source and the <strong>yin</strong> (dark) fish by the other, each on its own gradient. There are no decorative dots: every drop of ink is data.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<p>Each symbol is a circle split by an S-curve into two interlocking fish. The <strong>yang</strong> (light) fish is shaded by one source and the <strong>yin</strong> (dark) fish by the other, each on its own gradient. By default there are no decorative dots – every drop of ink is data – and the classic eyes, when you enable them, are data channels too (see below).</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pursuitofdatascience.github.io/ggtaichi/">ggtaichi</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span></span>
@@ -77,7 +82,7 @@
 <h2 id="a-clear-small-grid">A clear, small grid<a class="anchor" aria-label="anchor" href="#a-clear-small-grid"></a>
 </h2>
 <p>The built-in <code>pitts_tg</code> dataset holds the 30-week COVID-related Google and Twitter incidence rates for 9 categories in the Pittsburgh Metropolitan Statistical Area. With many weeks the symbols shrink, so it is often easier to read a slice. Here are the first six weeks, where each taichi is big enough to compare the two halves at a glance.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pitts_small</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">pitts_tg</span>, <span class="va">week</span> <span class="op">&lt;=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">pitts_small</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">category</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -91,7 +96,7 @@
 <h2 id="your-own-palettes">Your own palettes<a class="anchor" aria-label="anchor" href="#your-own-palettes"></a>
 </h2>
 <p>Each fish gets its own gradient, and any extra argument is passed straight to <code><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">ggplot2::scale_fill_gradientn()</a></code>.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">pitts_small</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">category</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span></span>
 <span>    yin  <span class="op">=</span> <span class="va">Twitter</span>, yin_name  <span class="op">=</span> <span class="st">"Twitter (%)"</span>,</span>
@@ -106,7 +111,7 @@
 <h2 id="comparing-places">Comparing places<a class="anchor" aria-label="anchor" href="#comparing-places"></a>
 </h2>
 <p>Because <code><a href="reference/geom_taichi.html">geom_taichi()</a></code> is an ordinary layer, faceting just works. The <code>states_tg</code> dataset repeats the same measurements across four states; showing two of them over a handful of weeks keeps the glyphs large and legible.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">two_states</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">states_tg</span>, <span class="va">state</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"New York"</span>, <span class="st">"Texas"</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">week</span> <span class="op">&lt;=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">two_states</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">category</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -116,6 +121,71 @@
 <span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"New York vs Texas, weeks 1-6"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-states-1.png" alt="Two faceted taichi grids comparing New York and Texas over six weeks, the yang fish red for Google and the yin fish grey for Twitter." style="display: block; margin: auto;"></p>
+</div>
+<div class="section level2">
+<h2 id="new-in-020-eyes-that-carry-data">New in 0.2.0: eyes that carry data<a class="anchor" aria-label="anchor" href="#new-in-020-eyes-that-carry-data"></a>
+</h2>
+<p><code>eyes = TRUE</code> draws the classic taichi dots, each centred in its own fish’s head. The eye arguments accept a constant <em>or a data column</em>: mapped eye sizes (rescaled to sensible radii) and colours make the glyph a genuine <strong>six-dimensional</strong> mark – <code>x</code>, <code>y</code>, two fills, two eyes.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">quad</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  yin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">5</span>, <span class="fl">7</span>, <span class="fl">9</span><span class="op">)</span>,</span>
+<span>  yang <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">7</span>, <span class="fl">5</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  reach <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">40</span>, <span class="fl">25</span>, <span class="fl">5</span><span class="op">)</span>,</span>
+<span>  quality <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">4</span>, <span class="fl">8</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">quad</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">yin</span>, yang <span class="op">=</span> <span class="va">yang</span>,</span>
+<span>              eyes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>              yin_eye_size <span class="op">=</span> <span class="va">reach</span>,</span>
+<span>              yang_eye_size <span class="op">=</span> <span class="va">quality</span>,</span>
+<span>              limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>  <span class="co"># shared limits keep the palest fish visible</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Eye sizes encode a 5th and 6th variable"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-eyes-1.png" alt="A two-by-two grid of taichi diagrams with classic eyes whose sizes vary from cell to cell, encoding two extra variables." style="display: block; margin: auto;"></p>
+</div>
+<div class="section level2">
+<h2 id="new-in-020-rotation">New in 0.2.0: rotation<a class="anchor" aria-label="anchor" href="#new-in-020-rotation"></a>
+</h2>
+<p><code>angle</code> rotates each glyph by a constant or by a column, so orientation can encode a directional or temporal variable – and, combined with <a href="https://gganimate.org" class="external-link">gganimate</a>, produces the iconic spinning taichi (see <code><a href="articles/animations.html">vignette("animations")</a></code>).</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, y <span class="op">=</span> <span class="fl">1</span>, yin <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, yang <span class="op">=</span> <span class="fl">4</span><span class="op">:</span><span class="fl">1</span>,</span>
+<span>                  turn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">45</span>, <span class="fl">90</span>, <span class="fl">135</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">rot</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">yin</span>, yang <span class="op">=</span> <span class="va">yang</span>, angle <span class="op">=</span> <span class="va">turn</span>, eyes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>              limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-rotation-1.png" alt="Four taichi diagrams rotated by 0, 45, 90, and 135 degrees read from a data column." style="display: block; margin: auto;"></p>
+</div>
+<div class="section level2">
+<h2 id="new-in-020-categorical-fills">New in 0.2.0: categorical fills<a class="anchor" aria-label="anchor" href="#new-in-020-categorical-fills"></a>
+</h2>
+<p>Factor, character, and logical columns now get a discrete fill scale automatically (v0.1.0 could only draw continuous values); computed expressions like <code>factor(week)</code> work too, and <code>yin_scale</code> / <code>yang_scale</code> accept any custom fill scale.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">disc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"A"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  outcome <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"win"</span>, <span class="st">"loss"</span>, <span class="st">"win"</span>, <span class="st">"loss"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">disc</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">method</span>, yang <span class="op">=</span> <span class="va">outcome</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Discrete yin &amp; yang"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-categorical-1.png" alt="A two-by-two grid of taichi diagrams whose fish are filled by discrete categories: methods A to C for yin and win or loss for yang." style="display: block; margin: auto;"></p>
+<p>v0.2.0 also fixes the parameter routing of <code><a href="reference/geom_taichi.html">geom_taichi()</a></code>: <code>alpha</code>, <code>colour</code>, <code>linewidth</code>, <code>linetype</code>, <code>width</code>, <code>height</code>, <code>na.rm</code>, and <code>show.legend</code> are all real arguments now, the deprecated <code>size</code> maps to <code>linewidth</code> with a warning, missing or misspelled <code>yin</code> / <code>yang</code> columns error immediately with a clear message, and the geometry is guarded by a testthat + vdiffr suite.</p>
+</div>
+<div class="section level2">
+<h2 id="animation">Animation<a class="anchor" aria-label="anchor" href="#animation"></a>
+</h2>
+<p>The taichi is a cyclical symbol, so motion suits it: <code><a href="reference/geom_taichi.html">geom_taichi()</a></code> composes cleanly with <code>gganimate</code> – turn a third variable into animation frames instead of an axis, or spin the glyphs via <code>angle</code>. Full recipes live in <code><a href="articles/animations.html">vignette("animations")</a></code>.</p>
 <p>See <code><a href="articles/ggtaichi.html">vignette("ggtaichi")</a></code> for the full tour.</p>
 </div>
 <div class="section level2">
@@ -125,19 +195,20 @@
 <blockquote>
 <p>Yu Y, Buskirk T (2025). <em>ggDoubleHeat: A Heatmap-Like Visualization Tool</em>. R package version 0.1.3. CRAN: <a href="https://CRAN.R-project.org/package=ggDoubleHeat" class="external-link uri">https://CRAN.R-project.org/package=ggDoubleHeat</a>, GitHub: <a href="https://github.com/PursuitOfDataScience/ggDoubleHeat" class="external-link uri">https://github.com/PursuitOfDataScience/ggDoubleHeat</a></p>
 </blockquote>
-<div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="sc">@</span>Manual{,</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  title  <span class="ot">=</span> {ggDoubleHeat<span class="sc">:</span> A Heatmap<span class="sc">-</span>Like Visualization Tool},</span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  author <span class="ot">=</span> {Youzhi Yu and Trent Buskirk},</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  year   <span class="ot">=</span> {<span class="dv">2025</span>},</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  note   <span class="ot">=</span> {R package version <span class="dv">0</span>.<span class="dv">1</span>.<span class="fl">3.</span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>            GitHub<span class="sc">:</span> https<span class="sc">:</span><span class="er">//</span>github.com<span class="sc">/</span>PursuitOfDataScience<span class="sc">/</span>ggDoubleHeat},</span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  url    <span class="ot">=</span> {https<span class="sc">:</span><span class="er">//</span>CRAN.R<span class="sc">-</span>project.org<span class="sc">/</span>package<span class="ot">=</span>ggDoubleHeat},</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="sc">@</span>Manual{,</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  title  <span class="ot">=</span> {ggDoubleHeat<span class="sc">:</span> A Heatmap<span class="sc">-</span>Like Visualization Tool},</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  author <span class="ot">=</span> {Youzhi Yu and Trent Buskirk},</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  year   <span class="ot">=</span> {<span class="dv">2025</span>},</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  note   <span class="ot">=</span> {R package version <span class="dv">0</span>.<span class="dv">1</span>.<span class="fl">3.</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>            GitHub<span class="sc">:</span> https<span class="sc">:</span><span class="er">//</span>github.com<span class="sc">/</span>PursuitOfDataScience<span class="sc">/</span>ggDoubleHeat},</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  url    <span class="ot">=</span> {https<span class="sc">:</span><span class="er">//</span>CRAN.R<span class="sc">-</span>project.org<span class="sc">/</span>package<span class="ot">=</span>ggDoubleHeat},</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://cloud.r-project.org/package=ggtaichi" class="external-link">View on CRAN</a></li>
 <li><a href="https://github.com/PursuitOfDataScience/ggtaichi/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/PursuitOfDataScience/ggtaichi/issues" class="external-link">Report a bug</a></li>
 </ul>

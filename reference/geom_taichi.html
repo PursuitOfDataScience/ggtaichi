@@ -4,12 +4,16 @@
 to show the values from two data sources on the same plot, so four
 dimensions of data can be expressed at once: the x and y
 position of every taichi symbol plus the yin and yang values
-that fill its two halves.'><meta property="og:description" content='The taichi geom turns each cell of a heatmap-like grid into a taichi
+that fill its two halves. With the optional eyes enabled and mapped to data
+(see eyes, yin_eye_size, yang_eye_size), a single glyph
+can carry up to six dimensions.'><meta property="og:description" content='The taichi geom turns each cell of a heatmap-like grid into a taichi
 (yin-yang) diagram. The two interlocking "fish" of the diagram use luminance
 to show the values from two data sources on the same plot, so four
 dimensions of data can be expressed at once: the x and y
 position of every taichi symbol plus the yin and yang values
-that fill its two halves.'></head><body>
+that fill its two halves. With the optional eyes enabled and mapped to data
+(see eyes, yin_eye_size, yang_eye_size), a single glyph
+can carry up to six dimensions.'></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -17,7 +21,7 @@ that fill its two halves.'></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ggtaichi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,9 +29,11 @@ that fill its two halves.'></head><body>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/ggtaichi.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/animations.html">Animations</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/PursuitOfDataScience/ggtaichi"><span class="fa fa-github fa-lg"></span></a></li>
+      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/PursuitOfDataScience/ggtaichi" aria-label="GitHub"><span class="fa fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -47,18 +53,36 @@ that fill its two halves.'></head><body>
 to show the values from two data sources on the same plot, so four
 dimensions of data can be expressed at once: the <code>x</code> and <code>y</code>
 position of every taichi symbol plus the <code>yin</code> and <code>yang</code> values
-that fill its two halves.</p>
+that fill its two halves. With the optional eyes enabled and mapped to data
+(see <code>eyes</code>, <code>yin_eye_size</code>, <code>yang_eye_size</code>), a single glyph
+can carry up to six dimensions.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">geom_taichi</span><span class="op">(</span></span>
 <span>  <span class="va">yin</span>,</span>
-<span>  yin_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  yin_colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gray100"</span>, <span class="st">"gray85"</span>, <span class="st">"gray50"</span>, <span class="st">"gray35"</span>, <span class="st">"gray0"</span><span class="op">)</span>,</span>
 <span>  <span class="va">yang</span>,</span>
+<span>  yin_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  yang_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  yin_colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gray100"</span>, <span class="st">"gray85"</span>, <span class="st">"gray50"</span>, <span class="st">"gray35"</span>, <span class="st">"gray0"</span><span class="op">)</span>,</span>
 <span>  yang_colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#FED7D8"</span>, <span class="st">"#FE8C91"</span>, <span class="st">"#F5636B"</span>, <span class="st">"#E72D3F"</span>, <span class="st">"#C20824"</span><span class="op">)</span>,</span>
+<span>  yin_scale <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  yang_scale <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  angle <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  eyes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  yin_eye_size <span class="op">=</span> <span class="fl">0.15</span>,</span>
+<span>  yang_eye_size <span class="op">=</span> <span class="fl">0.15</span>,</span>
+<span>  yin_eye_colour <span class="op">=</span> <span class="st">"white"</span>,</span>
+<span>  yang_eye_colour <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  height <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  na.rm <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  colour <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  linewidth <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  linetype <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  show.legend <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -68,82 +92,183 @@ that fill its two halves.</p>
 
 
 <dl><dt id="arg-yin">yin<a class="anchor" aria-label="anchor" href="#arg-yin"></a></dt>
-<dd><p>The column name for the yin (dark) fish of the taichi symbol.</p></dd>
+<dd><p>The unquoted column name (or a string naming a column) for the
+yin (dark) fish of the taichi symbol.</p></dd>
+
+
+<dt id="arg-yang">yang<a class="anchor" aria-label="anchor" href="#arg-yang"></a></dt>
+<dd><p>The unquoted column name (or a string naming a column) for the
+yang (light) fish of the taichi symbol.</p></dd>
 
 
 <dt id="arg-yin-name">yin_name<a class="anchor" aria-label="anchor" href="#arg-yin-name"></a></dt>
 <dd><p>The label name (in quotes) for the legend of the yin
-rendering. Default is <code>NULL</code>.</p></dd>
-
-
-<dt id="arg-yin-colors">yin_colors<a class="anchor" aria-label="anchor" href="#arg-yin-colors"></a></dt>
-<dd><p>A color vector, usually as hex codes.</p></dd>
-
-
-<dt id="arg-yang">yang<a class="anchor" aria-label="anchor" href="#arg-yang"></a></dt>
-<dd><p>The column name for the yang (light) fish of the taichi symbol.</p></dd>
+rendering. Default is <code>NULL</code> (uses the column name).</p></dd>
 
 
 <dt id="arg-yang-name">yang_name<a class="anchor" aria-label="anchor" href="#arg-yang-name"></a></dt>
 <dd><p>The label name (in quotes) for the legend of the yang
-rendering. Default is <code>NULL</code>.</p></dd>
+rendering. Default is <code>NULL</code> (uses the column name).</p></dd>
+
+
+<dt id="arg-yin-colors">yin_colors<a class="anchor" aria-label="anchor" href="#arg-yin-colors"></a></dt>
+<dd><p>A color vector, usually as hex codes, for the yin fish
+fill. Used as a gradient for continuous data and as a discrete palette
+for factor/character data. Ignored if <code>yin_scale</code> is provided.</p></dd>
 
 
 <dt id="arg-yang-colors">yang_colors<a class="anchor" aria-label="anchor" href="#arg-yang-colors"></a></dt>
-<dd><p>A color vector, usually as hex codes.</p></dd>
+<dd><p>A color vector, usually as hex codes, for the yang fish
+fill. Used as a gradient for continuous data and as a discrete palette
+for factor/character data. Ignored if <code>yang_scale</code> is provided.</p></dd>
+
+
+<dt id="arg-yin-scale">yin_scale<a class="anchor" aria-label="anchor" href="#arg-yin-scale"></a></dt>
+<dd><p>An optional fill scale for the yin fish: either a ready
+scale object or a scale constructor function (e.g.
+<code><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">ggplot2::scale_fill_viridis_d</a></code>). Overrides auto-detection.</p></dd>
+
+
+<dt id="arg-yang-scale">yang_scale<a class="anchor" aria-label="anchor" href="#arg-yang-scale"></a></dt>
+<dd><p>An optional fill scale for the yang fish, as
+<code>yin_scale</code>.</p></dd>
+
+
+<dt id="arg-angle">angle<a class="anchor" aria-label="anchor" href="#arg-angle"></a></dt>
+<dd><p>Rotation of each glyph in degrees, counter-clockwise: either a
+single number or an unquoted column name (one angle per cell).</p></dd>
+
+
+<dt id="arg-eyes">eyes<a class="anchor" aria-label="anchor" href="#arg-eyes"></a></dt>
+<dd><p>Logical. If <code>TRUE</code>, draws the classic taichi eyes (dots),
+each centred in its fish's head. Default <code>FALSE</code>, preserving the
+plain v0.1.0 look.</p></dd>
+
+
+<dt id="arg-yin-eye-size-yang-eye-size">yin_eye_size, yang_eye_size<a class="anchor" aria-label="anchor" href="#arg-yin-eye-size-yang-eye-size"></a></dt>
+<dd><p>Size of each eye as a proportion of the
+glyph radius: a constant (default 0.15) or an unquoted data column to
+encode a variable (see the Eyes section for the rescaling rule).</p></dd>
+
+
+<dt id="arg-yin-eye-colour-yang-eye-colour">yin_eye_colour, yang_eye_colour<a class="anchor" aria-label="anchor" href="#arg-yin-eye-colour-yang-eye-colour"></a></dt>
+<dd><p>Colour of each eye dot: a constant
+(defaults "white" and "black") or an unquoted data column containing
+colour strings.</p></dd>
+
+
+<dt id="arg-width-height">width, height<a class="anchor" aria-label="anchor" href="#arg-width-height"></a></dt>
+<dd><p>Width and height of each cell. Typically omitted.</p></dd>
+
+
+<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
+<dd><p>Alpha transparency for the fish fills.</p></dd>
+
+
+<dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
+<dd><p>If <code>TRUE</code>, silently removes rows with missing values.</p></dd>
+
+
+<dt id="arg-colour">colour<a class="anchor" aria-label="anchor" href="#arg-colour"></a></dt>
+<dd><p>Outline colour of the fish.</p></dd>
+
+
+<dt id="arg-linewidth">linewidth<a class="anchor" aria-label="anchor" href="#arg-linewidth"></a></dt>
+<dd><p>Outline width of the fish (in mm). Replaces the deprecated
+<code>size</code> aesthetic of ggtaichi 0.1.0.</p></dd>
+
+
+<dt id="arg-linetype">linetype<a class="anchor" aria-label="anchor" href="#arg-linetype"></a></dt>
+<dd><p>Outline linetype of the fish.</p></dd>
+
+
+<dt id="arg-show-legend">show.legend<a class="anchor" aria-label="anchor" href="#arg-show-legend"></a></dt>
+<dd><p>Logical. Should the layer be included in the legend?</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p><code>...</code> accepts any arguments <code><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_fill_gradientn()</a></code> has
-.</p></dd>
+<dd><p>Additional arguments passed to <em>both</em> auto-built fill
+scales (e.g., shared <code>limits</code> or <code>na.value</code>). For per-fish
+scale options, supply <code>yin_scale</code> / <code>yang_scale</code> instead.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A taichi diagram comparing two data sources.</p>
     </div>
+    <div class="section level2">
+    <h2 id="discrete-and-continuous-fills">Discrete and continuous fills<a class="anchor" aria-label="anchor" href="#discrete-and-continuous-fills"></a></h2>
+
+
+<p><code>geom_taichi()</code> inspects the plot data at <code>+</code> time. A numeric
+<code>yin</code> / <code>yang</code> column gets a continuous
+<code><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_fill_gradientn</a></code> built from <code>yin_colors</code> /
+<code>yang_colors</code>; a factor, character, or logical column (including
+computed expressions such as <code>factor(week)</code>) gets a discrete
+<code><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></code> whose palette is interpolated from
+the same color vectors. With the default vectors the discrete palette skips
+the palest end of the ramp so that no category is invisible on a white
+panel; an explicitly supplied color vector is used as-is. Supply
+<code>yin_scale</code> / <code>yang_scale</code> to override the automatic choice
+entirely.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="eyes">Eyes<a class="anchor" aria-label="anchor" href="#eyes"></a></h2>
+
+
+<p><code>eyes = TRUE</code> draws the classic taichi dots, each sitting in its own
+fish's head: the yin eye in the top bulb, the yang eye in the bottom bulb.
+The size and colour arguments accept either a constant or an (unquoted)
+data column, so the eyes can encode up to two further variables. A mapped
+eye-size column is rescaled to radii between 0.05 and 0.3 of the glyph
+radius, unless all its values already lie in <code>(0, 0.5]</code>, in which case
+they are used directly as radius proportions. Cells whose eye size is
+<code>NA</code> or <code>0</code> are drawn without an eye.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="missing-values">Missing values<a class="anchor" aria-label="anchor" href="#missing-values"></a></h2>
+
+
+<p>A fish whose fill value is <code>NA</code> is painted in the scale's
+<code>na.value</code> colour (pass e.g. <code>na.value = "transparent"</code> through
+<code>...</code> to change it), while <code>na.rm = TRUE</code> silently drops rows
+with missing positions.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># taichi with categorical variables only</span></span></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                   y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"d"</span>, <span class="st">"e"</span>, <span class="st">"f"</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                   yin_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">5</span>,<span class="fl">7</span><span class="op">)</span>,<span class="fl">3</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                   yang_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">3</span>,<span class="fl">4</span><span class="op">)</span>,<span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
-<span class="r-in"><span><span class="fu">geom_taichi</span><span class="op">(</span>yin <span class="op">=</span> <span class="va">yin_values</span>,</span></span>
-<span class="r-in"><span>            yang <span class="op">=</span> <span class="va">yang_values</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="geom_taichi-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># taichi with numeric variables only</span></span></span>
+<span class="r-in"><span><span class="co"># taichi with numeric fills</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                   y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                   yin_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">5</span>,<span class="fl">7</span><span class="op">)</span>,<span class="fl">3</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                   yang_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">3</span>,<span class="fl">4</span><span class="op">)</span>,<span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                   y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                   yin_values <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">9</span>,</span></span>
+<span class="r-in"><span>                   yang_values <span class="op">=</span> <span class="fl">9</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
-<span class="r-in"><span><span class="fu">geom_taichi</span><span class="op">(</span>yin <span class="op">=</span> <span class="va">yin_values</span>,</span></span>
-<span class="r-in"><span>            yang <span class="op">=</span> <span class="va">yang_values</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>  <span class="fu">geom_taichi</span><span class="op">(</span>yin <span class="op">=</span> <span class="va">yin_values</span>,</span></span>
+<span class="r-in"><span>              yang <span class="op">=</span> <span class="va">yang_values</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="geom_taichi-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># categorical (discrete) fills are detected automatically</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">data</span><span class="op">$</span><span class="va">yin_class</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"low"</span>, <span class="st">"mid"</span>, <span class="st">"high"</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>  <span class="fu">geom_taichi</span><span class="op">(</span>yin <span class="op">=</span> <span class="va">yin_class</span>,</span></span>
+<span class="r-in"><span>              yang <span class="op">=</span> <span class="va">yang_values</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="geom_taichi-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># classic eyes, rotation, and data-driven eye sizes</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># taichi with a mixture of numeric and categorical variables</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                   y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                   yin_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">5</span>,<span class="fl">7</span><span class="op">)</span>,<span class="fl">3</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                   yang_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">3</span>,<span class="fl">4</span><span class="op">)</span>,<span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
-<span class="r-in"><span><span class="fu">geom_taichi</span><span class="op">(</span>yin <span class="op">=</span> <span class="va">yin_values</span>,</span></span>
-<span class="r-in"><span>            yang <span class="op">=</span> <span class="va">yang_values</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>  <span class="fu">geom_taichi</span><span class="op">(</span>yin <span class="op">=</span> <span class="va">yin_values</span>,</span></span>
+<span class="r-in"><span>              yang <span class="op">=</span> <span class="va">yang_values</span>,</span></span>
+<span class="r-in"><span>              eyes <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>              yin_eye_size <span class="op">=</span> <span class="va">yang_values</span>,</span></span>
+<span class="r-in"><span>              angle <span class="op">=</span> <span class="fl">45</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="geom_taichi-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

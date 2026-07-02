@@ -8,11 +8,19 @@ encodes three dimensions (the `x`, `y` position and one value);
 [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
 turns every cell into a taichi symbol whose two interlocking fish are
 filled by **two** sources at once, so four dimensions are expressed on
-one plot.
+one plot – and with the optional data-driven eyes of v0.2.0, up to
+**six**.
 
 ## Installation
 
-You can install the development version from GitHub with:
+Install the released version from CRAN:
+
+``` r
+
+install.packages("ggtaichi")
+```
+
+Or the development version from GitHub with:
 
 ``` r
 
@@ -24,8 +32,9 @@ devtools::install_github("PursuitOfDataScience/ggtaichi")
 
 Each symbol is a circle split by an S-curve into two interlocking fish.
 The **yang** (light) fish is shaded by one source and the **yin** (dark)
-fish by the other, each on its own gradient. There are no decorative
-dots: every drop of ink is data.
+fish by the other, each on its own gradient. By default there are no
+decorative dots – every drop of ink is data – and the classic eyes, when
+you enable them, are data channels too (see below).
 
 ``` r
 
@@ -116,6 +125,106 @@ ggplot(two_states, aes(x = week, y = category)) +
 the yang fish red for Google and the yin fish grey for
 Twitter.](reference/figures/README-states-1.png)
 
+## New in 0.2.0: eyes that carry data
+
+`eyes = TRUE` draws the classic taichi dots, each centred in its own
+fish’s head. The eye arguments accept a constant *or a data column*:
+mapped eye sizes (rescaled to sensible radii) and colours make the glyph
+a genuine **six-dimensional** mark – `x`, `y`, two fills, two eyes.
+
+``` r
+
+quad <- data.frame(
+  x = c(1, 2, 1, 2),
+  y = c(2, 2, 1, 1),
+  yin = c(3, 5, 7, 9),
+  yang = c(9, 7, 5, 3),
+  reach = c(10, 40, 25, 5),
+  quality = c(2, 1, 4, 8)
+)
+
+ggplot(quad, aes(x, y)) +
+  geom_taichi(yin = yin, yang = yang,
+              eyes = TRUE,
+              yin_eye_size = reach,
+              yang_eye_size = quality,
+              limits = c(0, 10)) +  # shared limits keep the palest fish visible
+  coord_fixed() +
+  theme_taichi() +
+  ggtitle("Eye sizes encode a 5th and 6th variable")
+```
+
+![A two-by-two grid of taichi diagrams with classic eyes whose sizes
+vary from cell to cell, encoding two extra
+variables.](reference/figures/README-eyes-1.png)
+
+## New in 0.2.0: rotation
+
+`angle` rotates each glyph by a constant or by a column, so orientation
+can encode a directional or temporal variable – and, combined with
+[gganimate](https://gganimate.org), produces the iconic spinning taichi
+(see
+[`vignette("animations")`](https://pursuitofdatascience.github.io/ggtaichi/articles/animations.md)).
+
+``` r
+
+rot <- data.frame(x = 1:4, y = 1, yin = 1:4, yang = 4:1,
+                  turn = c(0, 45, 90, 135))
+
+ggplot(rot, aes(x, y)) +
+  geom_taichi(yin = yin, yang = yang, angle = turn, eyes = TRUE,
+              limits = c(0, 5)) +
+  coord_fixed() +
+  theme_taichi()
+```
+
+![Four taichi diagrams rotated by 0, 45, 90, and 135 degrees read from a
+data column.](reference/figures/README-rotation-1.png)
+
+## New in 0.2.0: categorical fills
+
+Factor, character, and logical columns now get a discrete fill scale
+automatically (v0.1.0 could only draw continuous values); computed
+expressions like `factor(week)` work too, and `yin_scale` / `yang_scale`
+accept any custom fill scale.
+
+``` r
+
+disc <- data.frame(
+  x = c(1, 2, 1, 2),
+  y = c(2, 2, 1, 1),
+  method = factor(c("A", "B", "C", "A")),
+  outcome = factor(c("win", "loss", "win", "loss"))
+)
+
+ggplot(disc, aes(x, y)) +
+  geom_taichi(yin = method, yang = outcome) +
+  coord_fixed() +
+  theme_taichi() +
+  ggtitle("Discrete yin & yang")
+```
+
+![A two-by-two grid of taichi diagrams whose fish are filled by discrete
+categories: methods A to C for yin and win or loss for
+yang.](reference/figures/README-categorical-1.png)
+
+v0.2.0 also fixes the parameter routing of
+[`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md):
+`alpha`, `colour`, `linewidth`, `linetype`, `width`, `height`, `na.rm`,
+and `show.legend` are all real arguments now, the deprecated `size` maps
+to `linewidth` with a warning, missing or misspelled `yin` / `yang`
+columns error immediately with a clear message, and the geometry is
+guarded by a testthat + vdiffr suite.
+
+## Animation
+
+The taichi is a cyclical symbol, so motion suits it:
+[`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
+composes cleanly with `gganimate` – turn a third variable into animation
+frames instead of an axis, or spin the glyphs via `angle`. Full recipes
+live in
+[`vignette("animations")`](https://pursuitofdatascience.github.io/ggtaichi/articles/animations.md).
+
 See
 [`vignette("ggtaichi")`](https://pursuitofdatascience.github.io/ggtaichi/articles/ggtaichi.md)
 for the full tour.
@@ -167,5 +276,7 @@ layer of this package and should be cited when you use `ggtaichi`:
 
 ### All vignettes
 
+- [Animating taichi
+  diagrams](https://pursuitofdatascience.github.io/ggtaichi/articles/animations.md):
 - [Introduction to
   ggtaichi](https://pursuitofdatascience.github.io/ggtaichi/articles/ggtaichi.md):

@@ -25,6 +25,8 @@ means visually.
 
 Useful links:
 
+- <https://pursuitofdatascience.github.io/ggtaichi/>
+
 - <https://github.com/PursuitOfDataScience/ggtaichi>
 
 - Report bugs at

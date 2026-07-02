@@ -21,9 +21,11 @@ Because both fish live in the same cell, a single
 [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
 layer encodes **four** dimensions at once: `x`, `y`, `yin`, and `yang`.
 The two sources keep their own color scales and legends, so they can be
-read independently while still being compared side by side. There are no
-decorative eyes or markers – every drop of ink on the plot is mapped to
-data.
+read independently while still being compared side by side. By default
+there are no decorative eyes or markers – every drop of ink on the plot
+is mapped to data – and when you do switch the classic eyes on
+(`eyes = TRUE`, new in v0.2.0), they can carry data too, taking a single
+glyph up to **six** dimensions.
 
 ``` r
 
@@ -228,6 +230,141 @@ ggplot(pitts_small, aes(x = week, y = category)) +
 ![The six-week Pittsburgh taichi grid using theme_taichi() with its
 off-white background overridden to plain
 white.](ggtaichi_files/figure-html/unnamed-chunk-9-1.png)
+
+## New in v0.2.0
+
+### Rotation
+
+The `angle` argument rotates each glyph by the given number of degrees.
+It can be a constant (same angle for every cell) or a column name (one
+angle per cell), encoding a directional or temporal variable as
+orientation.
+
+``` r
+
+one_rot <- data.frame(
+  x = c(1, 2, 1, 2),
+  y = c(2, 2, 1, 1),
+  yin = c(3, 5, 7, 9),
+  yang = c(9, 7, 5, 3),
+  rot = c(0, 45, 90, 180)
+)
+
+ggplot(one_rot, aes(x, y)) +
+  geom_taichi(yin = yin, yang = yang, angle = rot,
+              limits = c(0, 10)) +
+  coord_fixed() +
+  theme_taichi()
+```
+
+![Four taichi diagrams with rotation angles 0, 45, 90, and 180 drawn
+from a data column.](ggtaichi_files/figure-html/unnamed-chunk-10-1.png)
+
+### Data-driven eyes
+
+Setting `eyes = TRUE` draws the classic taichi dots, each sitting in its
+own fish’s head: the yin eye in the top bulb, the yang eye in the bottom
+one. With the default white and black dots the glyph looks exactly like
+the traditional symbol.
+
+``` r
+
+one_eye <- data.frame(
+  x = c(1, 2, 1, 2),
+  y = c(2, 2, 1, 1),
+  yin = c(3, 5, 7, 9),
+  yang = c(9, 7, 5, 3)
+)
+
+ggplot(one_eye, aes(x, y)) +
+  geom_taichi(yin = yin, yang = yang, eyes = TRUE,
+              limits = c(0, 10)) +  # shared limits keep the palest fish visible
+  coord_fixed() +
+  theme_taichi()
+```
+
+![Four taichi diagrams with the classic white and black eyes
+enabled.](ggtaichi_files/figure-html/unnamed-chunk-11-1.png)
+
+The eyes are not just decoration: `yin_eye_size`, `yang_eye_size`,
+`yin_eye_colour`, and `yang_eye_colour` all accept either a constant *or
+an unquoted column name*, so the two dots can encode up to two further
+variables – a **fifth and sixth dimension** on top of `x`, `y`, and the
+two fills. A mapped size column is rescaled to eye radii between 5% and
+30% of the glyph radius (values already between 0 and 0.5 are used as
+exact proportions, and an `NA` suppresses the eye for that cell).
+
+``` r
+
+one_eye$reach   <- c(10, 40, 25, 5)   # drives the yin eye
+one_eye$quality <- c(2, 1, 4, 8)      # drives the yang eye
+
+ggplot(one_eye, aes(x, y)) +
+  geom_taichi(yin = yin, yang = yang,
+              eyes = TRUE,
+              yin_eye_size = reach,
+              yang_eye_size = quality,
+              limits = c(0, 10)) +
+  coord_fixed() +
+  theme_taichi()
+```
+
+![Four taichi diagrams whose eye sizes vary from cell to cell, encoding
+two extra variables.](ggtaichi_files/figure-html/unnamed-chunk-12-1.png)
+
+### Categorical fills
+
+[`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
+now automatically detects whether the `yin` / `yang` columns are numeric
+or discrete (factor / character) and picks the appropriate scale. You
+can also supply a custom scale constructor via `yin_scale` /
+`yang_scale`:
+
+``` r
+
+disc <- data.frame(
+  x = c(1, 2, 1, 2),
+  y = c(2, 2, 1, 1),
+  method = factor(c("A", "B", "C", "A")),
+  outcome = factor(c("win", "loss", "win", "loss"))
+)
+
+ggplot(disc, aes(x, y)) +
+  geom_taichi(yin = method, yang = outcome) +
+  coord_fixed() +
+  theme_taichi()
+```
+
+![Taichi grid with discrete category
+fills.](ggtaichi_files/figure-html/unnamed-chunk-13-1.png)
+
+### Geom parameter routing
+
+All standard geom parameters (`alpha`, `colour`, `linewidth`,
+`linetype`, `width`, `height`, `na.rm`, `show.legend`) are now properly
+accepted by
+[`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
+and forwarded to the underlying fish geoms. The deprecated `size`
+aesthetic has been replaced with `linewidth`.
+
+``` r
+
+one_lwd <- data.frame(
+  x = c(1, 2, 1, 2),
+  y = c(2, 2, 1, 1),
+  yin = c(3, 5, 7, 9),
+  yang = c(9, 7, 5, 3)
+)
+
+ggplot(one_lwd, aes(x, y)) +
+  geom_taichi(yin = yin, yang = yang,
+              alpha = 0.7, linewidth = 1.5, colour = "#333333") +
+  coord_fixed() +
+  theme_taichi()
+```
+
+![Taichi diagrams with custom linewidth, alpha, and
+colour.](ggtaichi_files/figure-html/unnamed-chunk-14-1.png)
 
 ## Acknowledgement
 
