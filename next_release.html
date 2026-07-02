@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ggtaichi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -285,10 +285,10 @@
 <hr></div>
 </div>
 <div class="section level1">
-<h1 id="addendum--post-v020-status--v030-planning-added-2026-07-01">Addendum — post-v0.2.0 status &amp; v0.3.0 planning (added 2026-07-01)<a class="anchor" aria-label="anchor" href="#addendum--post-v020-status--v030-planning-added-2026-07-01"></a></h1>
-<p>Everything above is kept verbatim as the historical plan. This addendum records what v0.2.0 actually shipped and lays out the v0.3.0 scope.</p>
+<h1 id="addendum--v020-progress-first-wave-shipped-second-wave-planned-added-2026-07-01">Addendum — v0.2.0 progress: first wave shipped, second wave planned (added 2026-07-01)<a class="anchor" aria-label="anchor" href="#addendum--v020-progress-first-wave-shipped-second-wave-planned-added-2026-07-01"></a></h1>
+<p>Everything above is kept verbatim as the historical plan. This addendum records what the first v0.2.0 wave shipped and lays out a second wave. (Both waves ship together as <strong>v0.2.0</strong> — 0.2.0 was never released, so the version number does not advance until it actually goes out.)</p>
 <div class="section level2">
-<h2 id="what-v020-shipped-all-four-bugs--scope-items-05">What v0.2.0 shipped (all four bugs + scope items 0–5)<a class="anchor" aria-label="anchor" href="#what-v020-shipped-all-four-bugs--scope-items-05"></a></h2>
+<h2 id="what-the-first-v020-wave-shipped-all-four-bugs--scope-items-05">What the first v0.2.0 wave shipped (all four bugs + scope items 0–5)<a class="anchor" aria-label="anchor" href="#what-the-first-v020-wave-shipped-all-four-bugs--scope-items-05"></a></h2>
 <ul><li>BUG-1..4 fixed as planned; <code>...</code> now targets both fill scales, geom params are explicit arguments, and <code>size</code> is soft-deprecated into <code>linewidth</code> (both as a parameter and, via <code>rename_size</code>, as an inherited aesthetic).</li>
 <li>Rotation (<code>angle</code>, constant or column) and <strong>data-driven eyes</strong> (size and colour per fish, constant or column; mapped sizes rescaled to [0.05, 0.3], values in (0, 0.5] taken as literal proportions, <code>NA</code> suppresses the eye).</li>
 <li>Discrete fill detection via tidy evaluation (handles <code>factor(week)</code> and friends), <code>yin_scale</code> / <code>yang_scale</code> overrides, string column names, and clear <code>+</code>-time errors for missing columns.</li>
@@ -301,7 +301,7 @@
 <li>The gganimate spike <strong>succeeded</strong>: recipes verified frame-by-frame against gganimate 1.0.11 / ggplot2 4.0.3 — no wrapper needed; animation vignette shipped.</li>
 </ul></div>
 <div class="section level2">
-<h2 id="proposed-v030-scope">Proposed v0.3.0 scope<a class="anchor" aria-label="anchor" href="#proposed-v030-scope"></a></h2>
+<h2 id="second-v020-wave-shipped-as-part-of-v020">Second v0.2.0 wave (shipped as part of v0.2.0)<a class="anchor" aria-label="anchor" href="#second-v020-wave-shipped-as-part-of-v020"></a></h2>
 <ol style="list-style-type: decimal"><li>
 <strong>[P1] Shared &amp; diverging scales (§4b).</strong>
 <ul><li>
@@ -326,15 +326,15 @@
 <strong>[P1 docs] “When (not) to use taichi” + accessibility.</strong> Honest readability guidance (dense grids, luminance-vs-luminance comparisons, colorblind-safe palettes via <code>yin_scale = scale_fill_viridis_*</code>) in the intro vignette.</li>
 </ol></div>
 <div class="section level2">
-<h2 id="deferred-to-v04-sharpened-not-dropped">Deferred to v0.4+ (sharpened, not dropped)<a class="anchor" aria-label="anchor" href="#deferred-to-v04-sharpened-not-dropped"></a></h2>
+<h2 id="deferred-to-v03-sharpened-not-dropped">Deferred to v0.3+ (sharpened, not dropped)<a class="anchor" aria-label="anchor" href="#deferred-to-v03-sharpened-not-dropped"></a></h2>
 <ul><li>
-<strong>ggiraph interactivity (§2a).</strong> Implementation sketch after the 0.3 rendering rework: the vectorized <code>makeContent()</code> path makes it natural to emit <code>ggiraph::interactive_polygon_grob()</code> with per-cell <code>tooltip</code> / <code>data_id</code> when an <code>interactive</code> flag is set; test via girafe htmlwidget snapshots. Deferred so 0.3 stays dependency-light and CI-green.</li>
+<strong>ggiraph interactivity (§2a).</strong> Implementation sketch after the rendering rework: the vectorized <code>makeContent()</code> path makes it natural to emit <code>ggiraph::interactive_polygon_grob()</code> with per-cell <code>tooltip</code> / <code>data_id</code> when an <code>interactive</code> flag is set; test via girafe htmlwidget snapshots. Deferred so v0.2.0 stays dependency-light and CI-green.</li>
 <li>
 <strong>Maps / <code>coord_sf</code> demo (§6).</strong> Works in principle (bbox-based cells); needs an sf-heavy vignette and system deps on CI — pair it with the ggiraph release.</li>
 <li>
 <strong>Eye-size legend (open question).</strong> Mapped eye sizes currently have no guide; decide between a custom legend grob or documenting them as a annotation channel only.</li>
 <li>
-<strong>Lifecycle badge.</strong> Keep <code>experimental</code> through 0.3.0 (API grew again); revisit <code>stable</code> for 0.4.0 once the exported-geom API has survived a cycle.</li>
+<strong>Lifecycle badge.</strong> Keep <code>experimental</code> through 0.2.0 (API grew again); revisit <code>stable</code> for 0.3.0 once the exported-geom API has survived a cycle.</li>
 </ul></div>
 <div class="section level2">
 <h2 id="ci--testing-notes-learned-the-hard-way-keep-in-mind">CI / testing notes (learned the hard way, keep in mind)<a class="anchor" aria-label="anchor" href="#ci--testing-notes-learned-the-hard-way-keep-in-mind"></a></h2>

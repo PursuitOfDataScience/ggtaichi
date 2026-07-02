@@ -81,7 +81,7 @@ head(pitts_tg)
 
 `states_tg` is the larger sibling, repeating the same measurements
 across four states, and `pitts_emojis` holds the most popular weekly
-emoji per category. Since v0.3.0 the package also bundles `cafes_tg`, a
+emoji per category. Since v0.2.0 the package also bundles `cafes_tg`, a
 small *synthetic* espresso-vs-matcha dataset whose two columns share the
 same units — handy for the shared-scale features shown later. See
 [`?pitts_tg`](https://pursuitofdatascience.github.io/ggtaichi/reference/pitts_tg.md),
@@ -176,7 +176,7 @@ Google.](ggtaichi_files/figure-html/unnamed-chunk-6-1.png)
 `ggplot2` leaves a margin around discrete and continuous scales, which
 can make a taichi grid look like it is floating.
 [`remove_padding()`](https://pursuitofdatascience.github.io/ggtaichi/reference/remove_padding.md)
-trims it — since v0.3.0 it detects each axis’s scale type by itself, and
+trims it — as of v0.2.0 it detects each axis’s scale type by itself, and
 you can still spell it out with `"c"` (continuous) / `"d"` (discrete)
 when you want to override the detection.
 
@@ -400,8 +400,6 @@ ggplot(one_lwd, aes(x, y)) +
 
 ![Taichi diagrams with custom linewidth, alpha, and
 colour.](ggtaichi_files/figure-html/unnamed-chunk-15-1.png)
-
-## New in v0.3.0
 
 ### Shared limits and a single legend
 

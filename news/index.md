@@ -1,60 +1,5 @@
 # Changelog
 
-## ggtaichi 0.3.0
-
-### New features
-
-- **Shared scales** for directly comparable sources (§4b of the
-  roadmap):
-  - `shared_limits = TRUE` gives both auto-built fill scales common
-    limits — the union range of the two sources (or the union of levels
-    when both are discrete) — so equal values read as equal ink.
-    Explicit `limits` passed through `...` still win, and mixing a
-    discrete with a continuous source warns and ignores the flag.
-  - `shared_legend = TRUE` treats the sources as one measure: it implies
-    shared limits, paints both fish with `yin_colors`, drops the
-    duplicate yang guide, and titles the single legend “`yin` / `yang`”
-    unless `yin_name` is supplied.
-- **The fish geoms are exported** (§4d):
-  [`geom_yin_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
-  and
-  [`geom_yang_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
-  are now documented exports (with the `GeomYinFish` / `GeomYangFish`
-  ggproto objects available for extension packages), for users who want
-  a single fish or full manual control over scale stacking.
-- **[`remove_padding()`](https://pursuitofdatascience.github.io/ggtaichi/reference/remove_padding.md)
-  auto mode**: called with no arguments it now detects each axis’s scale
-  type from the plot it is added to; the explicit `"c"` / `"d"`
-  arguments remain as overrides.
-- **New dataset `cafes_tg`**: a small, clearly synthetic (seeded)
-  espresso vs. matcha dataset whose two columns share units — an
-  evergreen demo for the shared-scale features and a break from the
-  COVID-era examples. The generating script ships in `data-raw/`.
-- [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
-  now returns an object with a friendly
-  [`print()`](https://rdrr.io/r/base/print.html) method instead of
-  dumping raw list internals at the console.
-
-### Performance
-
-- **Vectorized rendering**: each layer now draws all of its cells as one
-  id-batched polygon (plus one batched circle grob for the eyes),
-  resolved against the physical panel size at draw time via
-  `makeContent()`. Glyphs stay perfectly round under resize, and large
-  grids render an order of magnitude faster: a 1200-cell grid with eyes
-  takes 0.24 s to build and draw versus 3.5 s in 0.2.0 (~15x, same
-  machine). The drawn output is pixel-identical to 0.2.0 (verified on
-  rotated, eyed, outlined, and faceted-discrete test plots).
-
-### Documentation
-
-- New pkgdown-only **gallery** article showing palettes, data-driven
-  eyes, rotation, categorical fills, shared scales, and dense-grid
-  texture.
-- New **“When (not) to use taichi”** section in the intro vignette:
-  honest guidance on dense grids, luminance precision, colorblind-safe
-  palettes (viridis via `yin_scale` / `yang_scale`), and NA visibility.
-
 ## ggtaichi 0.2.0
 
 ### New features
@@ -83,17 +28,59 @@
   constructors) can be supplied via `yin_scale` / `yang_scale`
   ([\#4](https://github.com/PursuitOfDataScience/ggtaichi/issues/4)a,
   BUG-4).
+- **Shared scales** for directly comparable sources
+  ([\#4](https://github.com/PursuitOfDataScience/ggtaichi/issues/4)b):
+  - `shared_limits = TRUE` gives both auto-built fill scales common
+    limits — the union range of the two sources (or the union of levels
+    when both are discrete) — so equal values read as equal ink.
+    Explicit `limits` passed through `...` still win, and mixing a
+    discrete with a continuous source warns and ignores the flag.
+  - `shared_legend = TRUE` treats the sources as one measure: it implies
+    shared limits, paints both fish with `yin_colors`, drops the
+    duplicate yang guide, and titles the single legend “`yin` / `yang`”
+    unless `yin_name` is supplied.
+- **The fish geoms are exported**
+  ([\#4](https://github.com/PursuitOfDataScience/ggtaichi/issues/4)d):
+  [`geom_yin_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
+  and
+  [`geom_yang_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
+  are now documented exports (with the `GeomYinFish` / `GeomYangFish`
+  ggproto objects available for extension packages), for users who want
+  a single fish or full manual control over scale stacking.
+- **[`remove_padding()`](https://pursuitofdatascience.github.io/ggtaichi/reference/remove_padding.md)
+  auto mode**: called with no arguments it now detects each axis’s scale
+  type from the plot it is added to; the explicit `"c"` / `"d"`
+  arguments remain as overrides.
+- **New dataset `cafes_tg`**: a small, clearly synthetic (seeded)
+  espresso vs. matcha dataset whose two columns share units — an
+  evergreen demo for the shared-scale features and a break from the
+  COVID-era examples. The generating script ships in `data-raw/`.
 - `yin` and `yang` also accept strings naming a column
   (`yin = "Twitter"`), which previously produced a meaningless constant
   fill.
+- [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
+  now returns an object with a friendly
+  [`print()`](https://rdrr.io/r/base/print.html) method instead of
+  dumping raw list internals at the console.
 - **Animation vignette**:
   [`vignette("animations")`](https://pursuitofdatascience.github.io/ggtaichi/articles/animations.md)
   documents how
   [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
   composes with gganimate
   ([`transition_states()`](https://gganimate.com/reference/transition_states.html),
-  spin animations via `angle`, export recipes). gganimate is a
-  Suggests-only dependency.
+  spin animations via `angle`, export recipes) — verified frame-by-frame
+  against gganimate 1.0.11. gganimate is a Suggests-only dependency.
+
+### Performance
+
+- **Vectorized rendering**: each layer now draws all of its cells as one
+  id-batched polygon (plus one batched circle grob for the eyes),
+  resolved against the physical panel size at draw time via
+  `makeContent()`. Glyphs stay perfectly round under resize, and large
+  grids render an order of magnitude faster than the per-cell grob
+  building used in 0.1.0: a 1200-cell grid with eyes takes 0.24 s to
+  build and draw versus ~3.5 s with the per-cell approach (~15x, same
+  machine), with pixel-identical output.
 
 ### Bug fixes
 
@@ -115,8 +102,25 @@
   a degenerate grey plot, and a `yin` / `yang` column that does not
   exist in the plot data errors at `+` time with the offending name.
 - **Categorical fills (BUG-4)**: factor / character columns no longer
-  trigger the cryptic “Discrete value supplied to continuous scale”
+  trigger the cryptic “Discrete value supplied to a continuous scale”
   error (see the categorical fill support above).
+- **[`theme_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/theme_taichi.md)
+  no longer clips text at the plot edges**: the title is now aligned
+  with the whole plot area (`plot.title.position = "plot"`) and slightly
+  smaller (15 instead of 18), so realistic titles fit at typical figure
+  sizes, and the right plot margin is a touch wider so an axis label
+  sitting on the panel boundary (common with
+  [`remove_padding()`](https://pursuitofdatascience.github.io/ggtaichi/reference/remove_padding.md))
+  is not cut off.
+
+### Documentation
+
+- New pkgdown-only **gallery** article showing palettes, data-driven
+  eyes, rotation, categorical fills, shared scales, and dense-grid
+  texture.
+- New **“When (not) to use taichi”** section in the intro vignette:
+  honest guidance on dense grids, luminance precision, colorblind-safe
+  palettes (viridis via `yin_scale` / `yang_scale`), and NA visibility.
 
 ### Internal
 
@@ -127,7 +131,8 @@
 - [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
   now returns a `ggtaichi_plot` object added to the plot via a
   [`ggplot_add()`](https://ggplot2.tidyverse.org/reference/update_ggplot.html)
-  method, which is what makes data-aware scale selection possible.
+  method, which is what makes data-aware scale selection and shared
+  limits possible.
 
 ## ggtaichi 0.1.0
 

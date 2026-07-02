@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ggtaichi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -133,7 +133,7 @@ records the 30-week COVID-related Google and Twitter incidence rates for
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Pittsburgh     1 2020-06-01 Symptoms           0.045<span style="text-decoration: underline;">7</span> 0.077<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
 <p><code>states_tg</code> is the larger sibling, repeating the same
 measurements across four states, and <code>pitts_emojis</code> holds the
-most popular weekly emoji per category. Since v0.3.0 the package also
+most popular weekly emoji per category. Since v0.2.0 the package also
 bundles <code>cafes_tg</code>, a small <em>synthetic</em>
 espresso-vs-matcha dataset whose two columns share the same units —
 handy for the shared-scale features shown later. See
@@ -215,7 +215,7 @@ is used verbatim.</p>
 </h2>
 <p><code>ggplot2</code> leaves a margin around discrete and continuous
 scales, which can make a taichi grid look like it is floating.
-<code><a href="../reference/remove_padding.html">remove_padding()</a></code> trims it — since v0.3.0 it detects each
+<code><a href="../reference/remove_padding.html">remove_padding()</a></code> trims it — as of v0.2.0 it detects each
 axis’s scale type by itself, and you can still spell it out with
 <code>"c"</code> (continuous) / <code>"d"</code> (discrete) when you
 want to override the detection.</p>
@@ -402,10 +402,6 @@ The deprecated <code>size</code> aesthetic has been replaced with
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="ggtaichi_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="Taichi diagrams with custom linewidth, alpha, and colour." width="840" style="display: block; margin: auto;"></p>
 </div>
-</div>
-<div class="section level2">
-<h2 id="new-in-v0-3-0">New in v0.3.0<a class="anchor" aria-label="anchor" href="#new-in-v0-3-0"></a>
-</h2>
 <div class="section level3">
 <h3 id="shared-limits-and-a-single-legend">Shared limits and a single legend<a class="anchor" aria-label="anchor" href="#shared-limits-and-a-single-legend"></a>
 </h3>

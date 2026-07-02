@@ -405,12 +405,14 @@ real `testthat` + `vdiffr` suite so they run in CI instead of by hand.
 
 ------------------------------------------------------------------------
 
-# Addendum — post-v0.2.0 status & v0.3.0 planning (added 2026-07-01)
+# Addendum — v0.2.0 progress: first wave shipped, second wave planned (added 2026-07-01)
 
 Everything above is kept verbatim as the historical plan. This addendum
-records what v0.2.0 actually shipped and lays out the v0.3.0 scope.
+records what the first v0.2.0 wave shipped and lays out a second wave.
+(Both waves ship together as **v0.2.0** — 0.2.0 was never released, so
+the version number does not advance until it actually goes out.)
 
-## What v0.2.0 shipped (all four bugs + scope items 0–5)
+## What the first v0.2.0 wave shipped (all four bugs + scope items 0–5)
 
 - BUG-1..4 fixed as planned; `...` now targets both fill scales, geom
   params are explicit arguments, and `size` is soft-deprecated into
@@ -440,7 +442,7 @@ records what v0.2.0 actually shipped and lays out the v0.3.0 scope.
   against gganimate 1.0.11 / ggplot2 4.0.3 — no wrapper needed;
   animation vignette shipped.
 
-## Proposed v0.3.0 scope
+## Second v0.2.0 wave (shipped as part of v0.2.0)
 
 1.  **\[P1\] Shared & diverging scales (§4b).**
     - `shared_limits = TRUE`: compute the union range of `yin` and
@@ -489,13 +491,13 @@ records what v0.2.0 actually shipped and lays out the v0.3.0 scope.
     comparisons, colorblind-safe palettes via
     `yin_scale = scale_fill_viridis_*`) in the intro vignette.
 
-## Deferred to v0.4+ (sharpened, not dropped)
+## Deferred to v0.3+ (sharpened, not dropped)
 
-- **ggiraph interactivity (§2a).** Implementation sketch after the 0.3
+- **ggiraph interactivity (§2a).** Implementation sketch after the
   rendering rework: the vectorized `makeContent()` path makes it natural
   to emit `ggiraph::interactive_polygon_grob()` with per-cell `tooltip`
   / `data_id` when an `interactive` flag is set; test via girafe
-  htmlwidget snapshots. Deferred so 0.3 stays dependency-light and
+  htmlwidget snapshots. Deferred so v0.2.0 stays dependency-light and
   CI-green.
 - **Maps / `coord_sf` demo (§6).** Works in principle (bbox-based
   cells); needs an sf-heavy vignette and system deps on CI — pair it
@@ -503,8 +505,8 @@ records what v0.2.0 actually shipped and lays out the v0.3.0 scope.
 - **Eye-size legend (open question).** Mapped eye sizes currently have
   no guide; decide between a custom legend grob or documenting them as a
   annotation channel only.
-- **Lifecycle badge.** Keep `experimental` through 0.3.0 (API grew
-  again); revisit `stable` for 0.4.0 once the exported-geom API has
+- **Lifecycle badge.** Keep `experimental` through 0.2.0 (API grew
+  again); revisit `stable` for 0.3.0 once the exported-geom API has
   survived a cycle.
 
 ## CI / testing notes (learned the hard way, keep in mind)

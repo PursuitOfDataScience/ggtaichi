@@ -216,7 +216,7 @@ to `linewidth` with a warning, missing or misspelled `yin` / `yang`
 columns error immediately with a clear message, and the geometry is
 guarded by a testthat + vdiffr suite.
 
-## New in 0.3.0: one legend, two fish
+## New in 0.2.0: one legend, two fish
 
 When both sources share units, `shared_legend = TRUE` puts them on a
 single scale and a single legend (`shared_limits = TRUE` aligns limits
@@ -239,15 +239,15 @@ ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
 espresso and matcha orders on one shared grey scale with a single
 legend.](reference/figures/README-shared-1.png)
 
-v0.3.0 also exports the building blocks
+v0.2.0 also exports the building blocks
 [`geom_yin_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
 /
 [`geom_yang_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
 for fully manual scale control, lets
 [`remove_padding()`](https://pursuitofdatascience.github.io/ggtaichi/reference/remove_padding.md)
-auto-detect the axis types (no more `"c"` / `"d"` guessing), and
-rewrites the renderer to draw each layer as one batched polygon – a
-1200-cell grid renders about 15x faster than in 0.2.0, pixel-for-pixel
+auto-detect the axis types (no more `"c"` / `"d"` guessing), and draws
+each layer as one batched polygon – a 1200-cell grid renders about 15x
+faster than with the per-cell grob building of v0.1.0, pixel-for-pixel
 identically.
 
 ## Animation

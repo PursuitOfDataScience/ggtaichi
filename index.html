@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ggtaichi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -184,7 +184,7 @@
 <p>v0.2.0 also fixes the parameter routing of <code><a href="reference/geom_taichi.html">geom_taichi()</a></code>: <code>alpha</code>, <code>colour</code>, <code>linewidth</code>, <code>linetype</code>, <code>width</code>, <code>height</code>, <code>na.rm</code>, and <code>show.legend</code> are all real arguments now, the deprecated <code>size</code> maps to <code>linewidth</code> with a warning, missing or misspelled <code>yin</code> / <code>yang</code> columns error immediately with a clear message, and the geometry is guarded by a testthat + vdiffr suite.</p>
 </div>
 <div class="section level2">
-<h2 id="new-in-030-one-legend-two-fish">New in 0.3.0: one legend, two fish<a class="anchor" aria-label="anchor" href="#new-in-030-one-legend-two-fish"></a>
+<h2 id="new-in-020-one-legend-two-fish">New in 0.2.0: one legend, two fish<a class="anchor" aria-label="anchor" href="#new-in-020-one-legend-two-fish"></a>
 </h2>
 <p>When both sources share units, <code>shared_legend = TRUE</code> puts them on a single scale and a single legend (<code>shared_limits = TRUE</code> aligns limits while keeping separate palettes). The bundled synthetic <code>cafes_tg</code> data – espresso vs matcha orders across eight neighbourhoods – is made for it:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -196,7 +196,7 @@
 <span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Espresso (yang) vs matcha (yin)"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-shared-1.png" alt="A 12-week by 8-neighbourhood grid of taichi diagrams comparing espresso and matcha orders on one shared grey scale with a single legend." style="display: block; margin: auto;"></p>
-<p>v0.3.0 also exports the building blocks <code><a href="reference/geom_yin_fish.html">geom_yin_fish()</a></code> / <code><a href="reference/geom_yin_fish.html">geom_yang_fish()</a></code> for fully manual scale control, lets <code><a href="reference/remove_padding.html">remove_padding()</a></code> auto-detect the axis types (no more <code>"c"</code> / <code>"d"</code> guessing), and rewrites the renderer to draw each layer as one batched polygon – a 1200-cell grid renders about 15x faster than in 0.2.0, pixel-for-pixel identically.</p>
+<p>v0.2.0 also exports the building blocks <code><a href="reference/geom_yin_fish.html">geom_yin_fish()</a></code> / <code><a href="reference/geom_yin_fish.html">geom_yang_fish()</a></code> for fully manual scale control, lets <code><a href="reference/remove_padding.html">remove_padding()</a></code> auto-detect the axis types (no more <code>"c"</code> / <code>"d"</code> guessing), and draws each layer as one batched polygon – a 1200-cell grid renders about 15x faster than with the per-cell grob building of v0.1.0, pixel-for-pixel identically.</p>
 </div>
 <div class="section level2">
 <h2 id="animation">Animation<a class="anchor" aria-label="anchor" href="#animation"></a>
