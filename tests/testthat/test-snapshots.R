@@ -65,3 +65,10 @@ test_that("taichi with theme_taichi snapshot", {
     theme_taichi()
   vdiffr::expect_doppelganger("taichi-themed", p)
 })
+
+test_that("taichi with a shared legend snapshot", {
+  p <- ggplot(snap_data, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, shared_legend = TRUE) +
+    coord_fixed()
+  vdiffr::expect_doppelganger("taichi-shared-legend", p)
+})

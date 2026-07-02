@@ -68,6 +68,17 @@
 #' @param yin_eye_colour,yang_eye_colour Colour of each eye dot: a constant
 #'   (defaults "white" and "black") or an unquoted data column containing
 #'   colour strings.
+#' @param shared_limits If \code{TRUE} and both sources are of the same type
+#'   (both continuous, or both discrete), the two auto-built fill scales share
+#'   common limits — the union range (or union of levels) of \code{yin} and
+#'   \code{yang} — so equal values read as equal ink. Explicit \code{limits}
+#'   passed through \code{...} take precedence. Default \code{FALSE}.
+#' @param shared_legend If \code{TRUE}, treats the two sources as directly
+#'   comparable: implies \code{shared_limits = TRUE}, paints both fish with
+#'   \code{yin_colors}, and shows a single legend (the yang guide is
+#'   dropped). Unless \code{yin_name} is supplied, the legend is titled
+#'   "\code{yin} / \code{yang}". Ignored when custom \code{yin_scale} /
+#'   \code{yang_scale} are given. Default \code{FALSE}.
 #' @param width,height Width and height of each cell. Typically omitted.
 #' @param alpha Alpha transparency for the fish fills.
 #' @param na.rm If \code{TRUE}, silently removes rows with missing values.
@@ -134,6 +145,8 @@ geom_taichi <- function(
   yang_eye_size = 0.15,
   yin_eye_colour = "white",
   yang_eye_colour = "black",
+  shared_limits = FALSE,
+  shared_legend = FALSE,
   width = NULL,
   height = NULL,
   alpha = NA,
@@ -164,7 +177,17 @@ geom_taichi <- function(
   if (!rlang::is_bool(eyes)) {
     rlang::abort("`eyes` must be TRUE or FALSE.")
   }
+  if (!rlang::is_bool(shared_limits)) {
+    rlang::abort("`shared_limits` must be TRUE or FALSE.")
+  }
+  if (!rlang::is_bool(shared_legend)) {
+    rlang::abort("`shared_legend` must be TRUE or FALSE.")
+  }
+  if (shared_legend) shared_limits <- TRUE
 
+  if (shared_legend && is.null(yin_name)) {
+    yin_name <- paste(rlang::as_label(yin_quo), "/", rlang::as_label(yang_quo))
+  }
   if (is.null(yin_name))  yin_name  <- rlang::as_label(yin_quo)
   if (is.null(yang_name)) yang_name <- rlang::as_label(yang_quo)
 
@@ -249,13 +272,32 @@ geom_taichi <- function(
     scale_dots = scale_dots,
     yang_layer = yang_layer,
     yang_mapping = yang_aes,
-    yang_colors = yang_colors,
+    yang_colors = if (shared_legend) yin_colors else yang_colors,
     yang_colors_user = !missing(yang_colors),
     yang_name = yang_name,
-    yang_scale = yang_scale
+    yang_scale = yang_scale,
+    shared_limits = shared_limits,
+    shared_legend = shared_legend,
+    eyes = eyes
   )
   class(result) <- c("ggtaichi_plot", "list")
   result
+}
+
+
+#' @export
+print.ggtaichi_plot <- function(x, ...) {
+  cat("<ggtaichi> taichi layers for a ggplot\n")
+  cat("  yin  : ", x$yin_name, "\n", sep = "")
+  cat("  yang : ", x$yang_name, "\n", sep = "")
+  cat("  eyes : ", if (isTRUE(x$eyes)) "on" else "off", "\n", sep = "")
+  if (isTRUE(x$shared_legend)) {
+    cat("  scale: shared limits, single legend\n")
+  } else if (isTRUE(x$shared_limits)) {
+    cat("  scale: shared limits\n")
+  }
+  cat("Add it to a plot: ggplot(data, aes(x, y)) + geom_taichi(...)\n")
+  invisible(x)
 }
 
 
@@ -271,6 +313,28 @@ check_eye_size <- function(value, arg) {
     rlang::abort(paste0("`", arg, "` must be a single number or a data column."))
   }
   value
+}
+
+# Common fill limits for the two sources: the union range when both are
+# continuous, the union of levels when both are discrete, NULL when the two
+# are of incompatible types (or nothing is known about them yet).
+shared_fill_limits <- function(yin_vals, yang_vals) {
+  disc <- function(v) is.factor(v) || is.character(v) || is.logical(v)
+  if (is.numeric(yin_vals) && is.numeric(yang_vals)) {
+    vals <- c(yin_vals, yang_vals)
+    vals <- vals[is.finite(vals)]
+    if (length(vals) == 0) return(NULL)
+    return(range(vals))
+  }
+  if (disc(yin_vals) && disc(yang_vals)) {
+    as_lvls <- function(v) {
+      if (is.factor(v)) levels(droplevels(v)) else unique(as.character(v[!is.na(v)]))
+    }
+    lvls <- union(as_lvls(yin_vals), as_lvls(yang_vals))
+    if (length(lvls) == 0) return(NULL)
+    return(lvls)
+  }
+  NULL
 }
 
 # Allow `yin = "Twitter"` as a synonym for `yin = Twitter`: a literal string
@@ -316,16 +380,20 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
     vals
   }
 
-  build_scale <- function(vals, colors, name, custom_scale, user_palette) {
+  build_scale <- function(vals, colors, name, custom_scale, user_palette,
+                          extra = list()) {
     if (!is.null(custom_scale)) {
       if (inherits(custom_scale, "Scale")) {
         return(custom_scale)
       }
       return(do.call(custom_scale, c(list(name = name), scale_dots)))
     }
+    dots <- c(extra, scale_dots)
     is_disc <- is.factor(vals) || is.character(vals) || is.logical(vals)
     if (is_disc) {
-      n_vals <- if (is.factor(vals)) {
+      n_vals <- if (!is.null(extra$limits)) {
+        length(extra$limits)
+      } else if (is.factor(vals)) {
         nlevels(droplevels(vals))
       } else {
         length(unique(vals[!is.na(vals)]))
@@ -340,19 +408,40 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
       } else {
         scale_col <- grDevices::colorRampPalette(colors)(n_vals)
       }
-      do.call(ggplot2::scale_fill_manual, c(list(name = name, values = scale_col), scale_dots))
+      do.call(ggplot2::scale_fill_manual, c(list(name = name, values = scale_col), dots))
     } else {
-      do.call(ggplot2::scale_fill_gradientn, c(list(name = name, colors = colors), scale_dots))
+      do.call(ggplot2::scale_fill_gradientn, c(list(name = name, colors = colors), dots))
     }
   }
 
   yin_vals <- resolve_values(object$yin_mapping, "yin")
   yang_vals <- resolve_values(object$yang_mapping, "yang")
 
+  yin_extra <- list()
+  yang_extra <- list()
+
+  if (isTRUE(object$shared_limits) && is.null(scale_dots$limits)) {
+    lims <- shared_fill_limits(yin_vals, yang_vals)
+    if (is.null(lims)) {
+      rlang::warn(paste0(
+        "`shared_limits` needs `yin` and `yang` to be of the same type ",
+        "(both continuous or both discrete); ignoring it."
+      ))
+    } else {
+      yin_extra$limits <- lims
+      yang_extra$limits <- lims
+    }
+  }
+  if (isTRUE(object$shared_legend)) {
+    yang_extra$guide <- "none"
+  }
+
   yin_scale_obj <- build_scale(yin_vals, object$yin_colors, object$yin_name,
-                               object$yin_scale, isTRUE(object$yin_colors_user))
+                               object$yin_scale, isTRUE(object$yin_colors_user),
+                               yin_extra)
   yang_scale_obj <- build_scale(yang_vals, object$yang_colors, object$yang_name,
-                                object$yang_scale, isTRUE(object$yang_colors_user))
+                                object$yang_scale, isTRUE(object$yang_colors_user),
+                                yang_extra)
 
   plot +
     object$yin_layer +
@@ -424,15 +513,15 @@ rescale_eye_size <- function(x) {
 
 
 # Build the grob (fish bodies, and optionally their eyes) for every taichi
-# cell of one panel.
+# cell of one panel. The heavy lifting happens at draw time in
+# makeContent.taichi_cells(), where the per-cell radius can be resolved
+# against the physical panel size (keeping every glyph round under resize)
+# and all cells collapse into one id-batched polygon plus one circle grob.
 draw_taichi <- function(coords, fish, eyes = FALSE) {
 
-  cx <- (coords$xmin + coords$xmax) / 2
-  cy <- (coords$ymin + coords$ymax) / 2
-  hw <- (coords$xmax - coords$xmin) / 2
-  hh <- (coords$ymax - coords$ymin) / 2
-
   n <- nrow(coords)
+  if (n == 0) return(grid::nullGrob())
+
   angles <- coords$angle %||% rep(0, n)
   angles[is.na(angles)] <- 0
 
@@ -443,56 +532,85 @@ draw_taichi <- function(coords, fish, eyes = FALSE) {
   eye_cols  <- as.character(coords$eye_colour %||%
     rep(if (fish == "yang") "black" else "white", n))
 
-  grobs <- lapply(seq_len(n), function(i) {
-    angle_i <- angles[i]
-    unit <- taichi_fish(0, 0, 1, fish, n = 50, angle = angle_i)
+  grid::gTree(
+    cx = (coords$xmin + coords$xmax) / 2,
+    cy = (coords$ymin + coords$ymax) / 2,
+    w  = coords$xmax - coords$xmin,
+    h  = coords$ymax - coords$ymin,
+    angle = angles,
+    fill = alpha(coords$fill, coords$alpha),
+    col = coords$colour,
+    lwd = lwd_vals * .pt,
+    lty = coords$linetype,
+    fish = fish,
+    eyes = isTRUE(eyes),
+    eye_size = eye_sizes,
+    eye_colour = eye_cols,
+    cl = "taichi_cells"
+  )
+}
 
-    vp <- grid::viewport(x = cx[i], y = cy[i],
-                         width  = grid::unit(2 * hw[i], "npc"),
-                         height = grid::unit(2 * hh[i], "npc"))
 
-    fish_grob <- grid::polygonGrob(
-      x = grid::unit(0.5, "npc") + grid::unit(0.5 * unit$x, "snpc"),
-      y = grid::unit(0.5, "npc") + grid::unit(0.5 * unit$y, "snpc"),
-      vp = vp,
-      gp = grid::gpar(
-        col = coords$colour[i],
-        fill = alpha(coords$fill[i], coords$alpha[i]),
-        lwd = lwd_vals[i] * .pt,
-        lty = coords$linetype[i]
+#' @export
+#' @method makeContent taichi_cells
+makeContent.taichi_cells <- function(x) {
+  n <- length(x$cx)
+
+  # Physical cell geometry: the glyph radius is half the smaller cell side,
+  # exactly as the former per-cell "snpc" viewports resolved it.
+  w_pt <- grid::convertWidth(grid::unit(x$w, "npc"), "pt", valueOnly = TRUE)
+  h_pt <- grid::convertHeight(grid::unit(x$h, "npc"), "pt", valueOnly = TRUE)
+  cx_pt <- grid::convertX(grid::unit(x$cx, "npc"), "pt", valueOnly = TRUE)
+  cy_pt <- grid::convertY(grid::unit(x$cy, "npc"), "pt", valueOnly = TRUE)
+  r_pt <- pmin(w_pt, h_pt) / 2
+
+  unit_fish <- taichi_fish(0, 0, 1, x$fish, n = 50)
+  m <- length(unit_fish$x)
+
+  theta <- x$angle * pi / 180
+  cs <- rep(cos(theta), each = m)
+  sn <- rep(sin(theta), each = m)
+  ux <- rep.int(unit_fish$x, n)
+  uy <- rep.int(unit_fish$y, n)
+  r_rep <- rep(r_pt, each = m)
+
+  vx <- rep(cx_pt, each = m) + r_rep * (ux * cs - uy * sn)
+  vy <- rep(cy_pt, each = m) + r_rep * (ux * sn + uy * cs)
+
+  fish_grob <- grid::polygonGrob(
+    x = grid::unit(vx, "pt"),
+    y = grid::unit(vy, "pt"),
+    id = rep(seq_len(n), each = m),
+    gp = grid::gpar(
+      col = x$col,
+      fill = x$fill,
+      lwd = x$lwd,
+      lty = x$lty
+    )
+  )
+  children <- grid::gList(fish_grob)
+
+  if (isTRUE(x$eyes)) {
+    keep <- !is.na(x$eye_size) & x$eye_size > 0
+    if (any(keep)) {
+      # Each eye sits in its own fish's head: the yin bulb is at the top of
+      # the glyph, the yang bulb at the bottom (see taichi_fish()), rotating
+      # with the glyph.
+      ey0 <- if (x$fish == "yang") -0.5 else 0.5
+      th <- x$angle[keep] * pi / 180
+      ex <- -ey0 * sin(th)
+      ey <-  ey0 * cos(th)
+      eye_grob <- grid::circleGrob(
+        x = grid::unit(cx_pt[keep] + r_pt[keep] * ex, "pt"),
+        y = grid::unit(cy_pt[keep] + r_pt[keep] * ey, "pt"),
+        r = grid::unit(r_pt[keep] * x$eye_size[keep], "pt"),
+        gp = grid::gpar(fill = x$eye_colour[keep], col = x$eye_colour[keep])
       )
-    )
-
-    if (!eyes) return(fish_grob)
-
-    eye_r <- eye_sizes[i]
-    if (is.na(eye_r) || eye_r <= 0) return(fish_grob)
-
-    # Each eye sits in its own fish's head: the yin bulb is at the top of the
-    # glyph, the yang bulb at the bottom (see taichi_fish()).
-    eye_cx <- 0
-    eye_cy <- if (fish == "yang") -0.5 else 0.5
-
-    if (angle_i != 0) {
-      th <- angle_i * pi / 180
-      ecx <- eye_cx * cos(th) - eye_cy * sin(th)
-      ecy <- eye_cx * sin(th) + eye_cy * cos(th)
-      eye_cx <- ecx
-      eye_cy <- ecy
+      children <- grid::gList(fish_grob, eye_grob)
     }
+  }
 
-    eye_grob <- grid::circleGrob(
-      x = grid::unit(0.5, "npc") + grid::unit(0.5 * eye_cx, "snpc"),
-      y = grid::unit(0.5, "npc") + grid::unit(0.5 * eye_cy, "snpc"),
-      r = grid::unit(0.5 * eye_r, "snpc"),
-      vp = vp,
-      gp = grid::gpar(fill = eye_cols[i], col = eye_cols[i])
-    )
-
-    grid::grobTree(fish_grob, eye_grob)
-  })
-
-  grid::gTree(children = do.call(grid::gList, grobs))
+  grid::setChildren(x, children)
 }
 
 
@@ -522,6 +640,17 @@ taichi_setup_data <- function(data, params) {
 }
 
 
+#' ggtaichi's ggproto classes
+#'
+#' The [ggplot2::ggproto()] objects powering [geom_yin_fish()] and
+#' [geom_yang_fish()]. Exported so that extension packages can inherit from
+#' them; most users never need to touch these.
+#'
+#' @format NULL
+#' @usage NULL
+#' @keywords internal
+#' @name ggtaichi-ggproto
+#' @export
 GeomYinFish <- ggplot2::ggproto("GeomYinFish", ggplot2::Geom,
   extra_params = c("na.rm", "eyes"),
 
@@ -547,6 +676,47 @@ GeomYinFish <- ggplot2::ggproto("GeomYinFish", ggplot2::Geom,
 )
 
 
+#' The individual taichi fish layers
+#'
+#' `geom_yin_fish()` and `geom_yang_fish()` each draw one of the two
+#' interlocking fish of a taichi symbol per `(x, y)` cell. They are the
+#' building blocks that [geom_taichi()] assembles (together with two fill
+#' scales and a [ggnewscale::new_scale_fill()] break); use them directly when
+#' you want full control — e.g. to bring your own fill scale for a single
+#' fish, to stack scales differently, or to draw only one source.
+#'
+#' Both geoms understand the aesthetics `x`, `y`, `fill`, `colour`,
+#' `linewidth`, `linetype`, `alpha`, `width`, `height`, `angle` (degrees,
+#' counter-clockwise), `eye_size`, and `eye_colour` (the latter two only
+#' matter when `eyes = TRUE`). At `angle = 0` the yin fish is the left half
+#' of the circle plus the top bulb (its head); the yang fish is the right
+#' half plus the bottom bulb.
+#'
+#' @param mapping,data,stat,position,inherit.aes See [ggplot2::layer()].
+#' @param width,height Cell size; defaults to the resolution of the data.
+#' @param eyes Logical. Draw the classic eye dot inside this fish's head?
+#' @param na.rm If `TRUE`, silently removes rows with missing values.
+#' @param show.legend Logical. Should this layer be included in the legends?
+#' @param ... Other arguments passed to [ggplot2::layer()]: either aesthetics
+#'   used as constant parameters (e.g. `eye_size = 0.2`) or geom parameters.
+#' @return A ggplot2 layer drawing one fish per cell.
+#' @export
+#' @examples
+#' library(ggplot2)
+#' d <- data.frame(x = 1:3, y = 1, value = 1:3)
+#'
+#' # a yin-only plot with an ordinary fill scale
+#' ggplot(d, aes(x, y)) +
+#'   geom_yin_fish(aes(fill = value)) +
+#'   scale_fill_viridis_c()
+#'
+#' # both fish, manually stacked with ggnewscale
+#' ggplot(d, aes(x, y)) +
+#'   geom_yin_fish(aes(fill = value)) +
+#'   scale_fill_viridis_c(name = "yin") +
+#'   ggnewscale::new_scale_fill() +
+#'   geom_yang_fish(aes(fill = rev(value))) +
+#'   scale_fill_viridis_c(name = "yang", option = "magma")
 geom_yin_fish <- function(mapping = NULL, data = NULL,
                           stat = "identity", position = "identity",
                           width = NULL, height = NULL,
@@ -575,6 +745,10 @@ geom_yin_fish <- function(mapping = NULL, data = NULL,
 }
 
 
+#' @format NULL
+#' @usage NULL
+#' @rdname ggtaichi-ggproto
+#' @export
 GeomYangFish <- ggplot2::ggproto("GeomYangFish", GeomYinFish,
 
   draw_panel = function(data, panel_params, coord, eyes = FALSE) {
@@ -590,6 +764,8 @@ GeomYangFish <- ggplot2::ggproto("GeomYangFish", GeomYinFish,
 )
 
 
+#' @rdname geom_yin_fish
+#' @export
 geom_yang_fish <- function(mapping = NULL, data = NULL,
                            stat = "identity", position = "identity",
                            width = NULL, height = NULL,

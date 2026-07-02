@@ -19,6 +19,8 @@ geom_taichi(
   yang_eye_size = 0.15,
   yin_eye_colour = "white",
   yang_eye_colour = "black",
+  shared_limits = FALSE,
+  shared_legend = FALSE,
   width = NULL,
   height = NULL,
   alpha = NA,
@@ -72,6 +74,19 @@ encode a variable (see the Eyes section for the rescaling rule).}
 \item{yin_eye_colour, yang_eye_colour}{Colour of each eye dot: a constant
 (defaults "white" and "black") or an unquoted data column containing
 colour strings.}
+
+\item{shared_limits}{If \code{TRUE} and both sources are of the same type
+(both continuous, or both discrete), the two auto-built fill scales share
+common limits — the union range (or union of levels) of \code{yin} and
+\code{yang} — so equal values read as equal ink. Explicit \code{limits}
+passed through \code{...} take precedence. Default \code{FALSE}.}
+
+\item{shared_legend}{If \code{TRUE}, treats the two sources as directly
+comparable: implies \code{shared_limits = TRUE}, paints both fish with
+\code{yin_colors}, and shows a single legend (the yang guide is
+dropped). Unless \code{yin_name} is supplied, the legend is titled
+"\code{yin} / \code{yang}". Ignored when custom \code{yin_scale} /
+\code{yang_scale} are given. Default \code{FALSE}.}
 
 \item{width, height}{Width and height of each cell. Typically omitted.}
 

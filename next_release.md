@@ -321,3 +321,101 @@ installing v0.1.0 into a scratch library and exercising it. To reproduce:
 
 First task of v0.2.0 (per scope item 1) is to fold these probes into a real
 `testthat` + `vdiffr` suite so they run in CI instead of by hand.
+
+---
+
+# Addendum — post-v0.2.0 status & v0.3.0 planning (added 2026-07-01)
+
+Everything above is kept verbatim as the historical plan. This addendum
+records what v0.2.0 actually shipped and lays out the v0.3.0 scope.
+
+## What v0.2.0 shipped (all four bugs + scope items 0–5)
+
+- BUG-1..4 fixed as planned; `...` now targets both fill scales, geom params
+  are explicit arguments, and `size` is soft-deprecated into `linewidth`
+  (both as a parameter and, via `rename_size`, as an inherited aesthetic).
+- Rotation (`angle`, constant or column) and **data-driven eyes** (size and
+  colour per fish, constant or column; mapped sizes rescaled to [0.05, 0.3],
+  values in (0, 0.5] taken as literal proportions, `NA` suppresses the eye).
+- Discrete fill detection via tidy evaluation (handles `factor(week)` and
+  friends), `yin_scale` / `yang_scale` overrides, string column names, and
+  clear `+`-time errors for missing columns.
+- Discovered & fixed along the way (not in the original list):
+  - the taichi **eyes were swapped** into the opposite fish's head, and the
+    yang polygon over-painted the yin eye — each eye now sits in its own
+    fish's bulb (yin top, yang bottom);
+  - the default discrete palette sampled `gray100` first, drawing invisible
+    white fish — default discrete palettes now skip the palest ramp end;
+  - vdiffr snapshots must be generated against the same ggplot2 minor version
+    CI installs (a 3.5.2-era snapshot failed under 4.0.3) — see CI notes below.
+- testthat + vdiffr suite (geometry Monte-Carlo, routing, eyes, rotation,
+  scale selection, rendering-level grob checks) runs green on all 5 CI
+  platforms, macOS/Windows included.
+- The gganimate spike **succeeded**: recipes verified frame-by-frame against
+  gganimate 1.0.11 / ggplot2 4.0.3 — no wrapper needed; animation vignette
+  shipped.
+
+## Proposed v0.3.0 scope
+
+1. **[P1] Shared & diverging scales (§4b).**
+   - `shared_limits = TRUE`: compute the union range of `yin` and `yang` at
+     `+` time (both continuous) and apply it to both fill scales, so equal
+     values read as equal ink.
+   - `shared_legend = TRUE`: for directly comparable sources — implies shared
+     limits, paints both fish with the *yin* palette, and shows a single
+     legend (the yang guide is dropped). Legend title falls back to
+     "yin / yang" names unless `yin_name` is given.
+   - Diverging data: document the symmetric-limits recipe
+     (`limits = c(-m, m)` with a diverging `yin_colors`/`yang_colors`).
+2. **[P1] Export the fish geoms (§4d).** `geom_yin_fish()` / `geom_yang_fish()`
+   become documented exports for power users who want their own scale /
+   ggnewscale arrangements; `geom_taichi()` remains the friendly wrapper.
+3. **[P1] Vectorized rendering (§5 performance).** Replace the per-cell
+   `lapply` + per-cell viewport with a draw-time `makeContent()` gTree that
+   emits one id-batched `polygonGrob` (and one `circleGrob` for eyes) per
+   layer. Keeps glyphs round under resize (radius resolved at draw time),
+   cuts grob count from O(cells) to O(1) per layer — matters for large grids
+   and animation frames. Rendering must stay visually identical (guarded by
+   the vdiffr suite + a pixel-level before/after comparison).
+4. **[P1] Fresh evergreen dataset (§7).** `cafes_tg`: a small, clearly
+   synthetic (seeded) two-source dataset — weekly espresso vs. matcha orders
+   across city neighbourhoods — so demos stop leaning on COVID-era data.
+5. **[P1] Gallery (§7).** A pkgdown-only article (vignettes/articles/) showing
+   palettes, eyes, rotation, categorical fills, shared scales, and the new
+   dataset side by side.
+6. **[P2] `remove_padding()` auto mode (§5 polish).** Calling it with no
+   arguments now auto-detects each axis's scale type from the plot data at
+   `+` time; the explicit `"c"` / `"d"` API stays for overrides.
+7. **[P2] Console `print()` method** for the object `geom_taichi()` returns,
+   so typing it bare no longer dumps raw list internals.
+8. **[P1 docs] "When (not) to use taichi" + accessibility.** Honest
+   readability guidance (dense grids, luminance-vs-luminance comparisons,
+   colorblind-safe palettes via `yin_scale = scale_fill_viridis_*`) in the
+   intro vignette.
+
+## Deferred to v0.4+ (sharpened, not dropped)
+
+- **ggiraph interactivity (§2a).** Implementation sketch after the 0.3
+  rendering rework: the vectorized `makeContent()` path makes it natural to
+  emit `ggiraph::interactive_polygon_grob()` with per-cell `tooltip` /
+  `data_id` when an `interactive` flag is set; test via girafe htmlwidget
+  snapshots. Deferred so 0.3 stays dependency-light and CI-green.
+- **Maps / `coord_sf` demo (§6).** Works in principle (bbox-based cells);
+  needs an sf-heavy vignette and system deps on CI — pair it with the
+  ggiraph release.
+- **Eye-size legend (open question).** Mapped eye sizes currently have no
+  guide; decide between a custom legend grob or documenting them as a
+  annotation channel only.
+- **Lifecycle badge.** Keep `experimental` through 0.3.0 (API grew again);
+  revisit `stable` for 0.4.0 once the exported-geom API has survived a cycle.
+
+## CI / testing notes (learned the hard way, keep in mind)
+
+- vdiffr snapshots are coupled to the **ggplot2 minor version** on CRAN (CI
+  installs current CRAN). Regenerate snapshots whenever CRAN's ggplot2 minor
+  bumps; generate them on a stack matching CI (ggplot2 4.0.x as of now).
+  They *are* stable across OSes (macOS/Windows/Linux all pass).
+- The animations vignette evaluates its chunks whenever gganimate is
+  installed (as on CI) — any chunk must attach its own packages in setup and
+  keep `animate()` calls commented (no gifski on CI).
+- `transition_states()` needs at least one positive length; `(0, 0)` errors.

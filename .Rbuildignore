@@ -15,3 +15,6 @@
 ^ggtaichi_.*\.tar\.gz$
 ^tmp_lib$
 ^Rplots\.pdf$
+^data-raw$
+^vignettes/articles$
+^\.claude$

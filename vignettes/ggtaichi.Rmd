@@ -83,7 +83,10 @@ head(pitts_tg)
 
 `states_tg` is the larger sibling, repeating the same measurements across four
 states, and `pitts_emojis` holds the most popular weekly emoji per category.
-See `?pitts_tg`, `?states_tg`, and `?pitts_emojis` for the full descriptions.
+Since v0.3.0 the package also bundles `cafes_tg`, a small *synthetic*
+espresso-vs-matcha dataset whose two columns share the same units — handy for
+the shared-scale features shown later. See `?pitts_tg`, `?states_tg`,
+`?pitts_emojis`, and `?cafes_tg` for the full descriptions.
 
 ## A first taichi grid
 
@@ -126,11 +129,13 @@ reads darkness quickly) and the source you want to read as *warmth* on `yang`.
 
 ## Customizing the color scales
 
-Each fish gets its own gradient. `yang_colors` and `yin_colors` accept any color
+Each fish gets its own scale. `yang_colors` and `yin_colors` accept any color
 vector (usually hex codes), and `yang_name` / `yin_name` relabel the legends.
-Any extra argument is forwarded to `ggplot2::scale_fill_gradientn()`, so you can,
-for example, set common `limits` so both legends share a scale, or pass an
-`na.value`.
+Any extra argument in `...` is forwarded to *both* auto-built fill scales, so
+you can, for example, set common `limits` so the two legends share a range, or
+pass an `na.value`. When the two fish need *different* scale options -- or an
+entirely different scale type -- hand a scale object or constructor to
+`yin_scale` / `yang_scale` and it is used verbatim.
 
 ```{r, fig.height = 8, fig.alt="The six-week Pittsburgh grid of taichi diagrams with a blue gradient for Twitter and an orange gradient for Google."}
 ggplot(pitts_small, aes(x = week, y = category)) +
@@ -146,13 +151,15 @@ ggplot(pitts_small, aes(x = week, y = category)) +
 ## Removing the panel padding
 
 `ggplot2` leaves a margin around discrete and continuous scales, which can make
-a taichi grid look like it is floating. `remove_padding()` trims it; tell it
-whether each axis is continuous (`"c"`) or discrete (`"d"`).
+a taichi grid look like it is floating. `remove_padding()` trims it — since
+v0.3.0 it detects each axis's scale type by itself, and you can still spell it
+out with `"c"` (continuous) / `"d"` (discrete) when you want to override the
+detection.
 
 ```{r, fig.height = 8, fig.alt="The six-week Pittsburgh taichi grid with the surrounding panel padding removed so the symbols reach the plot edges."}
 ggplot(pitts_small, aes(x = week, y = category)) +
   geom_taichi(yin = Twitter, yang = Google) +
-  remove_padding(x = "c", y = "d") +
+  remove_padding() +
   theme_taichi()
 ```
 
@@ -259,11 +266,12 @@ ggplot(one_eye, aes(x, y)) +
 ### Categorical fills
 
 `geom_taichi()` now automatically detects whether the `yin` / `yang`
-columns are numeric or discrete (factor / character) and picks the
-appropriate scale.  You can also supply a custom scale constructor
-via `yin_scale` / `yang_scale`:
+columns are numeric or discrete (factor / character / logical) and picks the
+appropriate scale -- computed expressions such as `factor(week)` work too.
+With the default palettes the discrete colors are sampled from the ramp
+skipping its palest end, so every category stays visible.
 
-```{r, fig.height = 4, fig.alt="Taichi grid with discrete category fills."}
+```{r, fig.height = 4, fig.alt="Taichi grid with discrete category fills: methods A to C on the yin fish and win or loss on the yang fish."}
 disc <- data.frame(
   x = c(1, 2, 1, 2),
   y = c(2, 2, 1, 1),
@@ -276,6 +284,28 @@ ggplot(disc, aes(x, y)) +
   coord_fixed() +
   theme_taichi()
 ```
+
+For full control, hand any fill scale -- an object or a constructor
+function -- to `yin_scale` / `yang_scale`; it overrides the auto-detection
+and the `*_colors` vectors entirely:
+
+```{r, fig.height = 4, fig.alt="The same discrete taichi grid drawn with viridis palettes supplied through yin_scale and yang_scale."}
+ggplot(disc, aes(x, y)) +
+  geom_taichi(yin = method, yang = outcome,
+              yin_scale = scale_fill_viridis_d,
+              yang_scale = scale_fill_viridis_d(name = "outcome", option = "rocket",
+                                                begin = 0.4, end = 0.8)) +
+  coord_fixed() +
+  theme_taichi()
+```
+
+### Missing values
+
+A fish whose fill value is `NA` is painted in its scale's `na.value` colour
+(grey by default; pass e.g. `na.value = "transparent"` through `...` to hide
+it), so one missing source never suppresses the other fish. `na.rm = TRUE`
+additionally drops rows with missing positions, and an `NA` eye size simply
+skips that cell's eye.
 
 ### Geom parameter routing
 
@@ -298,6 +328,68 @@ ggplot(one_lwd, aes(x, y)) +
   coord_fixed() +
   theme_taichi()
 ```
+
+## New in v0.3.0
+
+### Shared limits and a single legend
+
+When the two sources are measured in the same units, two separate legends are
+noise. `shared_limits = TRUE` aligns the limits of both fill scales (the union
+range of the two columns, or the union of levels for two discrete sources), so
+equal values carry equal ink. `shared_legend = TRUE` goes further: both fish
+use the yin palette and only one legend is shown. The synthetic `cafes_tg`
+data is the natural demo — espresso and matcha orders per 100 customers:
+
+```{r, fig.height = 6, fig.alt="A 12-week by 8-neighbourhood taichi grid of espresso versus matcha orders sharing one grey fill scale and a single legend."}
+ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
+  geom_taichi(yin = matcha, yang = espresso,
+              shared_legend = TRUE,
+              yin_name = "orders / 100 customers") +
+  remove_padding() +
+  theme_taichi() +
+  ggtitle("Espresso (yang) vs matcha (yin)")
+```
+
+For diverging data (values around 0), pass a diverging palette to both color
+arguments and symmetric limits through `...`, e.g.
+`limits = c(-5, 5)` — both fish then hinge on the same midpoint.
+
+### The fish geoms are exported
+
+`geom_yin_fish()` and `geom_yang_fish()` — the layers `geom_taichi()` is
+built from — are now exported and documented. Reach for them when you want
+one fish only, or full manual control over scales and
+`ggnewscale::new_scale_fill()` stacking. See `?geom_yin_fish`.
+
+### Faster rendering
+
+All cells of a layer are now drawn as one batched polygon (and one batch of
+eye dots) resolved at draw time, instead of one grob stack per cell. Large
+grids and animation frames render several times faster, and glyphs stay
+perfectly round when you resize the device.
+
+## When (not) to use taichi
+
+A taichi grid is at its best when *comparing two sources cell by cell* is the
+question — the interlocking fish put both numbers in one glance. A few honest
+caveats:
+
+- **Dense grids become texture.** Past roughly a thousand cells you stop
+  reading symbols and start reading fields; that is still useful for spotting
+  bands and regime changes, but for precise lookup, subset (as done above) or
+  facet.
+- **Luminance is a coarse channel.** Small differences in a fish's shade are
+  hard to judge; when exact comparison matters, add shared limits
+  (`shared_limits = TRUE`) so at least the two fish are on the same footing,
+  and consider printing the numbers alongside.
+- **Color-vision deficiency.** The default grey ramp is luminance-only and
+  safe, and the default red ramp varies strongly in luminance as well. For
+  fully colorblind-safe plots, supply viridis scales:
+  `yin_scale = ggplot2::scale_fill_viridis_c` (and a second option like
+  `"magma"` for yang) — every figure in this vignette can be redrawn that
+  way with one argument per fish.
+- **One source missing?** An `NA` fish keeps its place (painted in
+  `na.value`), so absence is visible rather than silently dropped.
 
 ## Acknowledgement
 

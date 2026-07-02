@@ -4,23 +4,41 @@
 \alias{remove_padding}
 \title{Remove ggplot2 default padding}
 \usage{
-remove_padding(x = "c", y = "d", ...)
+remove_padding(x = NULL, y = NULL, ...)
 }
 \arguments{
-\item{x}{x-axis scale, if it is continuous scale, input "c"; discrete, "d".}
+\item{x, y}{`NULL` (the default) to auto-detect the scale type of that axis
+from the plot's data and mapping, `"c"` for a continuous axis, or `"d"`
+for a discrete one.}
 
-\item{y}{y-axis scale, if it is continuous scale, input "c"; discrete, "d".}
-
-\item{...}{...}
+\item{...}{Additional arguments passed on to the underlying
+[ggplot2::scale_x_continuous()] / [ggplot2::scale_x_discrete()] (and y)
+calls.}
 }
 \value{
-remove_padding
+An object that, added to a ggplot, replaces both position scales
+  with padding-free ones.
 }
 \description{
-The default ggplot2 plots give certain amount of padding for both continuous
-and discrete variables. Due to this padding, it makes the plots generated
-from `geom_taichi()` look like there is something missing. Depends on users'
-preference, they can remove the "empty space" by using this function. The
-only thing users need to figure out is whether the `x` and `y` scales are
-continuous or discrete.
+ggplot2 pads both continuous and discrete axes with a little expansion,
+which can make a taichi grid look like it is floating. `remove_padding()`
+trims that space. Called with no arguments it inspects the plot it is
+added to and figures out for itself whether each axis is continuous or
+discrete; pass `"c"` (continuous) or `"d"` (discrete) explicitly to
+override the detection, e.g. when the axis mapping is a computed
+expression the plot data cannot answer for.
+}
+\examples{
+library(ggplot2)
+d <- data.frame(x = 1:3, y = c("a", "b", "c"), yin = 1:3, yang = 3:1)
+
+# auto-detects x as continuous and y as discrete
+ggplot(d, aes(x, y)) +
+  geom_taichi(yin = yin, yang = yang) +
+  remove_padding()
+
+# explicit override, identical result here
+ggplot(d, aes(x, y)) +
+  geom_taichi(yin = yin, yang = yang) +
+  remove_padding(x = "c", y = "d")
 }

@@ -22,6 +22,8 @@ navbar:
     href: articles/ggtaichi.html
   - text: Animations
     href: articles/animations.html
+  - text: Gallery
+    href: articles/gallery.html
   - text: Reference
     href: reference/index.html
   - text: News

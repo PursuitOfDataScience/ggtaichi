@@ -60,3 +60,32 @@
 #'
 #'
 "pitts_emojis"
+
+
+#' Synthetic café orders: espresso vs. matcha
+#'
+#' A small, deliberately \emph{synthetic} two-source dataset for demos and
+#' vignettes: weekly orders (per 100 customers) of espresso and matcha drinks
+#' across eight fictional neighbourhoods over a 12-week season. It provides an
+#' evergreen alternative to the COVID-era \code{pitts_tg} / \code{states_tg}
+#' data, and because both columns share the same units it is the natural demo
+#' for \code{shared_limits} / \code{shared_legend} in \code{geom_taichi()}.
+#' The values are simulated with a fixed seed (espresso cools off over the
+#' season while matcha picks up, at neighbourhood-specific rates, plus noise);
+#' the generating script ships in \code{data-raw/cafes_tg.R} in the source
+#' repository.
+#'
+#' @format A data frame with 96 rows and 4 columns:
+#' \describe{
+#'   \item{week}{Week of the season, 1 to 12.}
+#'   \item{neighbourhood}{One of eight fictional neighbourhoods (factor).}
+#'   \item{espresso}{Weekly espresso orders per 100 customers.}
+#'   \item{matcha}{Weekly matcha orders per 100 customers.}
+#' }
+#' @source Simulated by the package author; see \code{data-raw/cafes_tg.R}.
+#' @examples
+#' library(ggplot2)
+#' ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
+#'   geom_taichi(yin = matcha, yang = espresso, shared_legend = TRUE) +
+#'   theme_taichi()
+"cafes_tg"

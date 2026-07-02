@@ -1,7 +1,7 @@
 Package: ggtaichi
 Type: Package
 Title: Taichi-Diagram Visualization for Two Data Sources
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: person(given = "Youzhi", family = "Yu", role = c("aut", "cre"), email = "yuyouzhi666@icloud.com")
 Description: A data visualization design that compares two (usually on a par
     with each other) data sources on one grid of taichi (yin-yang) diagrams,

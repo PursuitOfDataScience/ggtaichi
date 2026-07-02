@@ -234,50 +234,22 @@ test_that("NA values in yang are handled", {
 })
 
 # ------------------------------------------------------------------
-# Rendering verification (eyes actually appear in the grob tree)
+# Rendering verification (eyes actually appear in the drawn scene)
 # ------------------------------------------------------------------
 
-# Helper: recursively count grobs of a given class inside a gTree
-count_grob_type <- function(g, type) {
-  n <- 0L
-  if (inherits(g, type)) n <- n + 1L
-  if (inherits(g, "gTree") && !is.null(g$children)) {
-    for (ch in g$children) n <- n + count_grob_type(ch, type)
-  }
-  n
+# The taichi cells materialize their children at draw time (makeContent), so
+# render the plot on a null device and grab the forced scene.
+forced_scene <- function(p) {
+  path <- tempfile(fileext = ".pdf")
+  grDevices::pdf(path)
+  on.exit({
+    grDevices::dev.off()
+    unlink(path)
+  }, add = TRUE)
+  print(p)
+  grid::grid.force()
+  grid::grid.grab()
 }
-
-panel_grob <- function(p) {
-  gt <- ggplotGrob(p)
-  idx <- grep("panel", sapply(gt$grobs, function(x) x$name %||% ""))
-  gt$grobs[[idx[1]]]
-}
-
-test_that("eyes = TRUE produces circle grobs for both fish", {
-  d <- data.frame(x = 1, y = 1, yin = 1, yang = 2)
-  p <- ggplot(d, aes(x, y)) + geom_taichi(yin = yin, yang = yang, eyes = TRUE)
-  pg <- panel_grob(p)
-  expect_equal(count_grob_type(pg, "circle"), 2L)
-  expect_equal(count_grob_type(pg, "polygon"), 2L)
-})
-
-test_that("eyes = FALSE produces no circle grobs", {
-  d <- data.frame(x = 1, y = 1, yin = 1, yang = 2)
-  p <- ggplot(d, aes(x, y)) + geom_taichi(yin = yin, yang = yang, eyes = FALSE)
-  pg <- panel_grob(p)
-  expect_equal(count_grob_type(pg, "circle"), 0L)
-  expect_equal(count_grob_type(pg, "polygon"), 2L)
-})
-
-test_that("eyes with custom colours and sizes render circles", {
-  d <- data.frame(x = 1, y = 1, yin = 1, yang = 2)
-  p <- ggplot(d, aes(x, y)) +
-    geom_taichi(yin = yin, yang = yang, eyes = TRUE,
-                yin_eye_colour = "blue", yang_eye_colour = "red",
-                yin_eye_size = 0.2, yang_eye_size = 0.1)
-  pg <- panel_grob(p)
-  expect_equal(count_grob_type(pg, "circle"), 2L)
-})
 
 # Helper: collect all grobs of a class inside a gTree
 collect_grobs <- function(g, type) {
@@ -290,23 +262,53 @@ collect_grobs <- function(g, type) {
   out
 }
 
-# Helper: the snpc offset of a grid unit like sum(0.5npc, 0.25snpc)
-snpc_offset <- function(u) {
-  s <- as.character(u)[1]
-  as.numeric(regmatches(s, regexec("(-?[0-9.]+)snpc", s))[[1]][2])
+# Circles drawn in a scene: circle grobs are batched, so count the points
+count_circles <- function(g) {
+  sum(vapply(collect_grobs(g, "circle"), function(ci) length(ci$x), integer(1)))
 }
+
+# Fish polygons drawn in a scene: one id-batched polygon grob per layer
+count_polygons <- function(g) {
+  sum(vapply(collect_grobs(g, "polygon"), function(pg) {
+    if (is.null(pg$id)) 1L else length(unique(pg$id))
+  }, integer(1)))
+}
+
+test_that("eyes = TRUE produces circles for both fish", {
+  d <- data.frame(x = 1, y = 1, yin = 1, yang = 2)
+  p <- ggplot(d, aes(x, y)) + geom_taichi(yin = yin, yang = yang, eyes = TRUE)
+  sc <- forced_scene(p)
+  expect_equal(count_circles(sc), 2L)
+  expect_equal(count_polygons(sc), 2L)
+})
+
+test_that("eyes = FALSE produces no circles", {
+  d <- data.frame(x = 1, y = 1, yin = 1, yang = 2)
+  p <- ggplot(d, aes(x, y)) + geom_taichi(yin = yin, yang = yang, eyes = FALSE)
+  sc <- forced_scene(p)
+  expect_equal(count_circles(sc), 0L)
+  expect_equal(count_polygons(sc), 2L)
+})
+
+test_that("eyes with custom colours and sizes render circles", {
+  d <- data.frame(x = 1, y = 1, yin = 1, yang = 2)
+  p <- ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, eyes = TRUE,
+                yin_eye_colour = "blue", yang_eye_colour = "red",
+                yin_eye_size = 0.2, yang_eye_size = 0.1)
+  sc <- forced_scene(p)
+  expect_equal(count_circles(sc), 2L)
+})
 
 test_that("each eye sits in its own fish's head (yin top, yang bottom)", {
   d <- data.frame(x = 1, y = 1, yin = 1, yang = 2)
   p <- ggplot(d, aes(x, y)) + geom_taichi(yin = yin, yang = yang, eyes = TRUE)
-  circles <- collect_grobs(panel_grob(p), "circle")
-  expect_length(circles, 2L)
-  fills <- vapply(circles, function(ci) ci$gp$fill, character(1))
-  offsets <- vapply(circles, function(ci) snpc_offset(ci$y), numeric(1))
-  # default yin eye is white and lives in the top bulb (positive offset);
-  # the yang eye is black and lives in the bottom bulb
-  expect_gt(offsets[fills == "white"], 0)
-  expect_lt(offsets[fills == "black"], 0)
+  circles <- collect_grobs(forced_scene(p), "circle")
+  fills <- unlist(lapply(circles, function(ci) as.character(ci$gp$fill)))
+  ys <- unlist(lapply(circles, function(ci) as.numeric(ci$y)))
+  expect_setequal(fills, c("white", "black"))
+  # the white yin eye lives in the top bulb, the black yang eye in the bottom
+  expect_gt(ys[fills == "white"], ys[fills == "black"])
 })
 
 test_that("mapped eye sizes are rescaled to [0.05, 0.3]", {
@@ -332,7 +334,7 @@ test_that("NA eye sizes skip the eye for that cell", {
   p <- ggplot(d, aes(x, y)) +
     geom_taichi(yin = yin, yang = yang, eyes = TRUE, yin_eye_size = sz)
   # 2 yin eyes (one NA) + 3 yang eyes
-  expect_equal(count_grob_type(panel_grob(p), "circle"), 5L)
+  expect_equal(count_circles(forced_scene(p)), 5L)
 })
 
 test_that("mapped eye colours reach the grobs", {
@@ -340,8 +342,8 @@ test_that("mapped eye colours reach the grobs", {
                   col = c("blue", "orange"))
   p <- ggplot(d, aes(x, y)) +
     geom_taichi(yin = yin, yang = yang, eyes = TRUE, yin_eye_colour = col)
-  circles <- collect_grobs(panel_grob(p), "circle")
-  fills <- vapply(circles, function(ci) as.character(ci$gp$fill), character(1))
+  circles <- collect_grobs(forced_scene(p), "circle")
+  fills <- unlist(lapply(circles, function(ci) as.character(ci$gp$fill)))
   expect_true(all(c("blue", "orange") %in% fills))
 })
 
@@ -413,4 +415,116 @@ test_that("alpha, colour, linewidth, linetype appear in built layer data", {
   expect_true(all(b$data[[1]]$colour == "red"))
   expect_true(all(b$data[[1]]$linewidth == 2))
   expect_true(all(b$data[[1]]$linetype == 2))
+})
+
+# ------------------------------------------------------------------
+# Shared limits / shared legend (v0.3.0, §4b)
+# ------------------------------------------------------------------
+
+test_that("shared_limits aligns both continuous fill scales", {
+  d <- data.frame(x = 1:3, y = 1:3, yin = c(1, 2, 3), yang = c(7, 8, 10))
+  p <- ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, shared_limits = TRUE)
+  b <- ggplot_build(p)
+  scales <- b$plot$scales$scales
+  fill_scales <- scales[sapply(scales, function(s) grepl("^fill", s$aesthetics[1]))]
+  lims <- lapply(fill_scales, function(s) s$limits)
+  expect_length(lims, 2L)
+  expect_true(all(vapply(lims, identical, logical(1), y = c(1, 10))))
+})
+
+test_that("shared_legend maps equal values to equal colours across fish", {
+  d <- data.frame(x = 1:2, y = 1:2, a = c(1, 5), b = c(5, 1))
+  p <- ggplot(d, aes(x, y)) +
+    geom_taichi(yin = a, yang = b, shared_legend = TRUE)
+  b_ <- ggplot_build(p)
+  # a == 5 (yin, row 2) and b == 5 (yang, row 1) must share a colour
+  expect_equal(b_$data[[1]]$fill[2], b_$data[[2]]$fill[1])
+  expect_equal(b_$data[[1]]$fill[1], b_$data[[2]]$fill[2])
+})
+
+test_that("shared_legend drops the yang guide and titles the legend jointly", {
+  obj <- geom_taichi(yin = matcha, yang = espresso, shared_legend = TRUE)
+  expect_equal(obj$yin_name, "matcha / espresso")
+  d <- data.frame(x = 1:2, y = 1:2, matcha = c(1, 5), espresso = c(5, 1))
+  b <- ggplot_build(ggplot(d, aes(x, y)) +
+    geom_taichi(yin = matcha, yang = espresso, shared_legend = TRUE))
+  scales <- b$plot$scales$scales
+  fill_scales <- scales[sapply(scales, function(s) grepl("^fill", s$aesthetics[1]))]
+  guides <- lapply(fill_scales, function(s) s$guide)
+  expect_true(any(vapply(guides, identical, logical(1), y = "none")))
+})
+
+test_that("shared_limits unions the levels of two discrete sources", {
+  d <- data.frame(x = 1:2, y = 1:2,
+                  yin = factor(c("a", "b")), yang = factor(c("b", "c")))
+  p <- ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, shared_limits = TRUE)
+  b <- ggplot_build(p)
+  scales <- b$plot$scales$scales
+  fill_scales <- scales[sapply(scales, function(s) grepl("^fill", s$aesthetics[1]))]
+  lims <- lapply(fill_scales, function(s) s$limits)
+  expect_true(all(vapply(lims, identical, logical(1), y = c("a", "b", "c"))))
+})
+
+test_that("shared_legend gives the shared discrete level one colour", {
+  d <- data.frame(x = 1:2, y = 1:2,
+                  yin = factor(c("a", "b")), yang = factor(c("b", "c")))
+  p <- ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, shared_legend = TRUE)
+  b <- ggplot_build(p)
+  # the shared level "b" gets the same colour on both fish
+  expect_equal(b$data[[1]]$fill[2], b$data[[2]]$fill[1])
+})
+
+test_that("shared_limits warns and is ignored for mixed source types", {
+  d <- data.frame(x = 1:2, y = 1:2, yin = factor(c("a", "b")), yang = c(1, 2))
+  expect_warning(
+    ggplot_build(ggplot(d, aes(x, y)) +
+      geom_taichi(yin = yin, yang = yang, shared_limits = TRUE)),
+    "same type"
+  )
+})
+
+test_that("explicit limits in ... beat shared_limits", {
+  d <- data.frame(x = 1:2, y = 1:2, yin = c(1, 2), yang = c(3, 4))
+  p <- ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, shared_limits = TRUE, limits = c(0, 100))
+  b <- ggplot_build(p)
+  scales <- b$plot$scales$scales
+  fill_scales <- scales[sapply(scales, function(s) grepl("^fill", s$aesthetics[1]))]
+  expect_true(all(vapply(fill_scales, function(s) identical(s$limits, c(0, 100)),
+                         logical(1))))
+})
+
+# ------------------------------------------------------------------
+# Exported fish geoms (v0.3.0, §4d)
+# ------------------------------------------------------------------
+
+test_that("geom_yin_fish / geom_yang_fish are exported and work standalone", {
+  expect_true(all(c("geom_yin_fish", "geom_yang_fish") %in%
+                    getNamespaceExports("ggtaichi")))
+  d <- data.frame(x = 1:3, y = 1, v = 1:3)
+  p <- ggplot(d, aes(x, y)) +
+    geom_yin_fish(aes(fill = v)) +
+    scale_fill_viridis_c() +
+    ggnewscale::new_scale_fill() +
+    geom_yang_fish(aes(fill = rev(v))) +
+    scale_fill_viridis_c(option = "magma")
+  expect_silent(ggplot_build(p))
+  sc <- forced_scene(p)
+  expect_equal(count_polygons(sc), 6L)
+})
+
+# ------------------------------------------------------------------
+# print method (v0.3.0)
+# ------------------------------------------------------------------
+
+test_that("printing the geom_taichi() object is human-readable", {
+  obj <- geom_taichi(yin = a, yang = b, eyes = TRUE, shared_legend = TRUE)
+  out <- capture.output(print(obj))
+  expect_true(any(grepl("<ggtaichi>", out)))
+  expect_true(any(grepl("yin  : a / b", out, fixed = TRUE)))
+  expect_true(any(grepl("eyes : on", out, fixed = TRUE)))
+  expect_true(any(grepl("shared", out)))
 })
