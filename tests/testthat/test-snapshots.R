@@ -30,6 +30,14 @@ test_that("taichi with eyes snapshot", {
   vdiffr::expect_doppelganger("taichi-eyes", p)
 })
 
+test_that("taichi with data-driven eyes snapshot", {
+  p <- ggplot(snap_data, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, eyes = TRUE,
+                yin_eye_size = yang, yang_eye_size = yin) +
+    coord_fixed()
+  vdiffr::expect_doppelganger("taichi-data-eyes", p)
+})
+
 test_that("taichi with rotation snapshot", {
   p <- ggplot(snap_data, aes(x, y)) +
     geom_taichi(yin = yin, yang = yang, angle = 45) +

@@ -18,6 +18,10 @@ home:
 navbar:
   type: default
   left:
+  - text: Get started
+    href: articles/ggtaichi.html
+  - text: Animations
+    href: articles/animations.html
   - text: Reference
     href: reference/index.html
   - text: News
@@ -25,3 +29,4 @@ navbar:
   right:
   - icon: fa-github fa-lg
     href: https://github.com/PursuitOfDataScience/ggtaichi
+    aria-label: GitHub

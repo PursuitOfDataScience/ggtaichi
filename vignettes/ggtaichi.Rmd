@@ -3,7 +3,6 @@ title: "Introduction to ggtaichi"
 author: |
   Youzhi Yu
   <br><span style="font-size: 0.8em;">University of Chicago</span>
-date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction to ggtaichi}
@@ -42,8 +41,10 @@ interlocking "fish":
 Because both fish live in the same cell, a single `geom_taichi()` layer encodes
 **four** dimensions at once: `x`, `y`, `yin`, and `yang`. The two sources keep
 their own color scales and legends, so they can be read independently while
-still being compared side by side. There are no decorative eyes or markers --
-every drop of ink on the plot is mapped to data.
+still being compared side by side. By default there are no decorative eyes or
+markers -- every drop of ink on the plot is mapped to data -- and when you do
+switch the classic eyes on (`eyes = TRUE`, new in v0.2.0), they can carry data
+too, taking a single glyph up to **six** dimensions.
 
 ```{r}
 library(ggtaichi)
@@ -205,18 +206,20 @@ one_rot <- data.frame(
 )
 
 ggplot(one_rot, aes(x, y)) +
-  geom_taichi(yin = yin, yang = yang, angle = rot) +
+  geom_taichi(yin = yin, yang = yang, angle = rot,
+              limits = c(0, 10)) +
   coord_fixed() +
   theme_taichi()
 ```
 
 ### Data-driven eyes
 
-Setting `eyes = TRUE` draws the classic taichi dots. Their colour and
-size are fully customizable through `yin_eye_colour`, `yang_eye_colour`,
-`yin_eye_size`, and `yang_eye_size`.
+Setting `eyes = TRUE` draws the classic taichi dots, each sitting in its own
+fish's head: the yin eye in the top bulb, the yang eye in the bottom one. With
+the default white and black dots the glyph looks exactly like the traditional
+symbol.
 
-```{r, fig.height = 4, fig.alt="Four taichi diagrams with eyes enabled."}
+```{r, fig.height = 4, fig.alt="Four taichi diagrams with the classic white and black eyes enabled."}
 one_eye <- data.frame(
   x = c(1, 2, 1, 2),
   y = c(2, 2, 1, 1),
@@ -225,10 +228,30 @@ one_eye <- data.frame(
 )
 
 ggplot(one_eye, aes(x, y)) +
+  geom_taichi(yin = yin, yang = yang, eyes = TRUE,
+              limits = c(0, 10)) +  # shared limits keep the palest fish visible
+  coord_fixed() +
+  theme_taichi()
+```
+
+The eyes are not just decoration: `yin_eye_size`, `yang_eye_size`,
+`yin_eye_colour`, and `yang_eye_colour` all accept either a constant *or an
+unquoted column name*, so the two dots can encode up to two further variables
+-- a **fifth and sixth dimension** on top of `x`, `y`, and the two fills. A
+mapped size column is rescaled to eye radii between 5% and 30% of the glyph
+radius (values already between 0 and 0.5 are used as exact proportions, and an
+`NA` suppresses the eye for that cell).
+
+```{r, fig.height = 4, fig.alt="Four taichi diagrams whose eye sizes vary from cell to cell, encoding two extra variables."}
+one_eye$reach   <- c(10, 40, 25, 5)   # drives the yin eye
+one_eye$quality <- c(2, 1, 4, 8)      # drives the yang eye
+
+ggplot(one_eye, aes(x, y)) +
   geom_taichi(yin = yin, yang = yang,
               eyes = TRUE,
-              yin_eye_colour = "blue",
-              yang_eye_colour = "orange") +
+              yin_eye_size = reach,
+              yang_eye_size = quality,
+              limits = c(0, 10)) +
   coord_fixed() +
   theme_taichi()
 ```

@@ -3,7 +3,6 @@ title: "Animating taichi diagrams"
 author: |
   Youzhi Yu
   <br><span style="font-size: 0.8em;">University of Chicago</span>
-date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Animating taichi diagrams}
@@ -28,6 +27,11 @@ knitr::opts_chunk$set(
 # evaluated, so this vignette builds on systems without gganimate.
 has_gganimate <- requireNamespace("gganimate", quietly = TRUE)
 knitr::opts_chunk$set(eval = has_gganimate)
+
+library(ggplot2)
+library(ggtaichi)
+if (has_gganimate) library(gganimate)
+set.seed(2026)
 ```
 
 ## Why animate?
@@ -55,25 +59,24 @@ legend.  gganimate works at the *layer* level --- it splits every layer's data
 by the transition variable and builds one frame per state.  Because the two
 fish layers are ordinary `ggplot2` layers, gganimate treats them independently
 and the two fill scales continue to apply frame-by-frame.  In short: **the
-ggnewscale layer stack composes cleanly with gganimate**, so no special wrapper
-is needed.
+ggnewscale layer stack composes cleanly with gganimate**, so no special
+wrapper is needed.  (This is not just theory: every recipe below has been
+rendered frame-by-frame against gganimate 1.0.11, with both legends and the
+per-fish fills intact in every frame.)
 
 ## Animating over a third variable
 
 Use `transition_states()` when the frame variable is discrete (e.g. week
 number), or `transition_time()` when it is a continuous time.  Both drive the
-underlying `GeomYinFish` / `GeomYangFish` layers.
+underlying fish layers.  The bundled `states_tg` data is a perfect showcase:
+instead of squeezing its 30 weeks onto the x-axis, keep a `category` x
+`state` grid of large glyphs and let the weeks play out as frames.  Because
+the fills are continuous, `tweenr` interpolates the values smoothly between
+consecutive weeks.
 
 ```{r}
-data <- data.frame(
-  week    = rep(1:4, each = 9),
-  state   = rep(rep(c("FL", "MO", "NY"), each = 3), 4),
-  yin     = sample(1:10, 36, replace = TRUE),
-  yang    = sample(1:10, 36, replace = TRUE)
-)
-
-p <- ggplot(data, aes(x = week, y = state)) +
-  geom_taichi(yin = yin, yang = yang) +
+p <- ggplot(states_tg, aes(x = category, y = state)) +
+  geom_taichi(yin = Twitter, yang = Google) +
   theme_taichi() +
   labs(title = "Week {closest_state}") +
   transition_states(week, transition_length = 1, state_length = 1)
@@ -85,12 +88,13 @@ p <- ggplot(data, aes(x = week, y = state)) +
 
 ## Keeping glyphs round
 
-Taichi symbols look best when they are circular.  Add `coord_fixed()` so the
-aspect ratio is preserved, and match the animation dimensions to the grid:
+Taichi symbols are always drawn round (they are sized in square units, like
+`grid::circleGrob()`), but `coord_fixed()` keeps the *cells* square too, so
+the glyphs fill them evenly.  Match the animation dimensions to the grid:
 
 ```{r}
-p_fixed <- ggplot(data, aes(x = week, y = state)) +
-  geom_taichi(yin = yin, yang = yang) +
+p_fixed <- ggplot(states_tg, aes(x = category, y = state)) +
+  geom_taichi(yin = Twitter, yang = Google) +
   coord_fixed() +
   theme_taichi() +
   transition_states(week, transition_length = 1, state_length = 1)
@@ -100,9 +104,10 @@ p_fixed <- ggplot(data, aes(x = week, y = state)) +
 
 ## Spin animation
 
-With the `angle` aesthetic (see `?geom_taichi`) you can rotate each glyph.
-Mapping `angle` to the frame variable and animating produces the iconic
-"turning taichi":
+With the `angle` argument (see `?geom_taichi`) you can rotate each glyph.
+Mapping `angle` to an expression of the frame variable and animating produces
+the iconic "turning taichi" --- with `eyes = TRUE` each eye rides around in
+its own fish's head:
 
 ```{r}
 spin <- data.frame(
@@ -115,11 +120,16 @@ p_spin <- ggplot(spin, aes(x, y)) +
               eyes = TRUE) +
   coord_fixed() +
   theme_taichi() +
-  transition_states(frame, transition_length = 0, state_length = 0) +
-  enter_grow() + exit_shrink()
+  transition_states(frame, transition_length = 0, state_length = 1)
 
 # animate(p_spin, width = 300, height = 300, fps = 12)
 ```
+
+Note the `state_length = 1` with `transition_length = 0`: each frame *is* a
+state, so the rotation advances in crisp steps (at least one of the two
+lengths must be positive, or gganimate cannot allocate frames).  For a
+grow-in reveal instead, keep a positive `transition_length` and add
+`enter_grow()` to the plot.
 
 ## Export helpers
 
