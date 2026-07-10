@@ -273,7 +273,7 @@ geom_taichi <- function(
     yang_layer = yang_layer,
     yang_mapping = yang_aes,
     yang_colors = if (shared_legend) yin_colors else yang_colors,
-    yang_colors_user = !missing(yang_colors),
+    yang_colors_user = if (shared_legend) !missing(yin_colors) else !missing(yang_colors),
     yang_name = yang_name,
     yang_scale = yang_scale,
     shared_limits = shared_limits,
@@ -503,12 +503,20 @@ rescale_eye_size <- function(x) {
   finite <- x[is.finite(x)]
   if (length(finite) == 0) return(x)
   rng <- range(finite)
-  if (rng[1] > 0 && rng[2] <= 0.5) return(x)
-  if (rng[1] == rng[2]) {
-    x[is.finite(x)] <- 0.175
-    return(x)
+  if (rng[1] > 0 && rng[2] <= 0.5) {
+    out <- x
+    out[is.finite(x) & x == 0] <- 0
+    return(out)
   }
-  0.05 + (x - rng[1]) / (rng[2] - rng[1]) * 0.25
+  if (rng[1] == rng[2]) {
+    out <- x
+    out[is.finite(x)] <- 0.175
+    out[is.finite(x) & x == 0] <- 0
+    return(out)
+  }
+  out <- 0.05 + (x - rng[1]) / (rng[2] - rng[1]) * 0.25
+  out[is.finite(x) & x == 0] <- 0
+  return(out)
 }
 
 
