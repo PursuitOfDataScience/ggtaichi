@@ -2,8 +2,16 @@
 #
 # These snapshots guard against silent rendering regressions, especially once
 # rotation and eyes land.  They are skipped when vdiffr is not installed.
+#
+# They are also skipped on CI: vdiffr SVGs are sensitive to the svglite/
+# systemfonts versions and the platform's font stack, so a single committed
+# reference cannot match every runner in the CI matrix (Linux/macOS/Windows x
+# several R versions) and drifts whenever those upstream renderers update.
+# Run them locally (`devtools::test()`) to review visual changes; the package
+# logic is covered by the non-visual tests.
 
 skip_if_not_installed("vdiffr")
+testthat::skip_on_ci()
 
 library(ggplot2)
 library(ggtaichi)
