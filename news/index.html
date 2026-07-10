@@ -70,6 +70,12 @@
 <div class="section level3">
 <h3 id="bug-fixes-0-2-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2-0"></a></h3>
 <ul><li>
+<strong>Mapped <code>eye_size = 0</code> drew an eye (<a href="https://github.com/PursuitOfDataScience/ggtaichi/issues/1" class="external-link">#1</a>)</strong>: a mapped eye-size of <code>0</code> was rescaled to a positive radius, so an eye was drawn despite the documented “0 → no eye” rule. Zeros are now preserved and drawn without an eye.</li>
+<li>
+<strong><code>shared_legend</code> palette mismatch (<a href="https://github.com/PursuitOfDataScience/ggtaichi/issues/2" class="external-link">#2</a>)</strong>: with <code>shared_legend = TRUE</code> and discrete fills, the yang fish was painted with a differently-interpolated palette than the yin fish when only one of <code>yin_colors</code> / <code>yang_colors</code> was supplied. Both fish now use <code>yin_colors</code>, so identical categories read as identical ink.</li>
+<li>
+<strong><code>states_tg</code> documentation (<a href="https://github.com/PursuitOfDataScience/ggtaichi/issues/3" class="external-link">#3</a>)</strong>: the dataset spans 31 weeks (the bundled data has 31); the documentation said 30. Corrected to 31 (the data is unchanged).</li>
+<li>
 <strong><code>...</code> routing (BUG-1)</strong>: geom parameters (<code>alpha</code>, <code>colour</code>, <code>linewidth</code>, <code>linetype</code>, <code>width</code>, <code>height</code>, <code>na.rm</code>, <code>show.legend</code>) are now real, documented arguments of <code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> and are forwarded to the underlying fish layers. <code>...</code> is reserved for options applied to both fill scales (e.g. shared <code>limits</code>); per-fish scale control goes through <code>yin_scale</code> / <code>yang_scale</code>.</li>
 <li>
 <strong><code>linewidth</code> aesthetic (BUG-2)</strong>: the outline width now uses the modern <code>linewidth</code> aesthetic. Passing <code>size</code> to <code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> still works but warns and is routed to <code>linewidth</code>, and an inherited <code>aes(size = ...)</code> mapping is renamed through ggplot2’s built-in deprecation path. ggtaichi now requires ggplot2 &gt;= 3.4.0.</li>
@@ -109,7 +115,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

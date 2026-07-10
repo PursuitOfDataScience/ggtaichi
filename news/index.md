@@ -84,6 +84,21 @@
 
 ### Bug fixes
 
+- **Mapped `eye_size = 0` drew an eye
+  ([\#1](https://github.com/PursuitOfDataScience/ggtaichi/issues/1))**:
+  a mapped eye-size of `0` was rescaled to a positive radius, so an eye
+  was drawn despite the documented “0 → no eye” rule. Zeros are now
+  preserved and drawn without an eye.
+- **`shared_legend` palette mismatch
+  ([\#2](https://github.com/PursuitOfDataScience/ggtaichi/issues/2))**:
+  with `shared_legend = TRUE` and discrete fills, the yang fish was
+  painted with a differently-interpolated palette than the yin fish when
+  only one of `yin_colors` / `yang_colors` was supplied. Both fish now
+  use `yin_colors`, so identical categories read as identical ink.
+- **`states_tg` documentation
+  ([\#3](https://github.com/PursuitOfDataScience/ggtaichi/issues/3))**:
+  the dataset spans 31 weeks (the bundled data has 31); the
+  documentation said 30. Corrected to 31 (the data is unchanged).
 - **`...` routing (BUG-1)**: geom parameters (`alpha`, `colour`,
   `linewidth`, `linetype`, `width`, `height`, `na.rm`, `show.legend`)
   are now real, documented arguments of
