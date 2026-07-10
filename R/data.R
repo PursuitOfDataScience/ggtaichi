@@ -26,8 +26,8 @@
 
 #' States' COVID-related Google & Twitter incidence rates
 #'
-#' A data set containing the 30-week incidence rates of COVID related categories
-#' from week 1 starting from June 1, 2020 to week 30
+#' A data set containing the 31-week incidence rates of COVID related categories
+#' from week 1 starting from June 1, 2020 to week 31
 #' that ended in the last Sunday of the year in 4 states (Florida, Missouri,
 #' New York, and Texas). The data columns are introduced below. One quick note
 #' about the columns of the data set: \code{week_start} as a column is present
@@ -36,7 +36,7 @@
 #' @format A data frame with 1116 rows and 6 columns:
 #' \describe{
 #'   \item{state}{state}
-#'   \item{week}{week 1 to week 30.}
+#'   \item{week}{week 1 to week 31.}
 #'   \item{week_start}{The Monday date of the week started.}
 #'   \item{category}{9 Covid-related categories in total.}
 #'   \item{Twitter}{weekly tweets percentage (\%) in state falling into each
