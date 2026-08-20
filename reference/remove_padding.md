@@ -20,13 +20,22 @@ remove_padding(x = NULL, y = NULL, ...)
 
   \`NULL\` (the default) to auto-detect the scale type of that axis from
   the plot's data and mapping, \`"c"\` for a continuous axis, or \`"d"\`
-  for a discrete one.
+  for a discrete one. Auto-detection reads the \*plot's\* mapping, so
+  name the type explicitly when \`x\` / \`y\` are mapped in a layer
+  rather than in \`ggplot()\`, or when the mapping is a computed
+  expression the plot data cannot answer for.
 
 - ...:
 
   Additional arguments passed on to the underlying
   \[ggplot2::scale_x_continuous()\] / \[ggplot2::scale_x_discrete()\]
-  (and y) calls.
+  (and y) calls. They go to \*both\* scales, so when the two axes are of
+  different types only arguments that continuous and discrete scales
+  share (\`name\`, \`breaks\`, \`labels\`, \`guide\`, ...) can be used
+  here — a continuous-only argument such as \`n.breaks\` would be
+  rejected by the discrete scale with an "unused argument" error. For
+  per-axis options, add your own \`scale_x\_\*(expand = c(0, 0))\` call
+  instead.
 
 ## Value
 

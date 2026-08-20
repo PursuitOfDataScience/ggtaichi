@@ -1,12 +1,12 @@
 # Pittsburgh COVID-related Google & Twitter incidence rates
 
-A data set containing the 30-week incidence rates of COVID related
-categories from week 1 starting from June 1, 2020 to week 30 that ended
-in the last Sunday of the year in Pittsburgh Metropolitan Statistical
-Area (MSA). The data columns are introduced below. One quick note about
-the columns of the data set: `week_start` as a column is present in the
-data set for illustration purposes, reminding users what `week` column
-is. In other words, it does not participate any visualization.
+A data set containing the 30-week incidence rates of COVID-related
+categories in the Pittsburgh Metropolitan Statistical Area (MSA), from
+week 1 beginning June 1, 2020 to week 30, which ended on the last Sunday
+of the year. The data columns are introduced below. One quick note about
+the columns of the data set: `week_start` is present for illustration
+purposes, as a reminder of what the `week` column counts. In other
+words, it does not participate in any visualization.
 
 ## Usage
 
@@ -32,7 +32,8 @@ A data frame with 270 rows and 6 columns:
 
 - category:
 
-  9 Covid-related categories in total.
+  One of 9 COVID-related categories: Covid, General Virus, Masks,
+  Sanitizing, Social Distancing, Symptoms, Tests, Treatment, Working.
 
 - Twitter:
 

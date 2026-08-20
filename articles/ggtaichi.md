@@ -68,15 +68,13 @@ Metropolitan Statistical Area (MSA).
 ``` r
 
 head(pitts_tg)
-#> # A tibble: 6 × 6
-#>   msa         week week_start category          Twitter Google
-#>   <chr>      <int> <date>     <chr>               <dbl>  <dbl>
-#> 1 Pittsburgh     1 2020-06-01 Covid              0.965  0.681 
-#> 2 Pittsburgh     1 2020-06-01 General Virus      0.538  0.0982
-#> 3 Pittsburgh     1 2020-06-01 Masks              0.466  0.117 
-#> 4 Pittsburgh     1 2020-06-01 Sanitizing         0.0561 0.127 
-#> 5 Pittsburgh     1 2020-06-01 Social Distancing  0.294  0.0386
-#> 6 Pittsburgh     1 2020-06-01 Symptoms           0.0457 0.0770
+#>          msa week week_start          category    Twitter     Google
+#> 1 Pittsburgh    1 2020-06-01             Covid 0.96499362 0.68119059
+#> 2 Pittsburgh    1 2020-06-01     General Virus 0.53773593 0.09821038
+#> 3 Pittsburgh    1 2020-06-01             Masks 0.46586871 0.11707305
+#> 4 Pittsburgh    1 2020-06-01        Sanitizing 0.05608462 0.12726983
+#> 5 Pittsburgh    1 2020-06-01 Social Distancing 0.29366920 0.03863268
+#> 6 Pittsburgh    1 2020-06-01          Symptoms 0.04565682 0.07701188
 ```
 
 `states_tg` is the larger sibling, repeating the same measurements

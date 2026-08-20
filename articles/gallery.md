@@ -64,9 +64,9 @@ ggplot(d, aes(x, y)) +
   ggtitle("Eye size as a fifth channel")
 ```
 
-![Left, a row of classic taichi symbols with white and black eyes;
-right, the same symbols with eye sizes driven by
-data.](gallery_files/figure-html/eyes-1.png)
+![A row of four taichi symbols whose white yin eyes grow and shrink with
+a data column while the black yang eyes stay a constant
+size.](gallery_files/figure-html/eyes-1.png)
 
 ## A turning grid
 
@@ -121,10 +121,10 @@ ggplot(subset(states_tg, state %in% c("New York", "Texas")),
   facet_wrap(~ state, ncol = 1) +
   remove_padding() +
   theme_taichi() +
-  ggtitle("30 weeks as texture")
+  ggtitle("31 weeks as texture")
 ```
 
-![A dense 30-week by 9-category grid of small taichi diagrams for four
+![A dense 31-week by 9-category grid of small taichi diagrams for two
 states, read as an overall texture rather than glyph by
 glyph.](gallery_files/figure-html/texture-1.png)
 

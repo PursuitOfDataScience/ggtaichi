@@ -45,13 +45,16 @@ geom_taichi(
 
 - yin:
 
-  The unquoted column name (or a string naming a column) for the yin
-  (dark) fish of the taichi symbol.
+  The unquoted column name (or a literal string naming a column) for the
+  yin (dark) fish of the taichi symbol. To pass a name held in a
+  variable, use `.data[[nm]]` or `!!rlang::sym(nm)` — a bare variable
+  would be mapped as a constant fill, exactly as it would be inside
+  [`aes()`](https://ggplot2.tidyverse.org/reference/aes.html).
 
 - yang:
 
-  The unquoted column name (or a string naming a column) for the yang
-  (light) fish of the taichi symbol.
+  The unquoted column name (or a literal string naming a column) for the
+  yang (light) fish of the taichi symbol, as `yin`.
 
 - yin_name:
 
@@ -80,7 +83,9 @@ geom_taichi(
   An optional fill scale for the yin fish: either a ready scale object
   or a scale constructor function (e.g.
   [`ggplot2::scale_fill_viridis_d`](https://ggplot2.tidyverse.org/reference/scale_viridis.html)).
-  Overrides auto-detection.
+  Overrides auto-detection. It must govern a *fill* aesthetic; a scale
+  for another aesthetic (say `scale_colour_viridis_c`) is rejected with
+  an error rather than quietly leaving the fish on the default gradient.
 
 - yang_scale:
 
@@ -89,7 +94,8 @@ geom_taichi(
 - angle:
 
   Rotation of each glyph in degrees, counter-clockwise: either a single
-  number or an unquoted column name (one angle per cell).
+  number or an unquoted column name (one angle per cell). A mapped
+  column must be numeric.
 
 - eyes:
 
@@ -129,7 +135,8 @@ geom_taichi(
 
 - alpha:
 
-  Alpha transparency for the fish fills.
+  Alpha transparency for the fish fills. A single value for the whole
+  layer (see the Styling section).
 
 - na.rm:
 
@@ -137,16 +144,19 @@ geom_taichi(
 
 - colour:
 
-  Outline colour of the fish.
+  Outline colour of the fish. A single value for the whole layer (see
+  the Styling section).
 
 - linewidth:
 
   Outline width of the fish (in mm). Replaces the deprecated `size`
-  aesthetic of ggtaichi 0.1.0.
+  aesthetic of ggtaichi 0.1.0. A single value for the whole layer (see
+  the Styling section).
 
 - linetype:
 
-  Outline linetype of the fish.
+  Outline linetype of the fish. A single value for the whole layer (see
+  the Styling section).
 
 - show.legend:
 
@@ -155,12 +165,22 @@ geom_taichi(
 - ...:
 
   Additional arguments passed to *both* auto-built fill scales (e.g.,
-  shared `limits` or `na.value`). For per-fish scale options, supply
-  `yin_scale` / `yang_scale` instead.
+  shared `limits` or `na.value`). Because they go to both, an argument
+  that suits only one kind of scale will be rejected by the other when
+  `yin` and `yang` are of different types — for instance a numeric
+  `limits` draws ggplot2's "Continuous limits supplied to discrete
+  scale" warning from the discrete fish. For per-fish scale options,
+  supply `yin_scale` / `yang_scale` instead. The scale arguments
+  `geom_taichi()` fills in itself — `name`, `values` and `colors` /
+  `colours` — are not accepted here; use `yin_name` / `yang_name` and
+  `yin_colors` / `yang_colors`.
 
 ## Value
 
-A taichi diagram comparing two data sources.
+A `ggtaichi_plot` object: the two fish layers plus the fill scales they
+need, ready to be added to a
+[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html) with
+`+`. It is not a plot on its own.
 
 ## Discrete and continuous fills
 
@@ -177,6 +197,13 @@ that no category is invisible on a white panel; an explicitly supplied
 color vector is used as-is. Supply `yin_scale` / `yang_scale` to
 override the automatic choice entirely.
 
+Because the choice is made when the layer is added, replacing the plot's
+data afterwards keeps the scales picked for the original data. Swapping
+in data of the same types is fine; if the new `yin` / `yang` columns are
+of the *other* kind, ggplot2 reports a "Discrete value supplied to a
+continuous scale" (or the reverse) at draw time — rebuild the plot
+rather than substituting its data.
+
 ## Eyes
 
 `eyes = TRUE` draws the classic taichi dots, each sitting in its own
@@ -184,9 +211,32 @@ fish's head: the yin eye in the top bulb, the yang eye in the bottom
 bulb. The size and colour arguments accept either a constant or an
 (unquoted) data column, so the eyes can encode up to two further
 variables. A mapped eye-size column is rescaled to radii between 0.05
-and 0.3 of the glyph radius, unless all its values already lie in
-`(0, 0.5]`, in which case they are used directly as radius proportions.
-Cells whose eye size is `NA` or `0` are drawn without an eye.
+and 0.3 of the glyph radius, unless all its non-zero values already lie
+in `(0, 0.5]`, in which case they are used directly as radius
+proportions. Cells whose eye size is `NA` or `0` are drawn without an
+eye, so a column may mix proportions with zeros to suppress individual
+eyes. A column whose values are all equal gets the midpoint radius,
+0.175.
+
+## Styling
+
+`alpha`, `colour`, `linewidth` and `linetype` are layer-wide constants
+here. Each has a concrete default, so `geom_taichi()` always passes it
+to both fish layers as a parameter, and a parameter takes precedence
+over an inherited mapping: a plot-level `aes(linewidth = ...)` (or
+`alpha`, `colour`, `linetype`) has no effect on the glyphs. To drive one
+of those from a column, build the layers yourself with
+[`geom_yin_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
+/
+[`geom_yang_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md),
+which take all four as ordinary aesthetics.
+
+`width` and `height` behave differently, because they default to `NULL`
+and are forwarded only when you actually supply them: a plot-level
+`aes(width = ...)` *does* size the cells per row. So the data-driven
+channels of `geom_taichi()` are `yin`, `yang`, `angle`, the two eyes,
+and `width` / `height` via
+[`aes()`](https://ggplot2.tidyverse.org/reference/aes.html).
 
 ## Missing values
 

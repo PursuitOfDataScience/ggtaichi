@@ -10,7 +10,7 @@ into an **animation frame**. Each frame is then a clean `category` x
 
 This vignette shows how to combine
 [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
-with [gganimate](https://gganimate.org). `gganimate` is a *Suggested*
+with [gganimate](https://gganimate.com). `gganimate` is a *Suggested*
 dependency; install it with `install.packages("gganimate")` if you have
 not already.
 
@@ -44,7 +44,7 @@ when the frame variable is discrete (e.g. week number), or
 [`transition_time()`](https://gganimate.com/reference/transition_time.html)
 when it is a continuous time. Both drive the underlying fish layers. The
 bundled `states_tg` data is a perfect showcase: instead of squeezing its
-30 weeks onto the x-axis, keep a `category` x `state` grid of large
+31 weeks onto the x-axis, keep a `category` x `state` grid of large
 glyphs and let the weeks play out as frames. Because the fills are
 continuous, `tweenr` interpolates the values smoothly between
 consecutive weeks.
