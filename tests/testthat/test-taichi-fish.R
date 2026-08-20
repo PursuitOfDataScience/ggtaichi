@@ -75,6 +75,15 @@ test_that("rotation rotates the fish by the specified angle", {
   expect_false(isTRUE(all.equal(orig$y, rot$y)))
 })
 
+test_that("rotation runs counter-clockwise, as documented", {
+  # the yin outline starts at the top of the circle, (0, r)
+  at0 <- ggtaichi:::taichi_fish(0, 0, 1, "yin", n = 50, angle = 0)
+  expect_equal(c(at0$x[1], at0$y[1]), c(0, 1), tolerance = 1e-12)
+  # a counter-clockwise quarter turn carries it to (-r, 0); clockwise to (r, 0)
+  at90 <- ggtaichi:::taichi_fish(0, 0, 1, "yin", n = 50, angle = 90)
+  expect_equal(c(at90$x[1], at90$y[1]), c(-1, 0), tolerance = 1e-12)
+})
+
 test_that("rotation by 360 degrees returns to original position", {
   orig <- ggtaichi:::taichi_fish(0, 0, 1, "yin", n = 50, angle = 0)
   rot  <- ggtaichi:::taichi_fish(0, 0, 1, "yin", n = 50, angle = 360)

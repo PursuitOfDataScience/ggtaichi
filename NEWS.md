@@ -65,6 +65,13 @@
 - **Mapped `eye_size = 0` drew an eye (#1)**: a mapped eye-size of `0` was
   rescaled to a positive radius, so an eye was drawn despite the documented
   "0 → no eye" rule. Zeros are now preserved and drawn without an eye.
+- **A zero disabled the eye-size pass-through for the whole column**: because
+  `0` is excluded from the documented `(0, 0.5]` pass-through range, a single
+  "no eye here" zero made every other value in an otherwise-proportional
+  column go through the `[0.05, 0.3]` rescale instead --- `c(0, 0.2, 0.4)`
+  drew eyes of `0, 0.175, 0.3`. Zeros are markers rather than measurements, so
+  they no longer take part in that decision; the column now draws `0, 0.2,
+  0.4`, and the two documented rules compose as intended.
 - **`shared_legend` palette mismatch (#2)**: with `shared_legend = TRUE` and
   discrete fills, the yang fish was painted with a differently-interpolated
   palette than the yin fish when only one of `yin_colors` / `yang_colors` was
@@ -91,12 +98,51 @@
 - **Categorical fills (BUG-4)**: factor / character columns no longer trigger
   the cryptic "Discrete value supplied to a continuous scale" error (see the
   categorical fill support above).
+- **Non-finite `angle` and `eye_size` values**: the guards tested `is.na()`,
+  which is `TRUE` for `NA` and `NaN` but not for `Inf` / `-Inf`. An infinite
+  angle therefore reached `cos()` / `sin()`, turned every vertex of that glyph
+  into `NaN` and drew nothing while warning "NaNs produced"; an infinite mapped
+  eye size asked grid for a circle of infinite radius. Both now test
+  `is.finite()`, so a non-finite angle falls back to no rotation and a
+  non-finite eye size means no eye, exactly as `NA` already did.
+- **Non-numeric `angle` columns**: mapping `angle` to a character column
+  failed at draw time with the base error "non-numeric argument to binary
+  operator", and mapping it to a *factor* silently drew unrotated glyphs
+  alongside `'*' not meaningful for factors` warnings. Both now error at build
+  time with a clear message, matching how a non-numeric `eye_size` column is
+  already handled.
+- **Explicit discrete `limits`**: passing `limits` through `...` for a
+  factor / character fish aborted with "Insufficient values in manual scale"
+  whenever the limits held more entries than the data had levels. The
+  auto-built palette is now sized against the limits.
+- **A custom scale for the wrong aesthetic drew the wrong plot silently**:
+  passing e.g. `yin_scale = scale_colour_viridis_c` attached the scale to
+  `colour`, which the fish never map, so the fish fell back to ggplot2's
+  default blue fill gradient with no error at all. `yin_scale` / `yang_scale`
+  are now checked to govern a fill aesthetic, and a value that is neither a
+  scale object nor a constructor function reports that instead of the base
+  error "'what' must be a function or character string".
+- **Non-numeric cell `width` / `height`** failed inside `setup_data()` with
+  "non-numeric argument to binary operator"; now reported directly.
+- **`...` colliding with the scale options `geom_taichi()` sets itself**:
+  `guide` together with `shared_legend = TRUE` aborted with the base error
+  "formal argument `guide` matched by multiple actual arguments". The
+  internally computed options now take precedence, so the yang guide is still
+  dropped while a user-supplied `guide` styles the shared legend. Passing
+  `name`, `values`, `colors`, or `colours` through `...` now reports which
+  per-fish argument to use instead of raising the same base error.
 - **`theme_taichi()` no longer clips text at the plot edges**: the title is
   now aligned with the whole plot area (`plot.title.position = "plot"`) and
   slightly smaller (15 instead of 18), so realistic titles fit at typical
   figure sizes, and the right plot margin is a touch wider so an axis label
   sitting on the panel boundary (common with `remove_padding()`) is not cut
   off.
+- **`theme_taichi()` element inheritance**: because the theme is composed with
+  `%+replace%`, three properties `theme_bw()` had set were silently dropped and
+  fell back to the generic `text` / `rect` parents. The rice-paper canvas
+  picked up a near-black 1px border around the whole plot, the y-axis tick
+  labels lost their right alignment and their gap from the panel, and the
+  legend title lost its left alignment. All three are restored.
 
 ## Documentation
 
@@ -105,6 +151,22 @@
 - New **"When (not) to use taichi"** section in the intro vignette: honest
   guidance on dense grids, luminance precision, colorblind-safe palettes
   (viridis via `yin_scale` / `yang_scale`), and NA visibility.
+- New **Styling** section in `?geom_taichi`: `alpha`, `colour`, `linewidth` and
+  `linetype` are layer-wide constants there (each has a concrete default, so it
+  is always forwarded as a layer parameter and outranks an inherited mapping) ---
+  map those through `geom_yin_fish()` / `geom_yang_fish()` instead. `width` and
+  `height` default to `NULL` and are forwarded only when supplied, so a
+  plot-level `aes(width = ...)` does size the cells per row.
+- `?theme_taichi` now spells out its two surprising choices --- the blanked y
+  axis title (so `labs(y = )` has no effect) and the 90-degree legend text ---
+  together with the `theme()` calls that put either back.
+- `?remove_padding` now states that `...` reaches *both* position scales, so
+  with axes of different types only arguments common to continuous and
+  discrete scales work there, and that auto-detection reads the plot's mapping
+  (name the type explicitly when `x` / `y` are mapped in a layer instead).
+- `?pitts_emojis` now documents the actual format (HTML `<img>` tags aligned
+  row-for-row with `pitts_tg`) and notes that the remote images it points at
+  are no longer served.
 
 ## Internal
 
@@ -112,6 +174,14 @@
   down to a Monte-Carlo tiling check, parameter routing, rotation, eyes,
   discrete-scale selection, grob-level rendering checks) plus **vdiffr**
   visual-regression snapshots.
+- Two gaps in that suite are closed. It now covers **non-square cells** --- the
+  per-cell box following `width` on x and `height` on y, and the glyph radius
+  coming from the shorter cell side --- which every `coord_fixed()` snapshot is
+  blind to. It also pins the **direction** of all three places rotation is
+  applied (`taichi_fish()`, the vectorised body rotation in `makeContent()`,
+  and the eye placement), so a sign error in any one of them fails a test.
+- `tests/testthat/setup.R` holds a null device open for the run, so the suite
+  no longer leaves a stray `Rplots.pdf` in `tests/testthat/`.
 - `geom_taichi()` now returns a `ggtaichi_plot` object added to the plot via
   a `ggplot_add()` method, which is what makes data-aware scale selection
   and shared limits possible.

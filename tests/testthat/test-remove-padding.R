@@ -55,6 +55,40 @@ test_that("remove_padding() auto mode honours a partial override", {
   expect_true(inherits(b$plot$scales$get_scales("y"), "ScaleDiscretePosition"))
 })
 
+test_that("... reaches both position scales", {
+  library(ggplot2)
+  mix <- data.frame(x = 1:3, y = c("a", "b", "c"), yin = 1:3, yang = 4:6)
+  p <- function(...) ggplot(mix, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang) + remove_padding(...)
+  # arguments both scale types accept are fine
+  expect_silent(ggplot_build(p(x = "c", y = "d", name = "shared")))
+  # a continuous-only argument is rejected by the discrete scale, because the
+  # same `...` is handed to both -- documented, so pin it
+  expect_error(p(x = "c", y = "d", n.breaks = 3), "unused argument")
+  # with axes of the same type it goes through
+  same <- data.frame(x = 1:3, y = 1:3, yin = 1:3, yang = 4:6)
+  expect_silent(ggplot_build(ggplot(same, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang) +
+    remove_padding(x = "c", y = "c", n.breaks = 3)))
+})
+
+test_that("auto-detection reads the plot mapping, and the override rescues it", {
+  library(ggplot2)
+  mix <- data.frame(x = 1:3, y = c("a", "b", "c"), v = 1:3)
+  # x/y mapped in the layer, not in ggplot(): nothing for detect_axis to read,
+  # so it falls back to continuous and the discrete y fails at build time
+  expect_error(
+    ggplot_build(ggplot() + geom_yin_fish(data = mix, aes(x = x, y = y, fill = v)) +
+                   remove_padding()),
+    "Discrete value supplied to a continuous scale"
+  )
+  # naming the types explicitly is the documented way out
+  expect_silent(
+    ggplot_build(ggplot() + geom_yin_fish(data = mix, aes(x = x, y = y, fill = v)) +
+                   remove_padding(x = "c", y = "d"))
+  )
+})
+
 test_that("remove_padding() auto works with factor x from expressions", {
   library(ggplot2)
   d <- data.frame(x = 1:3, y = 1:3, yin = 1:3, yang = 4:6)

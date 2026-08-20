@@ -5,14 +5,34 @@
 \alias{pitts_emojis}
 \title{Popular Emojis}
 \format{
-An object of class \code{character} of length 270.
+A character vector of 270 HTML \code{<img>} tags (90 distinct
+  emoji), one per row of \code{\link{pitts_tg}}.
+}
+\source{
+The most frequent emoji per week and category in the Meltwater
+Twitter sample described in \code{\link{pitts_tg}}, processed by the
+package author.
 }
 \usage{
 pitts_emojis
 }
 \description{
-The most popular Emoji of a given week in a given category from the Meltwater
-Tweet sample. They can be rendered by using \code{"richtext"} with
-\code{annotate()}.
+The most popular emoji of a given week in a given category from the
+Meltwater Tweet sample, as HTML \code{<img>} tags. The vector is aligned
+row-for-row with \code{\link{pitts_tg}}, so \code{pitts_emojis[i]} is the
+emoji for the \code{week} / \code{category} combination in row \code{i} of
+that data set. The tags are meant to be drawn as rich text, e.g. with
+\code{ggtext::geom_richtext()} or \code{annotate("richtext", ...)}.
 }
+\section{Note on the image URLs}{
+
+Each tag points at a remotely hosted PNG on the Emojipedia asset host used
+when the data was collected in 2020. Those objects are no longer served
+publicly, so the tags no longer render as pictures on their own. The emoji
+each tag refers to is still readable from its file name, which ends in the
+Unicode code point (for example \code{thinking-face_1f914.png} is
+U+1F914); substitute your own image paths or the literal emoji characters
+to draw them.
+}
+
 \keyword{datasets}

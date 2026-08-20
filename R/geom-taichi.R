@@ -22,15 +22,42 @@
 #' \code{yin_scale} / \code{yang_scale} to override the automatic choice
 #' entirely.
 #'
+#' Because the choice is made when the layer is added, replacing the plot's
+#' data afterwards keeps the scales picked for the original data. Swapping in
+#' data of the same types is fine; if the new \code{yin} / \code{yang} columns
+#' are of the \emph{other} kind, ggplot2 reports a "Discrete value supplied to
+#' a continuous scale" (or the reverse) at draw time --- rebuild the plot rather
+#' than substituting its data.
+#'
 #' @section Eyes:
 #' \code{eyes = TRUE} draws the classic taichi dots, each sitting in its own
 #' fish's head: the yin eye in the top bulb, the yang eye in the bottom bulb.
 #' The size and colour arguments accept either a constant or an (unquoted)
 #' data column, so the eyes can encode up to two further variables. A mapped
 #' eye-size column is rescaled to radii between 0.05 and 0.3 of the glyph
-#' radius, unless all its values already lie in \code{(0, 0.5]}, in which case
-#' they are used directly as radius proportions. Cells whose eye size is
-#' \code{NA} or \code{0} are drawn without an eye.
+#' radius, unless all its non-zero values already lie in \code{(0, 0.5]}, in
+#' which case they are used directly as radius proportions. Cells whose eye
+#' size is \code{NA} or \code{0} are drawn without an eye, so a column may
+#' mix proportions with zeros to suppress individual eyes. A column whose
+#' values are all equal gets the midpoint radius, 0.175.
+#'
+#' @section Styling:
+#' \code{alpha}, \code{colour}, \code{linewidth} and \code{linetype} are
+#' layer-wide constants here. Each has a concrete default, so
+#' \code{geom_taichi()} always passes it to both fish layers as a parameter,
+#' and a parameter takes precedence over an inherited mapping: a plot-level
+#' \code{aes(linewidth = ...)} (or \code{alpha}, \code{colour},
+#' \code{linetype}) has no effect on the glyphs. To drive one of those from a
+#' column, build the layers yourself with \code{\link{geom_yin_fish}()} /
+#' \code{\link{geom_yang_fish}()}, which take all four as ordinary
+#' aesthetics.
+#'
+#' \code{width} and \code{height} behave differently, because they default to
+#' \code{NULL} and are forwarded only when you actually supply them: a
+#' plot-level \code{aes(width = ...)} \emph{does} size the cells per row. So
+#' the data-driven channels of \code{geom_taichi()} are \code{yin},
+#' \code{yang}, \code{angle}, the two eyes, and \code{width} / \code{height}
+#' via \code{\link[ggplot2]{aes}()}.
 #'
 #' @section Missing values:
 #' A fish whose fill value is \code{NA} is painted in the scale's
@@ -38,10 +65,13 @@
 #' \code{...} to change it), while \code{na.rm = TRUE} silently drops rows
 #' with missing positions.
 #'
-#' @param yin The unquoted column name (or a string naming a column) for the
-#'   yin (dark) fish of the taichi symbol.
-#' @param yang The unquoted column name (or a string naming a column) for the
-#'   yang (light) fish of the taichi symbol.
+#' @param yin The unquoted column name (or a literal string naming a column)
+#'   for the yin (dark) fish of the taichi symbol. To pass a name held in a
+#'   variable, use \code{.data[[nm]]} or \code{!!rlang::sym(nm)} --- a bare
+#'   variable would be mapped as a constant fill, exactly as it would be inside
+#'   \code{\link[ggplot2]{aes}()}.
+#' @param yang The unquoted column name (or a literal string naming a column)
+#'   for the yang (light) fish of the taichi symbol, as \code{yin}.
 #' @param yin_name The label name (in quotes) for the legend of the yin
 #'   rendering. Default is \code{NULL} (uses the column name).
 #' @param yang_name The label name (in quotes) for the legend of the yang
@@ -54,11 +84,15 @@
 #'   for factor/character data. Ignored if \code{yang_scale} is provided.
 #' @param yin_scale An optional fill scale for the yin fish: either a ready
 #'   scale object or a scale constructor function (e.g.
-#'   \code{ggplot2::scale_fill_viridis_d}). Overrides auto-detection.
+#'   \code{ggplot2::scale_fill_viridis_d}). Overrides auto-detection. It must
+#'   govern a \emph{fill} aesthetic; a scale for another aesthetic (say
+#'   \code{scale_colour_viridis_c}) is rejected with an error rather than
+#'   quietly leaving the fish on the default gradient.
 #' @param yang_scale An optional fill scale for the yang fish, as
 #'   \code{yin_scale}.
 #' @param angle Rotation of each glyph in degrees, counter-clockwise: either a
-#'   single number or an unquoted column name (one angle per cell).
+#'   single number or an unquoted column name (one angle per cell). A mapped
+#'   column must be numeric.
 #' @param eyes Logical. If \code{TRUE}, draws the classic taichi eyes (dots),
 #'   each centred in its fish's head. Default \code{FALSE}, preserving the
 #'   plain v0.1.0 look.
@@ -70,8 +104,8 @@
 #'   colour strings.
 #' @param shared_limits If \code{TRUE} and both sources are of the same type
 #'   (both continuous, or both discrete), the two auto-built fill scales share
-#'   common limits — the union range (or union of levels) of \code{yin} and
-#'   \code{yang} — so equal values read as equal ink. Explicit \code{limits}
+#'   common limits --- the union range (or union of levels) of \code{yin} and
+#'   \code{yang} --- so equal values read as equal ink. Explicit \code{limits}
 #'   passed through \code{...} take precedence. Default \code{FALSE}.
 #' @param shared_legend If \code{TRUE}, treats the two sources as directly
 #'   comparable: implies \code{shared_limits = TRUE}, paints both fish with
@@ -80,22 +114,36 @@
 #'   "\code{yin} / \code{yang}". Ignored when custom \code{yin_scale} /
 #'   \code{yang_scale} are given. Default \code{FALSE}.
 #' @param width,height Width and height of each cell. Typically omitted.
-#' @param alpha Alpha transparency for the fish fills.
+#' @param alpha Alpha transparency for the fish fills. A single value for the
+#'   whole layer (see the Styling section).
 #' @param na.rm If \code{TRUE}, silently removes rows with missing values.
-#' @param colour Outline colour of the fish.
+#' @param colour Outline colour of the fish. A single value for the whole
+#'   layer (see the Styling section).
 #' @param linewidth Outline width of the fish (in mm). Replaces the deprecated
-#'   \code{size} aesthetic of ggtaichi 0.1.0.
-#' @param linetype Outline linetype of the fish.
+#'   \code{size} aesthetic of ggtaichi 0.1.0. A single value for the whole
+#'   layer (see the Styling section).
+#' @param linetype Outline linetype of the fish. A single value for the whole
+#'   layer (see the Styling section).
 #' @param show.legend Logical. Should the layer be included in the legend?
 #' @param ... Additional arguments passed to \emph{both} auto-built fill
-#'   scales (e.g., shared \code{limits} or \code{na.value}). For per-fish
-#'   scale options, supply \code{yin_scale} / \code{yang_scale} instead.
+#'   scales (e.g., shared \code{limits} or \code{na.value}). Because they go
+#'   to both, an argument that suits only one kind of scale will be rejected by
+#'   the other when \code{yin} and \code{yang} are of different types --- for
+#'   instance a numeric \code{limits} draws ggplot2's "Continuous limits
+#'   supplied to discrete scale" warning from the discrete fish. For per-fish
+#'   scale options, supply \code{yin_scale} / \code{yang_scale} instead. The
+#'   scale arguments \code{geom_taichi()} fills in itself --- \code{name},
+#'   \code{values} and \code{colors} / \code{colours} --- are not accepted
+#'   here; use \code{yin_name} / \code{yang_name} and \code{yin_colors} /
+#'   \code{yang_colors}.
 #'
 #' @import ggplot2
 #' @import grid
 #' @import rlang
 #' @import ggnewscale
-#' @return A taichi diagram comparing two data sources.
+#' @return A \code{ggtaichi_plot} object: the two fish layers plus the fill
+#'   scales they need, ready to be added to a \code{\link[ggplot2]{ggplot}}
+#'   with \code{+}. It is not a plot on its own.
 #' @export
 #'
 #' @examples
@@ -135,8 +183,8 @@ geom_taichi <- function(
   yin, yang,
   yin_name = NULL,
   yang_name = NULL,
-  yin_colors = c('gray100', 'gray85', 'gray50', 'gray35', 'gray0'),
-  yang_colors = c("#FED7D8","#FE8C91", "#F5636B", "#E72D3F","#C20824"),
+  yin_colors = c("gray100", "gray85", "gray50", "gray35", "gray0"),
+  yang_colors = c("#FED7D8", "#FE8C91", "#F5636B", "#E72D3F", "#C20824"),
   yin_scale = NULL,
   yang_scale = NULL,
   angle = NULL,
@@ -199,6 +247,38 @@ geom_taichi <- function(
     ))
     if (missing(linewidth)) linewidth <- scale_dots$size
     scale_dots$size <- NULL
+  }
+
+  # A custom scale is either used as-is or called to build one, so anything
+  # else would only surface as a do.call() error much later.
+  check_scale_arg <- function(value, arg) {
+    if (is.null(value) || is.function(value) || inherits(value, "Scale")) {
+      return(invisible())
+    }
+    rlang::abort(paste0(
+      "`", arg, "` must be a fill scale object (e.g. ",
+      "`scale_fill_viridis_c()`) or a scale constructor function (e.g. ",
+      "`scale_fill_viridis_c`), not ", class(value)[1], "."
+    ))
+  }
+  check_scale_arg(yin_scale, "yin_scale")
+  check_scale_arg(yang_scale, "yang_scale")
+
+  # These are supplied to the auto-built scales by geom_taichi() itself, so
+  # passing them through `...` would collide; say which per-fish argument to
+  # use instead of letting do.call() raise "matched by multiple arguments".
+  reserved <- c(
+    name    = "`yin_name` / `yang_name`",
+    values  = "`yin_colors` / `yang_colors`",
+    colors  = "`yin_colors` / `yang_colors`",
+    colours = "`yin_colors` / `yang_colors`"
+  )
+  clash <- intersect(names(reserved), names(scale_dots))
+  if (length(clash) > 0) {
+    rlang::abort(paste0(
+      "`", clash[1], "` cannot be passed through `...`; use ",
+      reserved[[clash[1]]], " instead."
+    ))
   }
 
   yin_eye_size_quo    <- rlang::enquo(yin_eye_size)
@@ -380,19 +460,51 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
     vals
   }
 
+  # A scale for another aesthetic (scale_colour_*) would be attached to that
+  # aesthetic instead, leaving the fish to ggplot2's default fill gradient --
+  # a wrong plot with no error. Catch it for objects and constructors alike.
+  check_fill_scale <- function(scale, arg) {
+    aes_names <- tryCatch(scale$aesthetics, error = function(e) NULL)
+    if (!any(grepl("^fill", aes_names))) {
+      governs <- if (length(aes_names) == 0) {
+        "the supplied scale declares no aesthetics"
+      } else {
+        paste0("the supplied scale governs ",
+               paste0("`", aes_names, "`", collapse = ", "))
+      }
+      rlang::abort(paste0(
+        "`", arg, "` must be a scale for the `fill` aesthetic; ", governs, "."
+      ))
+    }
+    scale
+  }
+
   build_scale <- function(vals, colors, name, custom_scale, user_palette,
-                          extra = list()) {
+                          extra = list(), arg) {
     if (!is.null(custom_scale)) {
       if (inherits(custom_scale, "Scale")) {
-        return(custom_scale)
+        return(check_fill_scale(custom_scale, arg))
       }
-      return(do.call(custom_scale, c(list(name = name), scale_dots)))
+      return(check_fill_scale(
+        do.call(custom_scale, c(list(name = name), scale_dots)), arg
+      ))
     }
-    dots <- c(extra, scale_dots)
+    # Options ggtaichi computes for this fish (shared limits, the dropped yang
+    # guide) win over the same name in `...`, which otherwise both reach
+    # do.call() and abort.
+    dots <- c(extra, scale_dots[setdiff(names(scale_dots), names(extra))])
     is_disc <- is.factor(vals) || is.character(vals) || is.logical(vals)
     if (is_disc) {
-      n_vals <- if (!is.null(extra$limits)) {
-        length(extra$limits)
+      # `limits` can arrive either from shared_limits (extra) or straight from
+      # the user through `...`; either way the manual palette must be as long
+      # as the limits, not as the data. A function-valued `limits` says nothing
+      # about how many levels survive, so fall back to counting the data.
+      lims <- extra$limits %||% scale_dots$limits
+      if (!is.character(lims) && !is.numeric(lims) && !is.logical(lims)) {
+        lims <- NULL
+      }
+      n_vals <- if (length(lims) > 0) {
+        length(lims)
       } else if (is.factor(vals)) {
         nlevels(droplevels(vals))
       } else {
@@ -438,10 +550,10 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
 
   yin_scale_obj <- build_scale(yin_vals, object$yin_colors, object$yin_name,
                                object$yin_scale, isTRUE(object$yin_colors_user),
-                               yin_extra)
+                               yin_extra, "yin_scale")
   yang_scale_obj <- build_scale(yang_vals, object$yang_colors, object$yang_name,
                                 object$yang_scale, isTRUE(object$yang_colors_user),
-                                yang_extra)
+                                yang_extra, "yang_scale")
 
   plot +
     object$yin_layer +
@@ -456,7 +568,7 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
 
 # Generate the boundary points of one taichi "fish".
 #
-# A taichi symbol is a circle of radius `r` centered at (cx, cy), split into
+# A taichi symbol is a circle of radius `r` centred at (cx, cy), split into
 # two fish by an S-curve made of two small semicircles of radius r / 2. Each
 # fish boundary is traced from three arcs that connect head-to-tail: half of
 # the big circle plus the two small semicircles bulging in opposite ways.
@@ -502,8 +614,13 @@ taichi_fish <- function(cx, cy, r, fish = c("yin", "yang"), n = 50, angle = 0) {
 rescale_eye_size <- function(x) {
   finite <- x[is.finite(x)]
   if (length(finite) == 0) return(x)
+  # A zero means "draw no eye here", not "an eye of size zero", so it is a
+  # marker rather than a measurement and must not decide whether the column is
+  # already expressed as radius proportions. Without this, one 0 in an
+  # otherwise-proportional column silently rescaled every other value.
+  prop <- finite[finite != 0]
   rng <- range(finite)
-  if (rng[1] > 0 && rng[2] <= 0.5) {
+  if (length(prop) > 0 && min(prop) > 0 && max(prop) <= 0.5) {
     out <- x
     out[is.finite(x) & x == 0] <- 0
     return(out)
@@ -531,7 +648,9 @@ draw_taichi <- function(coords, fish, eyes = FALSE) {
   if (n == 0) return(grid::nullGrob())
 
   angles <- coords$angle %||% rep(0, n)
-  angles[is.na(angles)] <- 0
+  # is.finite() rather than !is.na(): an infinite angle would otherwise reach
+  # cos()/sin() and turn every vertex of that glyph into NaN.
+  angles[!is.finite(angles)] <- 0
 
   lwd_vals <- coords$linewidth %||% rep(0.1, n)
   lwd_vals[is.na(lwd_vals)] <- 0.1
@@ -572,6 +691,12 @@ makeContent.taichi_cells <- function(x) {
   cy_pt <- grid::convertY(grid::unit(x$cy, "npc"), "pt", valueOnly = TRUE)
   r_pt <- pmin(w_pt, h_pt) / 2
 
+  # The unit fish is built once at angle 0 and then rotated here, vectorised
+  # over every cell of the panel -- which is what makes one id-batched polygon
+  # possible instead of a grob per cell. That means this is the rotation the
+  # plots actually use; `taichi_fish(angle =)` rotates a single fish for callers
+  # outside the draw path (the tests and data-raw/logo.R). The two must agree:
+  # both are counter-clockwise for a positive angle.
   unit_fish <- taichi_fish(0, 0, 1, x$fish, n = 50)
   m <- length(unit_fish$x)
 
@@ -599,7 +724,9 @@ makeContent.taichi_cells <- function(x) {
   children <- grid::gList(fish_grob)
 
   if (isTRUE(x$eyes)) {
-    keep <- !is.na(x$eye_size) & x$eye_size > 0
+    # A non-finite size is not a size: treat Inf/NaN like the documented NA
+    # case (no eye) rather than asking grid for a circle of infinite radius.
+    keep <- is.finite(x$eye_size) & x$eye_size > 0
     if (any(keep)) {
       # Each eye sits in its own fish's head: the yin bulb is at the top of
       # the glyph, the yang bulb at the bottom (see taichi_fish()), rotating
@@ -629,15 +756,31 @@ taichi_setup_data <- function(data, params) {
   data$width  <- data$width  %||% params$width  %||% resolution(data$x, FALSE)
   data$height <- data$height %||% params$height %||% resolution(data$y, FALSE)
 
-  data <- transform(data,
-                    xmin = x - width / 2,  xmax = x + width / 2,  width = NULL,
-                    ymin = y - height / 2, ymax = y + height / 2, height = NULL)
+  if (!is.numeric(data$width) || !is.numeric(data$height)) {
+    rlang::abort("Cell `width` and `height` must be numeric.")
+  }
+
+  data$xmin <- data$x - data$width / 2
+  data$xmax <- data$x + data$width / 2
+  data$ymin <- data$y - data$height / 2
+  data$ymax <- data$y + data$height / 2
+  data$width <- NULL
+  data$height <- NULL
 
   if (!is.null(data$eye_size) && is.null(params$eye_size)) {
     if (!is.numeric(data$eye_size)) {
       rlang::abort("Eye sizes must be numeric when mapped to a data column.")
     }
     data$eye_size <- rescale_eye_size(data$eye_size)
+  }
+
+  # Rotation is arithmetic on degrees at draw time, so a non-numeric column
+  # would otherwise fail with an opaque base error (or, for a factor, quietly
+  # draw unrotated glyphs).
+  if (!is.null(data$angle) && !is.numeric(data$angle)) {
+    rlang::abort(
+      "Rotation angles must be numeric when mapped to a data column."
+    )
   }
 
   if (anyDuplicated(data$group)) {
@@ -690,7 +833,7 @@ GeomYinFish <- ggplot2::ggproto("GeomYinFish", ggplot2::Geom,
 #' interlocking fish of a taichi symbol per `(x, y)` cell. They are the
 #' building blocks that [geom_taichi()] assembles (together with two fill
 #' scales and a [ggnewscale::new_scale_fill()] break); use them directly when
-#' you want full control — e.g. to bring your own fill scale for a single
+#' you want full control --- e.g. to bring your own fill scale for a single
 #' fish, to stack scales differently, or to draw only one source.
 #'
 #' Both geoms understand the aesthetics `x`, `y`, `fill`, `colour`,

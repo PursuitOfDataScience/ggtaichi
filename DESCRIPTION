@@ -9,6 +9,7 @@ Description: A data visualization design that compares two (usually on a par
     sources, while inheriting 'ggplot2' features.
 License: GPL (>= 3)
 Encoding: UTF-8
+Language: en-US
 LazyData: true
 URL: https://pursuitofdatascience.github.io/ggtaichi/,
     https://github.com/PursuitOfDataScience/ggtaichi
@@ -18,15 +19,13 @@ Depends:
 Imports:
     rlang,
     grid,
+    grDevices,
     ggplot2 (>= 3.4.0),
     ggnewscale (>= 0.4.5)
 RoxygenNote: 7.3.2
 Suggests:
     rmarkdown,
     knitr,
-    dplyr,
-    scales,
-    tidyr,
     testthat (>= 3.0.0),
     vdiffr,
     gganimate

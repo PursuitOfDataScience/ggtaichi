@@ -55,7 +55,7 @@ A ggplot2 layer drawing one fish per cell.
 interlocking fish of a taichi symbol per `(x, y)` cell. They are the
 building blocks that [geom_taichi()] assembles (together with two fill
 scales and a [ggnewscale::new_scale_fill()] break); use them directly when
-you want full control — e.g. to bring your own fill scale for a single
+you want full control --- e.g. to bring your own fill scale for a single
 fish, to stack scales differently, or to draw only one source.
 }
 \details{

@@ -11,10 +11,12 @@
 ^r-lib$
 ^r-lib-43$
 ^next_release\.md$
+^features\.md$
 ^ggtaichi\.Rcheck$
 ^ggtaichi_.*\.tar\.gz$
 ^tmp_lib$
-^Rplots\.pdf$
+Rplots\.pdf$
 ^data-raw$
 ^vignettes/articles$
 ^\.claude$
+\.new\.svg$

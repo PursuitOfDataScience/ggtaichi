@@ -1,17 +1,28 @@
 # Visual-regression snapshots with vdiffr.
 #
-# These snapshots guard against silent rendering regressions, especially once
-# rotation and eyes land.  They are skipped when vdiffr is not installed.
+# These snapshots guard against silent rendering regressions in the glyph
+# geometry, the eyes and the rotation.  They are skipped when vdiffr is not
+# installed.
 #
-# They are also skipped on CI: vdiffr SVGs are sensitive to the svglite/
-# systemfonts versions and the platform's font stack, so a single committed
-# reference cannot match every runner in the CI matrix (Linux/macOS/Windows x
-# several R versions) and drifts whenever those upstream renderers update.
+# They are also skipped on CRAN and on CI, because a single committed reference
+# SVG cannot match every rendering stack.  Two things drift independently of
+# ggtaichi: text metrics (the svglite / systemfonts versions and the platform's
+# font stack shift every label by a fraction of a point, which moves the panel),
+# and the continuous legend colourbar, which `guide_colourbar()` emits as an
+# embedded base64 PNG that different R graphics engines encode differently --
+# under R 4.3.2 six of these seven snapshots differ from the R >= 4.4 references
+# by nothing but those raster bytes.  The references here were generated with
+# R 4.4.1, ggplot2 4.0.3 and vdiffr 1.0.9; regenerate them on that stack (or
+# whatever the current reference is) rather than on an older R.
+#
 # Run them locally (`devtools::test()`) to review visual changes; the package
 # logic is covered by the non-visual tests.
 
 skip_if_not_installed("vdiffr")
 testthat::skip_on_ci()
+# vdiffr already passes cran = FALSE to expect_snapshot_file(); this makes the
+# same guarantee explicit and independent of that default.
+testthat::skip_on_cran()
 
 library(ggplot2)
 library(ggtaichi)

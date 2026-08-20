@@ -42,7 +42,7 @@ and shrinking every glyph, we can turn it into an **animation frame**.  Each
 frame is then a clean `category` x `state` grid of large, readable taichi.
 
 This vignette shows how to combine `geom_taichi()` with
-[gganimate](https://gganimate.org).  `gganimate` is a *Suggested* dependency;
+[gganimate](https://gganimate.com).  `gganimate` is a *Suggested* dependency;
 install it with `install.packages("gganimate")` if you have not already.
 
 ```r
@@ -69,7 +69,7 @@ per-fish fills intact in every frame.)
 Use `transition_states()` when the frame variable is discrete (e.g. week
 number), or `transition_time()` when it is a continuous time.  Both drive the
 underlying fish layers.  The bundled `states_tg` data is a perfect showcase:
-instead of squeezing its 30 weeks onto the x-axis, keep a `category` x
+instead of squeezing its 31 weeks onto the x-axis, keep a `category` x
 `state` grid of large glyphs and let the weeks play out as frames.  Because
 the fills are continuous, `tweenr` interpolates the values smoothly between
 consecutive weeks.

@@ -150,7 +150,7 @@ ggplot(quad, aes(x, y)) +
 
 `angle` rotates each glyph by a constant or by a column, so orientation
 can encode a directional or temporal variable – and, combined with
-[gganimate](https://gganimate.org), produces the iconic spinning taichi
+[gganimate](https://gganimate.com), produces the iconic spinning taichi
 (see `vignette("animations")`).
 
 ``` r

@@ -33,11 +33,14 @@ geom_taichi(
 )
 }
 \arguments{
-\item{yin}{The unquoted column name (or a string naming a column) for the
-yin (dark) fish of the taichi symbol.}
+\item{yin}{The unquoted column name (or a literal string naming a column)
+for the yin (dark) fish of the taichi symbol. To pass a name held in a
+variable, use \code{.data[[nm]]} or \code{!!rlang::sym(nm)} --- a bare
+variable would be mapped as a constant fill, exactly as it would be inside
+\code{\link[ggplot2]{aes}()}.}
 
-\item{yang}{The unquoted column name (or a string naming a column) for the
-yang (light) fish of the taichi symbol.}
+\item{yang}{The unquoted column name (or a literal string naming a column)
+for the yang (light) fish of the taichi symbol, as \code{yin}.}
 
 \item{yin_name}{The label name (in quotes) for the legend of the yin
 rendering. Default is \code{NULL} (uses the column name).}
@@ -55,13 +58,17 @@ for factor/character data. Ignored if \code{yang_scale} is provided.}
 
 \item{yin_scale}{An optional fill scale for the yin fish: either a ready
 scale object or a scale constructor function (e.g.
-\code{ggplot2::scale_fill_viridis_d}). Overrides auto-detection.}
+\code{ggplot2::scale_fill_viridis_d}). Overrides auto-detection. It must
+govern a \emph{fill} aesthetic; a scale for another aesthetic (say
+\code{scale_colour_viridis_c}) is rejected with an error rather than
+quietly leaving the fish on the default gradient.}
 
 \item{yang_scale}{An optional fill scale for the yang fish, as
 \code{yin_scale}.}
 
 \item{angle}{Rotation of each glyph in degrees, counter-clockwise: either a
-single number or an unquoted column name (one angle per cell).}
+single number or an unquoted column name (one angle per cell). A mapped
+column must be numeric.}
 
 \item{eyes}{Logical. If \code{TRUE}, draws the classic taichi eyes (dots),
 each centred in its fish's head. Default \code{FALSE}, preserving the
@@ -77,8 +84,8 @@ colour strings.}
 
 \item{shared_limits}{If \code{TRUE} and both sources are of the same type
 (both continuous, or both discrete), the two auto-built fill scales share
-common limits — the union range (or union of levels) of \code{yin} and
-\code{yang} — so equal values read as equal ink. Explicit \code{limits}
+common limits --- the union range (or union of levels) of \code{yin} and
+\code{yang} --- so equal values read as equal ink. Explicit \code{limits}
 passed through \code{...} take precedence. Default \code{FALSE}.}
 
 \item{shared_legend}{If \code{TRUE}, treats the two sources as directly
@@ -90,25 +97,39 @@ dropped). Unless \code{yin_name} is supplied, the legend is titled
 
 \item{width, height}{Width and height of each cell. Typically omitted.}
 
-\item{alpha}{Alpha transparency for the fish fills.}
+\item{alpha}{Alpha transparency for the fish fills. A single value for the
+whole layer (see the Styling section).}
 
 \item{na.rm}{If \code{TRUE}, silently removes rows with missing values.}
 
-\item{colour}{Outline colour of the fish.}
+\item{colour}{Outline colour of the fish. A single value for the whole
+layer (see the Styling section).}
 
 \item{linewidth}{Outline width of the fish (in mm). Replaces the deprecated
-\code{size} aesthetic of ggtaichi 0.1.0.}
+\code{size} aesthetic of ggtaichi 0.1.0. A single value for the whole
+layer (see the Styling section).}
 
-\item{linetype}{Outline linetype of the fish.}
+\item{linetype}{Outline linetype of the fish. A single value for the whole
+layer (see the Styling section).}
 
 \item{show.legend}{Logical. Should the layer be included in the legend?}
 
 \item{...}{Additional arguments passed to \emph{both} auto-built fill
-scales (e.g., shared \code{limits} or \code{na.value}). For per-fish
-scale options, supply \code{yin_scale} / \code{yang_scale} instead.}
+scales (e.g., shared \code{limits} or \code{na.value}). Because they go
+to both, an argument that suits only one kind of scale will be rejected by
+the other when \code{yin} and \code{yang} are of different types --- for
+instance a numeric \code{limits} draws ggplot2's "Continuous limits
+supplied to discrete scale" warning from the discrete fish. For per-fish
+scale options, supply \code{yin_scale} / \code{yang_scale} instead. The
+scale arguments \code{geom_taichi()} fills in itself --- \code{name},
+\code{values} and \code{colors} / \code{colours} --- are not accepted
+here; use \code{yin_name} / \code{yang_name} and \code{yin_colors} /
+\code{yang_colors}.}
 }
 \value{
-A taichi diagram comparing two data sources.
+A \code{ggtaichi_plot} object: the two fish layers plus the fill
+  scales they need, ready to be added to a \code{\link[ggplot2]{ggplot}}
+  with \code{+}. It is not a plot on its own.
 }
 \description{
 The taichi geom turns each cell of a heatmap-like grid into a taichi
@@ -133,6 +154,13 @@ the palest end of the ramp so that no category is invisible on a white
 panel; an explicitly supplied color vector is used as-is. Supply
 \code{yin_scale} / \code{yang_scale} to override the automatic choice
 entirely.
+
+Because the choice is made when the layer is added, replacing the plot's
+data afterwards keeps the scales picked for the original data. Swapping in
+data of the same types is fine; if the new \code{yin} / \code{yang} columns
+are of the \emph{other} kind, ggplot2 reports a "Discrete value supplied to
+a continuous scale" (or the reverse) at draw time --- rebuild the plot rather
+than substituting its data.
 }
 
 \section{Eyes}{
@@ -142,9 +170,31 @@ fish's head: the yin eye in the top bulb, the yang eye in the bottom bulb.
 The size and colour arguments accept either a constant or an (unquoted)
 data column, so the eyes can encode up to two further variables. A mapped
 eye-size column is rescaled to radii between 0.05 and 0.3 of the glyph
-radius, unless all its values already lie in \code{(0, 0.5]}, in which case
-they are used directly as radius proportions. Cells whose eye size is
-\code{NA} or \code{0} are drawn without an eye.
+radius, unless all its non-zero values already lie in \code{(0, 0.5]}, in
+which case they are used directly as radius proportions. Cells whose eye
+size is \code{NA} or \code{0} are drawn without an eye, so a column may
+mix proportions with zeros to suppress individual eyes. A column whose
+values are all equal gets the midpoint radius, 0.175.
+}
+
+\section{Styling}{
+
+\code{alpha}, \code{colour}, \code{linewidth} and \code{linetype} are
+layer-wide constants here. Each has a concrete default, so
+\code{geom_taichi()} always passes it to both fish layers as a parameter,
+and a parameter takes precedence over an inherited mapping: a plot-level
+\code{aes(linewidth = ...)} (or \code{alpha}, \code{colour},
+\code{linetype}) has no effect on the glyphs. To drive one of those from a
+column, build the layers yourself with \code{\link{geom_yin_fish}()} /
+\code{\link{geom_yang_fish}()}, which take all four as ordinary
+aesthetics.
+
+\code{width} and \code{height} behave differently, because they default to
+\code{NULL} and are forwarded only when you actually supply them: a
+plot-level \code{aes(width = ...)} \emph{does} size the cells per row. So
+the data-driven channels of \code{geom_taichi()} are \code{yin},
+\code{yang}, \code{angle}, the two eyes, and \code{width} / \code{height}
+via \code{\link[ggplot2]{aes}()}.
 }
 
 \section{Missing values}{

@@ -31,6 +31,26 @@ test_that("BUG-1: width and height params are accepted", {
 # BUG-2: linewidth aesthetic (replaces deprecated size)
 # ------------------------------------------------------------------
 
+test_that("mapped width/height size the cells, unlike the styling constants", {
+  d <- data.frame(x = 1:3, y = 1, yin = 1:3, yang = 3:1, w = c(0.2, 0.5, 0.9))
+  # width/height default to NULL, so they are not forwarded as params and an
+  # inherited mapping survives
+  b <- ggplot_build(ggplot(d, aes(x, y, width = w)) +
+    geom_taichi(yin = yin, yang = yang))
+  expect_equal(b$data[[1]]$xmax - b$data[[1]]$xmin, c(0.2, 0.5, 0.9))
+  bh <- ggplot_build(ggplot(d, aes(x, y, height = w)) +
+    geom_taichi(yin = yin, yang = yang))
+  expect_equal(bh$data[[1]]$ymax - bh$data[[1]]$ymin, c(0.2, 0.5, 0.9))
+  # an explicit argument still wins over the mapping
+  bp <- ggplot_build(ggplot(d, aes(x, y, width = w)) +
+    geom_taichi(yin = yin, yang = yang, width = 0.5))
+  expect_equal(bp$data[[1]]$xmax - bp$data[[1]]$xmin, rep(0.5, 3))
+  # whereas the styling constants ignore a mapping entirely
+  bs <- ggplot_build(ggplot(d, aes(x, y, linewidth = w)) +
+    geom_taichi(yin = yin, yang = yang))
+  expect_true(all(bs$data[[1]]$linewidth == 0.1))
+})
+
 test_that("BUG-2: linewidth is used instead of size", {
   d <- data.frame(x = 1:3, y = 1:3, yin = 1:3, yang = 4:6)
   p <- ggplot(d, aes(x, y)) +
@@ -89,6 +109,29 @@ test_that("BUG-3: a yin/yang column absent from the data errors at + time", {
 
 test_that("eyes flag is validated", {
   expect_error(geom_taichi(yin = a, yang = b, eyes = "yes"), "TRUE or FALSE")
+})
+
+test_that("shared_limits and shared_legend flags are validated", {
+  expect_error(geom_taichi(yin = a, yang = b, shared_limits = "yes"),
+               "`shared_limits` must be TRUE or FALSE")
+  expect_error(geom_taichi(yin = a, yang = b, shared_legend = "yes"),
+               "`shared_legend` must be TRUE or FALSE")
+  # NA and length > 1 are not booleans either
+  expect_error(geom_taichi(yin = a, yang = b, shared_limits = NA),
+               "TRUE or FALSE")
+  expect_error(geom_taichi(yin = a, yang = b, shared_legend = c(TRUE, FALSE)),
+               "TRUE or FALSE")
+})
+
+test_that("a constant eye size must be a single non-missing number", {
+  expect_error(geom_taichi(yin = a, yang = b, yin_eye_size = NA),
+               "`yin_eye_size` must be a single number or a data column")
+  expect_error(geom_taichi(yin = a, yang = b, yang_eye_size = NA),
+               "`yang_eye_size` must be a single number or a data column")
+  expect_error(geom_taichi(yin = a, yang = b, yin_eye_size = "big"),
+               "single number or a data column")
+  # a mapped column is fine, and so is an ordinary constant
+  expect_error(geom_taichi(yin = a, yang = b, yin_eye_size = 0.2), NA)
 })
 
 # ------------------------------------------------------------------
@@ -205,6 +248,41 @@ test_that("custom yin_scale / yang_scale (function) are accepted", {
   expect_silent(ggplot_build(p))
 })
 
+test_that("yin_scale / yang_scale must be a scale object or a constructor", {
+  expect_error(geom_taichi(yin = a, yang = b, yin_scale = "viridis"),
+               "must be a fill scale object")
+  expect_error(geom_taichi(yin = a, yang = b, yang_scale = 42),
+               "must be a fill scale object")
+  expect_error(geom_taichi(yin = a, yang = b, yin_scale = list()),
+               "must be a fill scale object")
+})
+
+test_that("a custom scale for another aesthetic is rejected, not silently ignored", {
+  d <- data.frame(x = 1:3, y = 1:3, yin = 1:3, yang = 4:6)
+  # scale_colour_* would attach to `colour` and leave the fish on ggplot2's
+  # default fill gradient, i.e. the wrong plot with no error
+  expect_error(
+    ggplot_build(ggplot(d, aes(x, y)) +
+      geom_taichi(yin = yin, yang = yang, yin_scale = scale_colour_viridis_c)),
+    "must be a scale for the `fill` aesthetic"
+  )
+  expect_error(
+    ggplot_build(ggplot(d, aes(x, y)) +
+      geom_taichi(yin = yin, yang = yang,
+                  yang_scale = scale_colour_gradient(low = "white", high = "black"))),
+    "must be a scale for the `fill` aesthetic"
+  )
+})
+
+test_that("non-numeric cell width / height error clearly", {
+  d <- data.frame(x = 1:3, y = 1:3, yin = 1:3, yang = 4:6)
+  expect_error(
+    ggplot_build(ggplot(d, aes(x, y)) +
+      geom_taichi(yin = yin, yang = yang, width = "wide")),
+    "must be numeric"
+  )
+})
+
 test_that("custom yin_scale / yang_scale (Scale object) are accepted", {
   d <- data.frame(x = 1:3, y = 1:3, yin = 1:3, yang = 4:6)
   my_scale <- scale_fill_gradient(low = "white", high = "black")
@@ -311,6 +389,50 @@ test_that("each eye sits in its own fish's head (yin top, yang bottom)", {
   expect_gt(ys[fills == "white"], ys[fills == "black"])
 })
 
+test_that("a positive angle rotates counter-clockwise in the drawn scene", {
+  # makeContent() rotates the unit fish itself, so this is the only path that
+  # exercises the rotation the plots actually use -- taichi_fish(angle =) is a
+  # separate implementation used outside drawing.
+  d <- data.frame(x = 1, y = 1, yin = 1, yang = 2)
+  eye_pos <- function(angle) {
+    p <- ggplot(d, aes(x, y)) +
+      geom_taichi(yin = yin, yang = yang, eyes = TRUE, angle = angle) +
+      coord_fixed()
+    circles <- collect_grobs(forced_scene(p), "circle")
+    fills <- vapply(circles, function(ci) as.character(ci$gp$fill)[1], character(1))
+    list(
+      white = c(x = as.numeric(circles[[which(fills == "white")]]$x),
+                y = as.numeric(circles[[which(fills == "white")]]$y)),
+      black = c(x = as.numeric(circles[[which(fills == "black")]]$x),
+                y = as.numeric(circles[[which(fills == "black")]]$y))
+    )
+  }
+  at0 <- eye_pos(0)
+  # at rest the yin (white) eye is the top bulb, the yang (black) eye the bottom
+  expect_gt(at0$white[["y"]], at0$black[["y"]])
+
+  at90 <- eye_pos(90)
+  # a counter-clockwise quarter turn carries the top bulb to the LEFT; a
+  # clockwise one would carry it to the right
+  expect_lt(at90$white[["x"]], at90$black[["x"]])
+  # and both eyes end up at about the same height
+  expect_equal(at90$white[["y"]], at90$black[["y"]], tolerance = 1e-6)
+
+  # The fish bodies are rotated by a different block of makeContent() than the
+  # eyes, so pin their direction too. The yin outline starts at the top of the
+  # circle, which a counter-clockwise quarter turn carries to the left.
+  first_vertex <- function(angle) {
+    p <- ggplot(d, aes(x, y)) +
+      geom_taichi(yin = yin, yang = yang, angle = angle) + coord_fixed()
+    pg <- collect_grobs(forced_scene(p), "polygon")[[1]]
+    c(x = as.numeric(pg$x)[1], y = as.numeric(pg$y)[1])
+  }
+  v0 <- first_vertex(0)
+  v90 <- first_vertex(90)
+  expect_lt(v90[["x"]], v0[["x"]])
+  expect_lt(v90[["y"]], v0[["y"]])
+})
+
 test_that("mapped eye sizes are rescaled to [0.05, 0.3]", {
   d <- data.frame(x = 1:3, y = 1:3, yin = 1:3, yang = 4:6, sz = c(10, 20, 30))
   p <- ggplot(d, aes(x, y)) +
@@ -327,6 +449,23 @@ test_that("mapped eye sizes already in (0, 0.5] pass through unchanged", {
     geom_taichi(yin = yin, yang = yang, eyes = TRUE, yin_eye_size = pz)
   b <- ggplot_build(p)
   expect_equal(b$data[[1]]$eye_size, c(0.1, 0.2, 0.3))
+})
+
+test_that("a zero does not stop the rest of the column passing through", {
+  # 0 means "no eye here", so it is a marker, not a measurement: it must not
+  # push an otherwise-proportional column through the [0.05, 0.3] rescale
+  expect_equal(ggtaichi:::rescale_eye_size(c(0, 0.2, 0.4)), c(0, 0.2, 0.4))
+  expect_equal(ggtaichi:::rescale_eye_size(c(0.2, 0, 0.5)), c(0.2, 0, 0.5))
+  # ... while genuinely out-of-range columns still rescale (over their full
+  # range, zero included) and zeros still suppress the eye
+  expect_equal(ggtaichi:::rescale_eye_size(c(0, 10, 20)), c(0, 0.175, 0.3))
+  # an all-zero column stays all-zero (no eyes at all)
+  expect_equal(ggtaichi:::rescale_eye_size(c(0, 0, 0)), c(0, 0, 0))
+  # and it reaches the built layer data intact
+  d <- data.frame(x = 1:3, y = 1:3, yin = 1:3, yang = 4:6, sz = c(0, 0.2, 0.4))
+  b <- ggplot_build(ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, eyes = TRUE, yin_eye_size = sz))
+  expect_equal(b$data[[1]]$eye_size, c(0, 0.2, 0.4))
 })
 
 test_that("NA eye sizes skip the eye for that cell", {
@@ -358,6 +497,42 @@ test_that("non-numeric mapped eye sizes error clearly", {
 # Rotation renders different output (§3a)
 # ------------------------------------------------------------------
 
+test_that("glyphs are sized by the SHORTER cell side, so they fit non-square cells", {
+  # Every visual snapshot uses coord_fixed() on a square grid, where the two
+  # cell sides are equal, pmin == pmax, and width/height are interchangeable.
+  # These checks use cells that are deliberately not square.
+
+  # 1. the per-cell box follows width on x and height on y, not the other way
+  d2 <- data.frame(x = 1:2, y = 1:2, yin = 1:2, yang = 2:1)
+  b <- ggplot_build(ggplot(d2, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, width = 0.9, height = 0.4))
+  expect_equal(b$data[[1]]$xmax - b$data[[1]]$xmin, rep(0.9, 2))
+  expect_equal(b$data[[1]]$ymax - b$data[[1]]$ymin, rep(0.4, 2))
+
+  # 2. on a wide, short device each cell is far wider than it is tall, so the
+  #    radius must come from the height. Taking the longer side would make each
+  #    glyph about four times its cell's height and swamp its neighbours.
+  g <- data.frame(x = rep(1:3, each = 3), y = rep(1:3, 3), yin = 1:9, yang = 9:1)
+  path <- tempfile(fileext = ".pdf")
+  grDevices::pdf(path, width = 12, height = 3)
+  on.exit({
+    grDevices::dev.off()
+    unlink(path)
+  }, add = TRUE)
+  print(ggplot(g, aes(x, y)) + geom_taichi(yin = yin, yang = yang))
+  grid::grid.force()
+  pg <- collect_grobs(grid::grid.grab(), "polygon")[[1]]
+  ys <- as.numeric(pg$y)
+  ids <- pg$id
+  # vertical extent of each cell's fish, and the pitch between cell rows
+  extent <- vapply(split(ys, ids), function(v) diff(range(v)), numeric(1))
+  centres <- vapply(split(ys, ids), mean, numeric(1))
+  rows <- sort(unique(round(centres, 6)))
+  pitch <- min(diff(rows))
+  expect_length(rows, 3L)
+  expect_true(all(extent <= pitch * 1.02))
+})
+
 test_that("rotation changes the rendered polygon coordinates", {
   d <- data.frame(x = 1, y = 1, yin = 1, yang = 2)
   p0 <- ggplot(d, aes(x, y)) + geom_taichi(yin = yin, yang = yang, angle = 0)
@@ -373,6 +548,51 @@ test_that("NA angles fall back to no rotation instead of failing", {
   d <- data.frame(x = 1:3, y = 1:3, yin = 1:3, yang = 4:6, rot = c(0, NA, 90))
   p <- ggplot(d, aes(x, y)) + geom_taichi(yin = yin, yang = yang, angle = rot)
   expect_silent(ggplotGrob(p))
+})
+
+test_that("non-finite angles and eye sizes degrade quietly, not into NaN", {
+  # is.na() catches NA and NaN but not +-Inf, so an infinite angle used to reach
+  # cos()/sin() and turn every vertex of that glyph into NaN, warning
+  # "NaNs produced" and drawing nothing.
+  d <- data.frame(x = 1, y = 1, yin = 1, yang = 2)
+  for (bad in c(Inf, -Inf, NaN, NA_real_)) {
+    p <- ggplot(transform(d, rot = bad), aes(x, y)) +
+      geom_taichi(yin = yin, yang = yang, angle = rot)
+    expect_warning(forced_scene(p), regexp = NA)
+    # the glyph is still drawn, unrotated
+    expect_equal(count_polygons(forced_scene(p)), 2L)
+  }
+
+  # an infinite eye size is not a size: it must mean "no eye", like NA, rather
+  # than a circle of infinite radius
+  d3 <- data.frame(x = 1:3, y = 1, yin = 1:3, yang = 3:1, sz = c(0.2, Inf, 0.4))
+  p2 <- ggplot(d3, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, eyes = TRUE, yin_eye_size = sz)
+  # 2 yin eyes (the Inf one skipped) + 3 yang eyes
+  expect_equal(count_circles(forced_scene(p2)), 5L)
+  expect_warning(forced_scene(p2), regexp = NA)
+})
+
+test_that("non-numeric mapped angles error clearly instead of at draw time", {
+  d <- data.frame(x = 1:3, y = 1:3, yin = 1:3, yang = 4:6,
+                  chr = c("a", "b", "c"), fct = factor(c("a", "b", "c")))
+  expect_error(
+    ggplot_build(ggplot(d, aes(x, y)) +
+                   geom_taichi(yin = yin, yang = yang, angle = chr)),
+    "Rotation angles must be numeric"
+  )
+  # a factor used to silently draw unrotated glyphs with base arithmetic warnings
+  expect_error(
+    ggplot_build(ggplot(d, aes(x, y)) +
+                   geom_taichi(yin = yin, yang = yang, angle = fct)),
+    "Rotation angles must be numeric"
+  )
+  # the same guard protects the exported fish geoms
+  expect_error(
+    ggplot_build(ggplot(d, aes(x, y)) +
+                   geom_yin_fish(aes(fill = yin, angle = chr))),
+    "Rotation angles must be numeric"
+  )
 })
 
 # ------------------------------------------------------------------
@@ -495,6 +715,47 @@ test_that("explicit limits in ... beat shared_limits", {
   fill_scales <- scales[sapply(scales, function(s) grepl("^fill", s$aesthetics[1]))]
   expect_true(all(vapply(fill_scales, function(s) identical(s$limits, c(0, 100)),
                          logical(1))))
+})
+
+test_that("scale options ggtaichi sets itself win over the same name in ...", {
+  d <- data.frame(x = 1:3, y = 1:3, yin = 1:3, yang = 4:6)
+  # `guide` in ... used to collide with the yang guide shared_legend drops
+  p <- ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, shared_legend = TRUE, guide = "colourbar")
+  b <- expect_silent(ggplot_build(p))
+  scales <- b$plot$scales$scales
+  fill_scales <- scales[sapply(scales, function(s) grepl("^fill", s$aesthetics[1]))]
+  guides <- lapply(fill_scales, function(s) s$guide)
+  # the yang guide is still dropped, and the yin guide is the user's colourbar
+  expect_true(any(vapply(guides, identical, logical(1), y = "none")))
+  expect_true(any(vapply(guides, function(g) !identical(g, "none"), logical(1))))
+})
+
+test_that("... arguments geom_taichi() supplies itself error informatively", {
+  expect_error(geom_taichi(yin = a, yang = b, name = "oops"), "yin_name")
+  expect_error(geom_taichi(yin = a, yang = b, colors = c("red", "blue")),
+               "yin_colors")
+  expect_error(geom_taichi(yin = a, yang = b, values = c("red", "blue")),
+               "yin_colors")
+})
+
+test_that("a discrete palette is sized against explicit limits, not the data", {
+  d <- data.frame(x = 1:3, y = 1:3,
+                  yin = factor(c("a", "b", "c")),
+                  yang = factor(c("p", "q", "r")))
+  # limits wider than the levels present used to abort with
+  # "Insufficient values in manual scale"
+  p <- ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, limits = c("a", "b", "c", "d"))
+  b <- expect_silent(ggplot_build(p))
+  expect_length(unique(b$data[[1]]$fill), 3L)
+  # narrower limits still work: the unmatched level falls to na.value
+  expect_silent(ggplot_build(ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, limits = c("a", "b"))))
+  # a function-valued `limits` says nothing about the level count, so the
+  # palette must still be sized from the data
+  expect_silent(ggplot_build(ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, limits = rev)))
 })
 
 # ------------------------------------------------------------------

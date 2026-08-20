@@ -58,7 +58,7 @@ ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
 
 ## Classic eyes, data-driven eyes
 
-```{r eyes, fig.height = 4.2, fig.alt="Left, a row of classic taichi symbols with white and black eyes; right, the same symbols with eye sizes driven by data."}
+```{r eyes, fig.height = 4.2, fig.alt="A row of four taichi symbols whose white yin eyes grow and shrink with a data column while the black yang eyes stay a constant size."}
 d <- data.frame(x = 1:4, y = 1, yin = c(2, 4, 6, 8), yang = c(8, 6, 4, 2),
                 pull = c(30, 5, 18, 45))
 
@@ -107,14 +107,14 @@ ggplot(d9, aes(x, y)) +
 Dense grids stop being symbols you read one by one and become a texture of
 two interleaved fields — still useful for spotting bands and regime changes:
 
-```{r texture, fig.height = 7, fig.alt="A dense 30-week by 9-category grid of small taichi diagrams for four states, read as an overall texture rather than glyph by glyph."}
+```{r texture, fig.height = 7, fig.alt="A dense 31-week by 9-category grid of small taichi diagrams for two states, read as an overall texture rather than glyph by glyph."}
 ggplot(subset(states_tg, state %in% c("New York", "Texas")),
        aes(x = week, y = category)) +
   geom_taichi(yin = Twitter, yang = Google) +
   facet_wrap(~ state, ncol = 1) +
   remove_padding() +
   theme_taichi() +
-  ggtitle("30 weeks as texture")
+  ggtitle("31 weeks as texture")
 ```
 
 ## Bring your own scales

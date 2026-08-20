@@ -10,7 +10,9 @@ A data frame with 270 rows and 6 columns:
   \item{msa}{Metropolitan statistical area (Pittsburgh only).}
   \item{week}{week 1 to week 30.}
   \item{week_start}{The Monday date of the week started.}
-  \item{category}{9 Covid-related categories in total.}
+  \item{category}{One of 9 COVID-related categories: Covid, General Virus,
+  Masks, Sanitizing, Social Distancing, Symptoms, Tests, Treatment,
+  Working.}
   \item{Twitter}{weekly tweets percentage (\%) in the MSA falling into each
   category.}
   \item{Google}{weekly Google search percentage (\%) in the MSA falling into
@@ -26,12 +28,12 @@ processed by the author of the package.
 pitts_tg
 }
 \description{
-A data set containing the 30-week incidence rates of COVID related categories
-from week 1 starting from June 1, 2020 to week 30
-that ended in the last Sunday of the year in Pittsburgh Metropolitan
-Statistical Area (MSA). The data columns are introduced below. One quick note
-about the columns of the data set: \code{week_start} as a column is present
-in the data set for illustration purposes, reminding users what \code{week}
-column is. In other words, it does not participate any visualization.
+A data set containing the 30-week incidence rates of COVID-related
+categories in the Pittsburgh Metropolitan Statistical Area (MSA), from
+week 1 beginning June 1, 2020 to week 30, which ended on the last Sunday of
+the year. The data columns are introduced below. One quick note about the
+columns of the data set: \code{week_start} is present for illustration
+purposes, as a reminder of what the \code{week} column counts. In other
+words, it does not participate in any visualization.
 }
 \keyword{datasets}
