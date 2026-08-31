@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ggtaichi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,7 +32,136 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="drawing-the-glyph">Drawing the glyph<a class="anchor" aria-label="anchor" href="#drawing-the-glyph"></a></h2>
+
+      <div class="section-desc"><p>The main layer, and the two fish it is assembled from.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="geom_taichi.html">geom_taichi()</a></code>
+
+        </dt>
+        <dd>Taichi</dd>
+
+        <dt>
+
+          <code><a href="geom_yin_fish.html">geom_yin_fish()</a></code> <code><a href="geom_yin_fish.html">geom_yang_fish()</a></code>
+
+        </dt>
+        <dd>The individual taichi fish layers</dd>
+
+        <dt>
+
+          <code><a href="ggtaichi-ggproto.html">ggtaichi-ggproto</a></code> <code><a href="ggtaichi-ggproto.html">GeomYinFish</a></code> <code><a href="ggtaichi-ggproto.html">GeomYangFish</a></code>
+
+        </dt>
+        <dd>ggtaichi's ggproto classes</dd>
+      </dl></div><div class="section level2">
+      <h2 id="the-relationship-between-the-two-sources">The relationship between the two sources<a class="anchor" aria-label="anchor" href="#the-relationship-between-the-two-sources"></a></h2>
+
+      <div class="section-desc"><p>A taichi grid shows two sources in one position, which answers “which is bigger here?” and not “by how much?”. These compute the second question’s answer – inside the glyph, as a table, or as a heatmap of its own.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="taichi_summary.html">taichi_summary()</a></code>
+
+        </dt>
+        <dd>Summarise the two sources cell by cell</dd>
+
+        <dt>
+
+          <code><a href="geom_taichi_diff.html">geom_taichi_diff()</a></code>
+
+        </dt>
+        <dd>The difference between the two sources, as a heatmap</dd>
+      </dl></div><div class="section level2">
+      <h2 id="palettes">Palettes<a class="anchor" aria-label="anchor" href="#palettes"></a></h2>
+
+      <div class="section-desc"><p>The two fill ramps are compared against each other, so pairing them is a correctness question rather than a matter of taste. These build a matched pair and measure any pair.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="taichi_palette_pair.html">taichi_palette_pair()</a></code>
+
+        </dt>
+        <dd>Build a luminance-matched pair of sequential palettes</dd>
+
+        <dt>
+
+          <code><a href="taichi_palette.html">taichi_palette()</a></code>
+
+        </dt>
+        <dd>Ready-made palette pairs</dd>
+
+        <dt>
+
+          <code><a href="taichi_check_palette.html">taichi_check_palette()</a></code>
+
+        </dt>
+        <dd>Measure whether two fill ramps are a fair pair</dd>
+      </dl></div><div class="section level2">
+      <h2 id="scales">Scales<a class="anchor" aria-label="anchor" href="#scales"></a></h2>
+
+      <div class="section-desc"><p>Ready fill scales in the package’s conventions, including the binned ones worth reaching for on a dense grid.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="scale_taichi.html">scale_taichi_yin_c()</a></code> <code><a href="scale_taichi.html">scale_taichi_yang_c()</a></code> <code><a href="scale_taichi.html">scale_taichi_yin_d()</a></code> <code><a href="scale_taichi.html">scale_taichi_yang_d()</a></code> <code><a href="scale_taichi.html">scale_taichi_yin_binned()</a></code> <code><a href="scale_taichi.html">scale_taichi_yang_binned()</a></code> <code><a href="scale_taichi.html">scale_taichi_yin_viridis_c()</a></code> <code><a href="scale_taichi.html">scale_taichi_yang_viridis_c()</a></code> <code><a href="scale_taichi.html">scale_taichi_yin_viridis_d()</a></code> <code><a href="scale_taichi.html">scale_taichi_yang_viridis_d()</a></code>
+
+        </dt>
+        <dd>Fill scales for the taichi fish</dd>
+      </dl></div><div class="section level2">
+      <h2 id="styling">Styling<a class="anchor" aria-label="anchor" href="#styling"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="theme_taichi.html">theme_taichi()</a></code>
+
+        </dt>
+        <dd>Plot Themes</dd>
+
+        <dt>
+
+          <code><a href="remove_padding.html">remove_padding()</a></code>
+
+        </dt>
+        <dd>Remove ggplot2 default padding</dd>
+
+        <dt>
+
+          <code><a href="draw_key_taichi.html">draw_key_taichi()</a></code>
+
+        </dt>
+        <dd>A taichi-shaped legend key</dd>
+      </dl></div><div class="section level2">
+      <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a></h2>
 
 
 
@@ -50,38 +179,10 @@
 
         <dt>
 
-          <code><a href="geom_taichi.html">geom_taichi()</a></code>
-
-        </dt>
-        <dd>Taichi</dd>
-
-        <dt>
-
-          <code><a href="geom_yin_fish.html">geom_yin_fish()</a></code> <code><a href="geom_yin_fish.html">geom_yang_fish()</a></code>
-
-        </dt>
-        <dd>The individual taichi fish layers</dd>
-
-        <dt>
-
-          <code><a href="pitts_emojis.html">pitts_emojis</a></code>
-
-        </dt>
-        <dd>Popular Emojis</dd>
-
-        <dt>
-
           <code><a href="pitts_tg.html">pitts_tg</a></code>
 
         </dt>
         <dd>Pittsburgh COVID-related Google &amp; Twitter incidence rates</dd>
-
-        <dt>
-
-          <code><a href="remove_padding.html">remove_padding()</a></code>
-
-        </dt>
-        <dd>Remove ggplot2 default padding</dd>
 
         <dt>
 
@@ -92,12 +193,29 @@
 
         <dt>
 
-          <code><a href="theme_taichi.html">theme_taichi()</a></code>
+          <code><a href="pitts_emojis.html">pitts_emojis</a></code>
 
         </dt>
-        <dd>Plot Themes</dd>
+        <dd>Popular Emojis</dd>
+      </dl></div><div class="section level2">
+      <h2 id="package">Package<a class="anchor" aria-label="anchor" href="#package"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="ggtaichi-package.html">ggtaichi</a></code> <code><a href="ggtaichi-package.html">ggtaichi-package</a></code>
+
+        </dt>
+        <dd>ggtaichi: Taichi diagrams for two data sources</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

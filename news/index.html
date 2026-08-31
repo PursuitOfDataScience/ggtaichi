@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ggtaichi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,7 +33,81 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.2.0" id="ggtaichi-020">ggtaichi 0.2.0<a class="anchor" aria-label="anchor" href="#ggtaichi-020"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.3.0" id="ggtaichi-030">ggtaichi 0.3.0<a class="anchor" aria-label="anchor" href="#ggtaichi-030"></a></h2>
+<p>This release closes the structural gap in the design and brings the package up to date with ggplot2 4.x. A taichi grid is a <em>superposition</em> comparison: it shows two sources in one position, which is what makes spatial patterns directly comparable, and which is also why it can say “which is bigger here?” but not “by how much?”. 0.3.0 answers the second question three ways — as a third channel of the glyph, as a companion heatmap, and as a table — and adds the two things a colour-encoded chart needs to be trustworthy: an interactive route to the exact values, and a way to check that its two colour ramps are a fair pair.</p>
+<p>Nothing about the default appearance changes.</p>
+<div class="section level3">
+<h3 id="explicit-encoding-the-relationship-not-just-the-two-levels-0-3-0">Explicit encoding: the relationship, not just the two levels<a class="anchor" aria-label="anchor" href="#explicit-encoding-the-relationship-not-just-the-two-levels-0-3-0"></a></h3>
+<ul><li>
+<strong><code>explicit =</code> computes a third channel</strong> from the two sources — <code>"difference"</code>, <code>"ratio"</code>, <code>"log_ratio"</code> or <code>"z"</code> — and <strong><code>explicit_channel =</code></strong> decides where it goes:
+<ul><li>
+<code>"eye_size"</code> (the default) puts the gap in the eyes, which already exist and are visually subordinate to the fills. Cells where the two sources agree exactly get no eye, so a plain glyph <em>means</em> agreement.</li>
+<li>
+<code>"angle"</code> puts it in the glyph’s tilt. Direction is read far more accurately than shading, so this is the most precise of the four: upright means the sources agree, and the lean shows which way and how far.</li>
+<li>
+<code>"border"</code> puts it in the outline width, and <code>"radius"</code> in the glyph’s size, scaled by area (radius proportional to the square root of the statistic) rather than by diameter. <code>explicit_range =</code> sets the output range. The statistic is rescaled across the whole layer, so facets stay comparable, and driving the same channel by hand as well is an error rather than a silent override.</li>
+</ul></li>
+<li>
+<strong><code><a href="../reference/geom_taichi_diff.html">geom_taichi_diff()</a></code></strong> draws the same statistic as a diverging heatmap, with limits symmetric about “the two sources agree”. Sometimes the right chart for “how much bigger?” is not a glyph, and the package would rather say so than insist.</li>
+<li>
+<strong><code><a href="../reference/taichi_summary.html">taichi_summary()</a></code></strong> returns the numbers per cell — both values, the difference, the ratio, the log ratio, the standardised difference, which source dominates, and the cell’s rank by the size of the gap.</li>
+<li>A ratio of a zero or negative value is <code>NA</code> with a warning, never <code>Inf</code>, in all three.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="interactivity-0-3-0">Interactivity<a class="anchor" aria-label="anchor" href="#interactivity-0-3-0"></a></h3>
+<ul><li>
+<strong><code>interactive = TRUE</code></strong> makes the fish and their eyes <a href="https://davidgohel.github.io/ggiraph/" class="external-link">ggiraph</a> grobs, so <code><a href="https://davidgohel.github.io/ggiraph/reference/girafe.html" class="external-link">ggiraph::girafe()</a></code> turns the plot into a widget. This matters more than convenience: fill is the least accurate channel there is, and hovering is how a colour-encoded chart supplies exact values without abandoning its encoding. The default tooltip carries both values, their difference and the cell’s coordinates.</li>
+<li>
+<strong><code>data_id_by =</code></strong> decides what a hover highlights: <code>"cell"</code> (both fish of one glyph, the default), <code>"fish"</code>, or <code>"source"</code> — which lights up every fish of one source at once, temporarily turning the superposition display into a single-source one. That is the one thing a static superposition cannot do.</li>
+<li>
+<code>tooltip</code>, <code>data_id</code> and <code>onclick</code> take a data column to override any of it.</li>
+<li>The static path is untouched: with <code>interactive = FALSE</code> the package does not load ggiraph at all, and the interactive geometry is identical to the static geometry. ggiraph is a Suggests-only dependency.</li>
+<li>plotly remains unsupported and will stay that way: <code>ggplotly()</code> cannot translate the custom grobs this package draws. The help page now says so.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="palettes-are-a-correctness-problem-and-now-they-are-measurable-0-3-0">Palettes are a correctness problem, and now they are measurable<a class="anchor" aria-label="anchor" href="#palettes-are-a-correctness-problem-and-now-they-are-measurable-0-3-0"></a></h3>
+<ul><li>
+<strong><code><a href="../reference/taichi_check_palette.html">taichi_check_palette()</a></code></strong> measures a pair of ramps: per-step luminance and chroma, the largest luminance mismatch, whether each ramp is monotone, and — with <strong>colorspace</strong> installed — how far apart the two stay under deuteranopia, protanopia and tritanopia, against a normal-vision baseline. Run on the package’s own defaults it returns <strong>FAIL</strong>: the grey yin ramp spans the full luminance range while the red yang ramp stops around L* 41, a mismatch of about 41 units, so equal values have never read as equal ink. That is documented rather than quietly fixed — see below.</li>
+<li>
+<strong><code><a href="../reference/taichi_palette_pair.html">taichi_palette_pair()</a></code></strong> builds a pair that differs only in hue, sharing one luminance and one chroma trajectory, so step for step the two fish carry the same visual weight.</li>
+<li>
+<strong><code>palette =</code></strong> on <code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> selects a ready-made pair: <code>"balanced"</code> (the recommended one), <code>"diverging"</code>, <code>"viridis_pair"</code>, <code>"brewer_pair"</code>, <code>"print_safe"</code> (a grey ramp and a hued ramp on the same luminance trajectory, so the figure survives greyscale printing), or <code>"default"</code>. <strong><code><a href="../reference/taichi_palette.html">taichi_palette()</a></code></strong> returns any of them for inspection.</li>
+<li>
+<strong>The defaults do not change.</strong> Every existing figure is unaffected. The honest fix is a different default, and that is a 1.0.0 decision with a prominent note, not something to slip into a minor release.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="fill-scales-including-binned-ones-0-3-0">Fill scales, including binned ones<a class="anchor" aria-label="anchor" href="#fill-scales-including-binned-ones-0-3-0"></a></h3>
+<ul><li>A family of ready fill scales: <code><a href="../reference/scale_taichi.html">scale_taichi_yin_c()</a></code> / <code><a href="../reference/scale_taichi.html">scale_taichi_yang_c()</a></code>, <code><a href="../reference/scale_taichi.html">scale_taichi_yin_d()</a></code> / <code><a href="../reference/scale_taichi.html">scale_taichi_yang_d()</a></code>, <code><a href="../reference/scale_taichi.html">scale_taichi_yin_binned()</a></code> / <code><a href="../reference/scale_taichi.html">scale_taichi_yang_binned()</a></code>, and <code><a href="../reference/scale_taichi.html">scale_taichi_yin_viridis_c()</a></code> / <code>_d()</code> with their yang counterparts. Pass them to <code>yin_scale</code> / <code>yang_scale</code>, or use them directly with the fish geoms.</li>
+<li>
+<strong>Binning is the cheapest accuracy win available on a dense grid</strong>, and the documentation now says so: matching a patch to one of five labelled bins is much closer to a categorical lookup than reading a position on a continuous luminance ramp.</li>
+<li>
+<strong><code>shared_limits</code> now composes with a supplied scale.</strong> Previously the limits ggtaichi computed were dropped as soon as anyone brought their own scale, so <code>shared_limits = TRUE</code> silently did nothing next to a binned or viridis scale. They are now pushed into it (a scale that sets its own limits still wins), which is what makes binning both fish against one set of breaks work. <code>shared_legend</code> likewise drops the duplicate yang guide from a supplied scale.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="ggplot2x-currency-0-3-0">ggplot2 4.x currency<a class="anchor" aria-label="anchor" href="#ggplot2x-currency-0-3-0"></a></h3>
+<ul><li>
+<strong>The geoms follow the theme.</strong> ggplot2 4.0 lets a theme set geom defaults through <code>theme(geom = element_geom(ink, paper, accent))</code>; ggtaichi’s fallbacks were hard-coded, so on a dark theme the fallback fish was nearly invisible and the two eyes were the wrong way round. Fill, outline colour, linewidth, linetype and both eye colours now read from the theme, resolving to exactly the previous values on any light theme. The eye-colour arguments default to <code>NULL</code>, meaning “ask the theme”. The ggplot2 floor stays at 3.4.0: the theme-aware defaults are installed at load time when the installed ggplot2 supports them, and the literal fallbacks are used otherwise. Raising the floor to 4.0.0 is a 1.0.0 decision.</li>
+<li>
+<strong><code><a href="../reference/draw_key_taichi.html">draw_key_taichi()</a></code></strong>: legend keys are now small taichi symbols with the layer’s own fish filled, rather than plain rectangles — and they grow eyes when the layer has them. <code>key_glyph = "rect"</code> restores the old keys, and <code>key_glyph</code> is a new argument of <code><a href="../reference/geom_taichi.html">geom_taichi()</a></code>, <code><a href="../reference/geom_yin_fish.html">geom_yin_fish()</a></code> and <code><a href="../reference/geom_yin_fish.html">geom_yang_fish()</a></code>. Keys only appear for discrete fills; a continuous fill still gets a colourbar.</li>
+<li>
+<strong><code>inst/CITATION</code></strong>, so <code>citation("ggtaichi")</code> gives a proper entry.</li>
+<li>New tests pin the things ggplot2’s S7 migration could quietly break: <code><a href="https://ggplot2.tidyverse.org/reference/update_ggplot.html" class="external-link">ggplot_add()</a></code> dispatch, the <code>+</code> chain, and the theme-aware defaults resolving to the historical appearance. The suite moves to testthat edition 3, adds <code>expect_snapshot()</code> coverage of every print method and error message, and adds a vdiffr case per new channel.</li>
+<li>CI gains a coverage job and a weekly, non-blocking spelling and URL check.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-aesthetics-on-the-fish-geoms-0-3-0">New aesthetics on the fish geoms<a class="anchor" aria-label="anchor" href="#new-aesthetics-on-the-fish-geoms-0-3-0"></a></h3>
+<p><code><a href="../reference/geom_yin_fish.html">geom_yin_fish()</a></code> and <code><a href="../reference/geom_yin_fish.html">geom_yang_fish()</a></code> additionally understand <code>radius</code> (a proportion of the cell’s own radius, so <code>0.5</code> draws a half-size glyph in the same cell), <code>border</code> (a per-cell outline width in mm, overriding <code>linewidth</code>), and <code>tooltip</code> / <code>data_id</code> / <code>onclick</code>. Both gain <code>interactive</code> and <code>key_glyph</code> arguments.</p>
+</div>
+<div class="section level3">
+<h3 id="deprecations-and-notes-0-3-0">Deprecations and notes<a class="anchor" aria-label="anchor" href="#deprecations-and-notes-0-3-0"></a></h3>
+<ul><li>The <code>size</code> argument of <code><a href="../reference/geom_taichi.html">geom_taichi()</a></code>, soft-deprecated in favour of <code>linewidth</code> since 0.2.0, will be <strong>removed in 1.0.0</strong>. It still works, and still warns.</li>
+<li>
+<code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> now takes around thirty arguments, which is a design smell the roadmap has flagged. Grouping them into option objects (<code>taichi_eyes()</code>, <code>taichi_scales()</code>, …) is intended to land <em>before</em> the next wave of glyph channels, not after.</li>
+<li>The lifecycle badge stays <code>experimental</code>. The gate for <code>stable</code> is one release cycle with no new arguments to <code><a href="../reference/geom_taichi.html">geom_taichi()</a></code>, which this is emphatically not.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="ggtaichi-020">ggtaichi 0.2.0<a class="anchor" aria-label="anchor" href="#ggtaichi-020"></a></h2><p class="text-muted">CRAN release: 2026-08-24</p>
 <div class="section level3">
 <h3 id="new-features-0-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
 <ul><li>

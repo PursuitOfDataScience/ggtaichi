@@ -21,6 +21,22 @@ for styling. Users should reference the documentation and run the
 examples in the help files when trying to understand what each argument
 means visually.
 
+Around it are the pieces that make a grid of glyphs readable:
+[`taichi_summary()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_summary.md)
+and
+[`geom_taichi_diff()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi_diff.md)
+put the relationship between the two sources into numbers and into a
+diverging heatmap;
+[`taichi_palette_pair()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_palette_pair.md),
+[`taichi_palette()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_palette.md)
+and
+[`taichi_check_palette()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_check_palette.md)
+build and audit the pair of colour ramps the comparison depends on; the
+`scale_taichi_*()` family supplies ready fill scales, including the
+binned ones worth reaching for on a dense grid; and
+`geom_taichi(interactive = TRUE)` hands the plot to ggiraph so a reader
+can hover for the exact values.
+
 ## See also
 
 Useful links:

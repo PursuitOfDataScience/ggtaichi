@@ -21,7 +21,7 @@ can carry up to six dimensions.'><meta property="og:image" content="https://purs
 
     <a class="navbar-brand me-2" href="../index.html">ggtaichi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,14 +67,23 @@ can carry up to six dimensions.</p>
 <span>  yang_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  yin_colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gray100"</span>, <span class="st">"gray85"</span>, <span class="st">"gray50"</span>, <span class="st">"gray35"</span>, <span class="st">"gray0"</span><span class="op">)</span>,</span>
 <span>  yang_colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#FED7D8"</span>, <span class="st">"#FE8C91"</span>, <span class="st">"#F5636B"</span>, <span class="st">"#E72D3F"</span>, <span class="st">"#C20824"</span><span class="op">)</span>,</span>
+<span>  palette <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  yin_scale <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  yang_scale <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  angle <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  eyes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  yin_eye_size <span class="op">=</span> <span class="fl">0.15</span>,</span>
 <span>  yang_eye_size <span class="op">=</span> <span class="fl">0.15</span>,</span>
-<span>  yin_eye_colour <span class="op">=</span> <span class="st">"white"</span>,</span>
-<span>  yang_eye_colour <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>  yin_eye_colour <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  yang_eye_colour <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  explicit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"difference"</span>, <span class="st">"ratio"</span>, <span class="st">"log_ratio"</span>, <span class="st">"z"</span><span class="op">)</span>,</span>
+<span>  explicit_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"eye_size"</span>, <span class="st">"angle"</span>, <span class="st">"border"</span>, <span class="st">"radius"</span><span class="op">)</span>,</span>
+<span>  explicit_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  interactive <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  tooltip <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  data_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  onclick <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  data_id_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cell"</span>, <span class="st">"fish"</span>, <span class="st">"source"</span><span class="op">)</span>,</span>
 <span>  shared_limits <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  shared_legend <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -85,6 +94,7 @@ can carry up to six dimensions.</p>
 <span>  linewidth <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>  linetype <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  show.legend <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  key_glyph <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -128,6 +138,17 @@ fill. Used as a gradient for continuous data and as a discrete palette
 for factor/character data. Ignored if <code>yang_scale</code> is provided.</p></dd>
 
 
+<dt id="arg-palette">palette<a class="anchor" aria-label="anchor" href="#arg-palette"></a></dt>
+<dd><p>A matched pair of ramps to use instead of
+<code>yin_colors</code> / <code>yang_colors</code>: the name of a
+<code><a href="taichi_palette.html">taichi_palette()</a></code> preset (<code>"balanced"</code>,
+<code>"diverging"</code>, <code>"viridis_pair"</code>, <code>"brewer_pair"</code>,
+<code>"print_safe"</code>, <code>"default"</code>) or a list with <code>yin</code> and
+<code>yang</code> colour vectors, such as the result of
+<code><a href="taichi_palette_pair.html">taichi_palette_pair()</a></code>. Default <code>NULL</code>, which keeps the
+package's historical grey / seal-red pair. See the Palettes section.</p></dd>
+
+
 <dt id="arg-yin-scale">yin_scale<a class="anchor" aria-label="anchor" href="#arg-yin-scale"></a></dt>
 <dd><p>An optional fill scale for the yin fish: either a ready
 scale object or a scale constructor function (e.g.
@@ -161,9 +182,59 @@ encode a variable (see the Eyes section for the rescaling rule).</p></dd>
 
 
 <dt id="arg-yin-eye-colour-yang-eye-colour">yin_eye_colour, yang_eye_colour<a class="anchor" aria-label="anchor" href="#arg-yin-eye-colour-yang-eye-colour"></a></dt>
-<dd><p>Colour of each eye dot: a constant
-(defaults "white" and "black") or an unquoted data column containing
-colour strings.</p></dd>
+<dd><p>Colour of each eye dot: a constant,
+an unquoted data column containing colour strings, or <code>NULL</code> (the
+default) to take the colour from the theme — the yin eye from the
+theme's <code>paper</code> and the yang eye from its <code>ink</code>, which is white
+and black on every light theme and swaps on a dark one. On ggplot2 before
+4.0.0, where themes cannot set geom defaults, <code>NULL</code> falls back to
+the literal "white" and "black".</p></dd>
+
+
+<dt id="arg-explicit">explicit<a class="anchor" aria-label="anchor" href="#arg-explicit"></a></dt>
+<dd><p>Which relationship between the two sources to compute and
+show as a third channel: <code>"none"</code> (the default), <code>"difference"</code>,
+<code>"ratio"</code>, <code>"log_ratio"</code> or <code>"z"</code>. See the Explicit
+encoding section, and <code><a href="taichi_summary.html">taichi_summary()</a></code> for the definitions.</p></dd>
+
+
+<dt id="arg-explicit-channel">explicit_channel<a class="anchor" aria-label="anchor" href="#arg-explicit-channel"></a></dt>
+<dd><p>Where the computed statistic goes:
+<code>"eye_size"</code> (the default), <code>"angle"</code>, <code>"border"</code> or
+<code>"radius"</code>. Ignored when <code>explicit = "none"</code>. The chosen
+channel cannot also be set by hand — e.g. <code>explicit_channel =
+  "angle"</code> together with an <code>angle</code> argument is an error rather than a
+silent override.</p></dd>
+
+
+<dt id="arg-explicit-range">explicit_range<a class="anchor" aria-label="anchor" href="#arg-explicit-range"></a></dt>
+<dd><p>Two numbers giving the output range of
+<code>explicit_channel</code>, or <code>NULL</code> (the default) for that channel's
+own sensible range.</p></dd>
+
+
+<dt id="arg-interactive">interactive<a class="anchor" aria-label="anchor" href="#arg-interactive"></a></dt>
+<dd><p>If <code>TRUE</code>, draw the fish (and their eyes) as
+<span class="pkg">ggiraph</span> grobs carrying <code>tooltip</code>, <code>data_id</code> and
+<code>onclick</code>, so that <code><a href="https://davidgohel.github.io/ggiraph/reference/girafe.html" class="external-link">ggiraph::girafe()</a></code> turns the plot into a
+widget. Needs the <span class="pkg">ggiraph</span> package. Default <code>FALSE</code>, which
+renders exactly as before and does not touch <span class="pkg">ggiraph</span>. See the
+Interactivity section.</p></dd>
+
+
+<dt id="arg-tooltip-data-id-onclick">tooltip, data_id, onclick<a class="anchor" aria-label="anchor" href="#arg-tooltip-data-id-onclick"></a></dt>
+<dd><p>Optional unquoted data columns overriding
+the interactive attributes. Used only when <code>interactive = TRUE</code>; by
+default <code>tooltip</code> is built from the two values, their difference and
+the cell's coordinates, <code>data_id</code> from <code>data_id_by</code>, and
+<code>onclick</code> is empty.</p></dd>
+
+
+<dt id="arg-data-id-by">data_id_by<a class="anchor" aria-label="anchor" href="#arg-data-id-by"></a></dt>
+<dd><p>Scope of the default <code>data_id</code>, i.e. what one hover
+highlights: <code>"cell"</code> (both fish of that glyph; the default),
+<code>"fish"</code> (one fish), or <code>"source"</code> (every fish of that source,
+in every cell). Ignored when <code>data_id</code> is supplied.</p></dd>
 
 
 <dt id="arg-shared-limits">shared_limits<a class="anchor" aria-label="anchor" href="#arg-shared-limits"></a></dt>
@@ -171,7 +242,10 @@ colour strings.</p></dd>
 (both continuous, or both discrete), the two auto-built fill scales share
 common limits — the union range (or union of levels) of <code>yin</code> and
 <code>yang</code> — so equal values read as equal ink. Explicit <code>limits</code>
-passed through <code>...</code> take precedence. Default <code>FALSE</code>.</p></dd>
+passed through <code>...</code> take precedence. As of 0.3.0 the shared limits
+are also pushed into a custom <code>yin_scale</code> / <code>yang_scale</code> that
+does not set limits of its own, so a supplied binned scale shares breaks
+too. Default <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-shared-legend">shared_legend<a class="anchor" aria-label="anchor" href="#arg-shared-legend"></a></dt>
@@ -179,8 +253,15 @@ passed through <code>...</code> take precedence. Default <code>FALSE</code>.</p>
 comparable: implies <code>shared_limits = TRUE</code>, paints both fish with
 <code>yin_colors</code>, and shows a single legend (the yang guide is
 dropped). Unless <code>yin_name</code> is supplied, the legend is titled
-"<code>yin</code> / <code>yang</code>". Ignored when custom <code>yin_scale</code> /
-<code>yang_scale</code> are given. Default <code>FALSE</code>.</p></dd>
+"<code>yin</code> / <code>yang</code>". Default <code>FALSE</code>. This is the
+perceptually correct choice whenever the two sources really are
+directly comparable: one ramp means equal values are equal ink by
+construction, with no palette pairing to get wrong (see the Palettes
+section). The cost is that the sources are then told apart only by their
+position inside the glyph — yin is the top bulb, yang the bottom. When
+a custom <code>yang_scale</code> is supplied it is used as given, so making the
+two palettes agree is then your business; the duplicate yang guide is
+dropped either way.</p></dd>
 
 
 <dt id="arg-width-height">width, height<a class="anchor" aria-label="anchor" href="#arg-width-height"></a></dt>
@@ -216,6 +297,14 @@ layer (see the Styling section).</p></dd>
 <dd><p>Logical. Should the layer be included in the legend?</p></dd>
 
 
+<dt id="arg-key-glyph">key_glyph<a class="anchor" aria-label="anchor" href="#arg-key-glyph"></a></dt>
+<dd><p>The legend key glyph, passed on to
+<code><a href="https://ggplot2.tidyverse.org/reference/layer.html" class="external-link">layer()</a></code>. Both fish default to a small taichi with
+their own half filled (see <code><a href="draw_key_taichi.html">draw_key_taichi()</a></code>); pass
+<code>"rect"</code> for the plain ggplot2 rectangles of earlier versions. Keys
+only appear for discrete fills — a continuous fill gets a colourbar.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to <em>both</em> auto-built fill
 scales (e.g., shared <code>limits</code> or <code>na.value</code>). Because they go
@@ -233,8 +322,15 @@ here; use <code>yin_name</code> / <code>yang_name</code> and <code>yin_colors</c
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>ggtaichi_plot</code> object: the two fish layers plus the fill
-  scales they need, ready to be added to a <code><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></code>
-  with <code>+</code>. It is not a plot on its own.</p>
+scales they need, ready to be added to a <code><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></code>
+with <code>+</code>. It is not a plot on its own.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>A seventh channel, <code>angle</code>, rotates the glyph, and <code>explicit</code>
+adds an eighth that is <em>computed</em> rather than mapped: the relationship
+between the two sources, shown as a third channel of the same mark. See
+the Explicit encoding section.</p>
     </div>
     <div class="section level2">
     <h2 id="discrete-and-continuous-fills">Discrete and continuous fills<a class="anchor" aria-label="anchor" href="#discrete-and-continuous-fills"></a></h2>
@@ -302,6 +398,100 @@ via <code><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="exte
 <code>...</code> to change it), while <code>na.rm = TRUE</code> silently drops rows
 with missing positions.</p>
     </div>
+    <div class="section level2">
+    <h2 id="explicit-encoding">Explicit encoding<a class="anchor" aria-label="anchor" href="#explicit-encoding"></a></h2>
+
+
+<p>Two fish sharing one position is a <em>superposition</em> comparison. It is
+very good at "are these similar?" and "which is bigger here?", and it
+cannot answer "by how much?" — that needs the relationship itself to be
+computed and drawn. <code>explicit</code> does exactly that, turning one of
+<code>"difference"</code> (<code>yin - yang</code>), <code>"ratio"</code>,
+<code>"log_ratio"</code> or <code>"z"</code> into a third channel of the glyph. The
+statistics are the ones <code><a href="taichi_summary.html">taichi_summary()</a></code> tabulates, including
+its rule that a ratio of a non-positive value is <code>NA</code> rather than
+<code>Inf</code>.</p>
+<p><code>explicit_channel</code> chooses where it goes:</p><dl><dt><code>"eye_size"</code></dt>
+<dd><p>The default, and the tidiest: the eyes already
+exist and are visually subordinate to the fills, so the two fish keep
+carrying the two sources while eye size carries the gap between them.
+A big eye reads as "look here", which is what a big gap means. Cells
+where the two sources agree exactly get no eye at all, so a plain glyph
+means agreement. Implies <code>eyes = TRUE</code>.</p></dd>
+
+<dt><code>"angle"</code></dt>
+<dd><p>The most <em>accurate</em> option. Direction and
+angle are read far more precisely than shading, so encoding the gap as
+tilt makes it legible to a precision the fills can never reach: an
+upright glyph means the two sources agree and the lean shows which way
+and how far. The cost is the symbol's upright orientation, which is why
+it is a choice rather than the default.</p></dd>
+
+<dt><code>"border"</code></dt>
+<dd><p>Outline width. Unobtrusive, and it composes with
+everything else, but the least precise of the four. Because the default
+<code>colour</code> is <code>NA</code> — no outline at all — this channel gives
+the outline a visible colour unless you set <code>colour</code> yourself.</p></dd>
+
+<dt><code>"radius"</code></dt>
+<dd><p>Glyph size, scaled by area (radius proportional to
+the square root of the statistic) so that the eye's area-based reading
+is the correct one. Cells where the sources agree shrink; use it when
+the interesting thing is <em>where</em> they disagree.</p></dd>
+
+
+</dl><p><code>explicit_range</code> sets the channel's output range; each channel has a
+sensible default (<code>c(0, 0.3)</code> of the glyph radius for eyes,
+<code>c(-45, 45)</code> degrees for angle, <code>c(0, 1)</code> mm for the border,
+<code>c(0.4, 1)</code> of the cell for radius). The statistic is rescaled across
+the whole layer, so the mapping is comparable between facets.</p>
+<p><code><a href="geom_taichi_diff.html">geom_taichi_diff()</a></code> draws the same statistic as a diverging
+heatmap when the glyph is not the right chart for the question, and
+<code><a href="taichi_summary.html">taichi_summary()</a></code> returns it as a table.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="palettes">Palettes<a class="anchor" aria-label="anchor" href="#palettes"></a></h2>
+
+
+<p>The two ramps are compared against each other, so they need to be matched:
+if one spans a wider luminance range than the other then equal values do
+not read as equal ink and one fish looks heavier wherever the data says the
+sources are level. The default grey-and-red pair is <em>not</em> matched
+(run <code><a href="taichi_check_palette.html">taichi_check_palette()</a></code> with no arguments to see the
+numbers) and is kept only for continuity. <code>palette</code> selects a
+matched pair instead — <code>"balanced"</code> is the recommended one — and
+also accepts the output of <code><a href="taichi_palette_pair.html">taichi_palette_pair()</a></code>. It is a
+shorthand for setting <code>yin_colors</code> and <code>yang_colors</code> together,
+so passing both is an error.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="interactivity">Interactivity<a class="anchor" aria-label="anchor" href="#interactivity"></a></h2>
+
+
+<p>Fill is the least accurate channel there is, which is why an interactive
+version of a taichi grid is not a gimmick: hovering supplies the exact
+values without giving up the encoding. With <code>interactive = TRUE</code> the
+layers emit <span class="pkg">ggiraph</span> grobs, and the plot becomes a widget when it is
+passed to <code><a href="https://davidgohel.github.io/ggiraph/reference/girafe.html" class="external-link">ggiraph::girafe()</a></code>:</p>
+<div class="sourceCode"><pre><code><span>  <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">week</span>, <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>, interactive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="fu">ggiraph</span><span class="fu">::</span><span class="fu"><a href="https://davidgohel.github.io/ggiraph/reference/girafe.html" class="external-link">girafe</a></span><span class="op">(</span>ggobj <span class="op">=</span> <span class="va">p</span><span class="op">)</span></span></code></pre></div>
+
+<p>The default tooltip carries both values, their difference, and the cell's
+coordinates. <code>data_id_by</code> decides what a hover highlights:
+<code>"cell"</code> (the default) lights up both fish of one glyph,
+<code>"fish"</code> one fish at a time, and <code>"source"</code> every fish of one
+source at once — which turns the superposition display into a
+single-source display for as long as the pointer rests there, letting a
+reader decompose the comparison instead of doing it in their head.
+<code>tooltip</code>, <code>data_id</code> and <code>onclick</code> take a data column to
+override any of it.</p>
+<p>The static rendering is unchanged: with <code>interactive = FALSE</code> the
+package does not touch <span class="pkg">ggiraph</span> at all, and with it <code>TRUE</code> the
+same geometry is drawn, only in grobs that carry the extra attributes.
+<span class="pkg">plotly</span> is not and will not be supported — <code>ggplotly()</code> cannot
+translate custom grobs, which is exactly what this package draws.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -338,6 +528,35 @@ with missing positions.</p>
 <span class="r-in"><span>              yin_eye_size <span class="op">=</span> <span class="va">yang_values</span>,</span></span>
 <span class="r-in"><span>              angle <span class="op">=</span> <span class="fl">45</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="geom_taichi-3.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># a matched palette pair, and the gap between the sources as eye size</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>  <span class="fu">geom_taichi</span><span class="op">(</span>yin <span class="op">=</span> <span class="va">yin_values</span>,</span></span>
+<span class="r-in"><span>              yang <span class="op">=</span> <span class="va">yang_values</span>,</span></span>
+<span class="r-in"><span>              palette <span class="op">=</span> <span class="st">"balanced"</span>,</span></span>
+<span class="r-in"><span>              shared_limits <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>              explicit <span class="op">=</span> <span class="st">"difference"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="geom_taichi-4.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># the same gap as tilt: the most accurate channel available</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>  <span class="fu">geom_taichi</span><span class="op">(</span>yin <span class="op">=</span> <span class="va">yin_values</span>,</span></span>
+<span class="r-in"><span>              yang <span class="op">=</span> <span class="va">yang_values</span>,</span></span>
+<span class="r-in"><span>              explicit <span class="op">=</span> <span class="st">"difference"</span>,</span></span>
+<span class="r-in"><span>              explicit_channel <span class="op">=</span> <span class="st">"angle"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="geom_taichi-5.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># tooltips carry the exact values; needs ggiraph to view</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>  <span class="fu">geom_taichi</span><span class="op">(</span>yin <span class="op">=</span> <span class="va">yin_values</span>, yang <span class="op">=</span> <span class="va">yang_values</span>,</span></span>
+<span class="r-in"><span>              interactive <span class="op">=</span> <span class="cn">TRUE</span>, data_id_by <span class="op">=</span> <span class="st">"source"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ggiraph"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="co"># ggiraph::girafe(ggobj = p)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

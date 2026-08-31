@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ggtaichi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -121,13 +121,15 @@ records the 30-week COVID-related Google and Twitter incidence rates for
 9 categories in the Pittsburgh Metropolitan Statistical Area (MSA).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pitts_tg</span><span class="op">)</span></span>
-<span><span class="co">#&gt;          msa week week_start          category    Twitter     Google</span></span>
-<span><span class="co">#&gt; 1 Pittsburgh    1 2020-06-01             Covid 0.96499362 0.68119059</span></span>
-<span><span class="co">#&gt; 2 Pittsburgh    1 2020-06-01     General Virus 0.53773593 0.09821038</span></span>
-<span><span class="co">#&gt; 3 Pittsburgh    1 2020-06-01             Masks 0.46586871 0.11707305</span></span>
-<span><span class="co">#&gt; 4 Pittsburgh    1 2020-06-01        Sanitizing 0.05608462 0.12726983</span></span>
-<span><span class="co">#&gt; 5 Pittsburgh    1 2020-06-01 Social Distancing 0.29366920 0.03863268</span></span>
-<span><span class="co">#&gt; 6 Pittsburgh    1 2020-06-01          Symptoms 0.04565682 0.07701188</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
+<span><span class="co">#&gt;   msa         week week_start category          Twitter Google</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Pittsburgh     1 2020-06-01 Covid              0.965  0.681 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Pittsburgh     1 2020-06-01 General Virus      0.538  0.098<span style="text-decoration: underline;">2</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Pittsburgh     1 2020-06-01 Masks              0.466  0.117 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Pittsburgh     1 2020-06-01 Sanitizing         0.056<span style="text-decoration: underline;">1</span> 0.127 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Pittsburgh     1 2020-06-01 Social Distancing  0.294  0.038<span style="text-decoration: underline;">6</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Pittsburgh     1 2020-06-01 Symptoms           0.045<span style="text-decoration: underline;">7</span> 0.077<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
 <p><code>states_tg</code> is the larger sibling, repeating the same
 measurements across four states, and <code>pitts_emojis</code> holds the
 most popular weekly emoji per category. Since v0.2.0 the package also
@@ -258,7 +260,7 @@ own.</p>
 <p><img src="ggtaichi_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="The six-week Pittsburgh taichi grid using theme_taichi() with its off-white background overridden to plain white." width="840" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
-<h2 id="new-in-v0-2-0">New in v0.2.0<a class="anchor" aria-label="anchor" href="#new-in-v0-2-0"></a>
+<h2 id="the-glyphs-other-channels">The glyph’s other channels<a class="anchor" aria-label="anchor" href="#the-glyphs-other-channels"></a>
 </h2>
 <div class="section level3">
 <h3 id="rotation">Rotation<a class="anchor" aria-label="anchor" href="#rotation"></a>
@@ -443,6 +445,259 @@ glyphs stay perfectly round when you resize the device.</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="new-in-v0-3-0">New in v0.3.0<a class="anchor" aria-label="anchor" href="#new-in-v0-3-0"></a>
+</h2>
+<div class="section level3">
+<h3 id="how-much-bigger-the-explicit-channel">How much bigger? The explicit channel<a class="anchor" aria-label="anchor" href="#how-much-bigger-the-explicit-channel"></a>
+</h3>
+<p>Two fish sharing one position is what the comparison literature calls
+a <em>superposition</em> design. Its strength is that the two sources
+are in the same place, so spatial patterns line up and “are these
+similar?” is answered at a glance. Its weakness is precise: it can say
+<em>which</em> is bigger, but not <em>by how much</em>. For that, the
+relationship has to be computed and drawn — what the same literature
+calls <strong>explicit encoding</strong>.</p>
+<p><code>explicit</code> does that. It takes one of four statistics —
+<code>"difference"</code> (<code>yin - yang</code>),
+<code>"ratio"</code>, <code>"log_ratio"</code>, or <code>"z"</code> (the
+difference of the two standardised sources, for when the two are not in
+the same units) — and <code>explicit_channel</code> decides where in the
+glyph it goes.</p>
+<p>The default is the eyes, and it is the tidiest option: the eyes
+already exist, they are visually subordinate to the fills, and a big eye
+reads as “look here”. Cells where the two sources agree exactly get
+<strong>no eye at all</strong>, so a plain glyph means agreement.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>,</span>
+<span>              shared_legend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>              yin_name <span class="op">=</span> <span class="st">"orders / 100 customers"</span>,</span>
+<span>              explicit <span class="op">=</span> <span class="st">"difference"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/remove_padding.html">remove_padding</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Eye size = the gap between the two sources"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="ggtaichi_files/figure-html/explicit-eye-1.png" class="r-plt" alt="" width="840" style="display: block; margin: auto;"></p>
+<p><code>explicit_channel = "angle"</code> is the most <em>accurate</em>
+choice. Direction and angle are read far more precisely than shading, so
+the gap becomes legible to a precision the fills can never reach:
+upright means the two sources agree, and the lean shows which way and
+how far. The price is the symbol’s upright orientation, which is why it
+is a choice rather than the default.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tilt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, y <span class="op">=</span> <span class="fl">1</span>, yin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">5</span>, <span class="fl">7</span>, <span class="fl">9</span><span class="op">)</span>, yang <span class="op">=</span> <span class="fl">9</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">tilt</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">yin</span>, yang <span class="op">=</span> <span class="va">yang</span>, shared_limits <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>              explicit <span class="op">=</span> <span class="st">"difference"</span>, explicit_channel <span class="op">=</span> <span class="st">"angle"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="ggtaichi_files/figure-html/explicit-angle-1.png" class="r-plt" alt="" width="840" style="display: block; margin: auto;"></p>
+<p>The other two channels are <code>"border"</code> (outline width) and
+<code>"radius"</code> (glyph size, scaled by area rather than diameter,
+so cells where the sources agree shrink). <code>explicit_range</code>
+sets the output range of whichever you pick, and the statistic is
+rescaled across the whole layer, so facets stay comparable.</p>
+<p>A ratio of a zero or negative value is <code>NA</code> with a warning
+— never <code>Inf</code>.</p>
+</div>
+<div class="section level3">
+<h3 id="the-same-numbers-as-a-table-and-as-a-heatmap">The same numbers, as a table and as a heatmap<a class="anchor" aria-label="anchor" href="#the-same-numbers-as-a-table-and-as-a-heatmap"></a>
+</h3>
+<p>Sometimes the right answer to “by how much?” is not a glyph.
+<code><a href="../reference/taichi_summary.html">taichi_summary()</a></code> returns every statistic per cell, plus
+which source dominates and the cell’s rank by the size of the gap:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">summ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/taichi_summary.html">taichi_summary</a></span><span class="op">(</span><span class="va">cafes_tg</span>, yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>,</span>
+<span>                       x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">neighbourhood</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">summ</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">summ</span><span class="op">$</span><span class="va">rank</span><span class="op">)</span>, <span class="op">]</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt;     x               y  yin yang difference    ratio log_ratio        z dominant</span></span>
+<span><span class="co">#&gt; 35 11      University 74.1 24.0       50.1 3.087500  1.626439 4.260819   matcha</span></span>
+<span><span class="co">#&gt; 82 10 Garden District 70.9 22.2       48.7 3.193694  1.675226 4.152065   matcha</span></span>
+<span><span class="co">#&gt; 33  9      University 76.1 28.4       47.7 2.679577  1.422006 4.037432   matcha</span></span>
+<span><span class="co">#&gt; 84 12 Garden District 72.2 24.7       47.5 2.923077  1.547488 4.038890   matcha</span></span>
+<span><span class="co">#&gt; 36 12      University 76.1 32.9       43.2 2.313070  1.209809 3.637092   matcha</span></span>
+<span><span class="co">#&gt;    rank</span></span>
+<span><span class="co">#&gt; 35    1</span></span>
+<span><span class="co">#&gt; 82    2</span></span>
+<span><span class="co">#&gt; 33    3</span></span>
+<span><span class="co">#&gt; 84    4</span></span>
+<span><span class="co">#&gt; 36    5</span></span></code></pre></div>
+<p>and <code><a href="../reference/geom_taichi_diff.html">geom_taichi_diff()</a></code> draws it as a diverging heatmap,
+with limits symmetric about “the two sources agree”, so the mid colour
+really is the middle:</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/geom_taichi_diff.html">geom_taichi_diff</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/remove_padding.html">remove_padding</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"matcha - espresso"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="ggtaichi_files/figure-html/diff-1.png" class="r-plt" alt="" width="840" style="display: block; margin: auto;"></p>
+<p>Use it <em>beside</em> a taichi grid rather than instead of one: the
+glyphs show the levels, the tiles show the gap.</p>
+</div>
+<div class="section level3">
+<h3 id="palette-pairing-is-a-correctness-problem">Palette pairing is a correctness problem<a class="anchor" aria-label="anchor" href="#palette-pairing-is-a-correctness-problem"></a>
+</h3>
+<p>The whole point of the design is comparing two sources fairly, and
+the fills are what carries the comparison. If the two ramps do not span
+the same luminance range then equal values do not produce equal visual
+weight, and one fish appears to dominate wherever the data says the two
+are level. That is not a matter of taste; it decides whether the chart
+is telling the truth.</p>
+<p><code><a href="../reference/taichi_check_palette.html">taichi_check_palette()</a></code> measures it. With no arguments it
+measures the package’s own defaults:</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/taichi_check_palette.html">taichi_check_palette</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; &lt;ggtaichi palette check&gt;</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   step yin            L      C   yang           L      C       dL</span></span>
+<span><span class="co">#&gt;   1    #FFFFFF    100.0    0.0   #FED7D8     89.2   14.5     10.8</span></span>
+<span><span class="co">#&gt;   2    #EBEBEB     93.0    0.0   #FFB2B3     79.8   30.2     13.2</span></span>
+<span><span class="co">#&gt;   3    #D8D8D8     86.3    0.0   #FE8C91     70.8   46.6     15.6</span></span>
+<span><span class="co">#&gt;   4    #AAAAAA     69.6    0.0   #F9787D     65.8   53.9      3.8</span></span>
+<span><span class="co">#&gt;   5    #7F7F7F     53.2    0.0   #F4636B     61.0   61.4     -7.8</span></span>
+<span><span class="co">#&gt;   6    #6B6B6B     45.2    0.0   #EE4B54     55.9   70.0    -10.7</span></span>
+<span><span class="co">#&gt;   7    #595959     37.8    0.0   #E62C3F     50.7   78.1    -12.8</span></span>
+<span><span class="co">#&gt;   8    #2D2D2D     18.5    0.0   #D41D31     45.8   77.1    -27.3</span></span>
+<span><span class="co">#&gt;   9    #000000      0.0    0.0   #C10724     40.6   75.7    -40.6</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   largest luminance mismatch : 40.6 L* (tolerance 5.0)</span></span>
+<span><span class="co">#&gt;   largest chroma mismatch    : 78.1</span></span>
+<span><span class="co">#&gt;   how far apart the ramps stay (median distance, step for step)</span></span>
+<span><span class="co">#&gt;       normal       27.2  </span></span>
+<span><span class="co">#&gt;       deutan       20.9  </span></span>
+<span><span class="co">#&gt;       protan       12.7  (much worse than normal vision)</span></span>
+<span><span class="co">#&gt;       tritan       28.4  </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   Verdict: FAIL</span></span>
+<span><span class="co">#&gt;   the two ramps do not share a luminance trajectory, so equal</span></span>
+<span><span class="co">#&gt;   values do NOT read as equal ink and one fish will appear to</span></span>
+<span><span class="co">#&gt;   dominate. Consider `palette = "balanced"` or `taichi_palette_pair()`.</span></span></code></pre></div>
+<p>The verdict is honest: the grey yin ramp runs the full way to black
+while the red yang ramp stops around L* 41, a mismatch of about 41
+units, so the yin fish has always looked heavier at the dark end.
+<strong>The defaults have not been changed</strong> — every existing
+figure would move — but <code>palette = "balanced"</code> gives a pair
+built to be matched, differing only in hue:</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/taichi_check_palette.html">taichi_check_palette</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"balanced"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; &lt;ggtaichi palette check&gt;</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   step yin            L      C   yang           L      C       dL</span></span>
+<span><span class="co">#&gt;   1    #DEE3EC     90.1    5.0   #EDDFDE     89.9    5.1      0.2</span></span>
+<span><span class="co">#&gt;   2    #C5CDDE     82.3    9.4   #E0C7C5     82.2    9.4      0.0</span></span>
+<span><span class="co">#&gt;   3    #ADB8D1     74.7   13.9   #D2B1AC     74.9   13.1     -0.2</span></span>
+<span><span class="co">#&gt;   4    #95A4C3     67.2   17.7   #C49A95     67.3   17.2     -0.1</span></span>
+<span><span class="co">#&gt;   5    #7D91B6     59.9   21.7   #B6857E     60.1   21.0     -0.2</span></span>
+<span><span class="co">#&gt;   6    #647EA9     52.4   25.9   #A76F66     52.4   25.4     -0.1</span></span>
+<span><span class="co">#&gt;   7    #4A6C9D     45.1   30.4   #98594E     44.8   30.3      0.3</span></span>
+<span><span class="co">#&gt;   8    #2F5A93     37.9   36.1   #894433     37.3   36.5      0.6</span></span>
+<span><span class="co">#&gt;   9    #004888     30.4   41.6   #792E19     29.6   43.2      0.8</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   largest luminance mismatch : 0.8 L* (tolerance 5.0)</span></span>
+<span><span class="co">#&gt;   largest chroma mismatch    : 1.5</span></span>
+<span><span class="co">#&gt;   how far apart the ramps stay (median distance, step for step)</span></span>
+<span><span class="co">#&gt;       normal       26.4  </span></span>
+<span><span class="co">#&gt;       deutan       27.7  </span></span>
+<span><span class="co">#&gt;       protan       22.9  </span></span>
+<span><span class="co">#&gt;       tritan       40.3  </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   Verdict: PASS</span></span>
+<span><span class="co">#&gt;   the two ramps share a luminance trajectory, so equal values</span></span>
+<span><span class="co">#&gt;   read as equal ink.</span></span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>,</span>
+<span>              palette <span class="op">=</span> <span class="st">"balanced"</span>, shared_limits <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/remove_padding.html">remove_padding</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"A luminance-matched pair"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="ggtaichi_files/figure-html/balanced-1.png" class="r-plt" alt="" width="840" style="display: block; margin: auto;"></p>
+<p>The other presets are <code>"diverging"</code> (both ramps reaching a
+shared near-white midpoint, so the two fish read as the two arms of one
+diverging scale), <code>"viridis_pair"</code>,
+<code>"brewer_pair"</code>, and <code>"print_safe"</code> — a grey ramp
+and a hued ramp on the <em>same</em> luminance trajectory, so in colour
+the two fish are told apart by hue and in greyscale they collapse to the
+same ink, which keeps equal values equal in a black-and-white printout.
+<code><a href="../reference/taichi_palette.html">taichi_palette()</a></code> returns any of them, and
+<code><a href="../reference/taichi_palette_pair.html">taichi_palette_pair()</a></code> builds your own from hue, luminance
+and chroma.</p>
+<p><code>shared_legend = TRUE</code> deserves a mention here too. It
+paints both fish with one ramp, which makes equal values equal ink
+<em>by construction</em> — there is no pairing left to get wrong. The
+cost is that the two sources are then distinguished only by their
+position inside the glyph: yin is the top bulb, yang the bottom. When
+the two sources really are directly comparable, that is usually the
+right trade.</p>
+</div>
+<div class="section level3">
+<h3 id="binned-fills-for-grids-too-dense-to-read">Binned fills, for grids too dense to read<a class="anchor" aria-label="anchor" href="#binned-fills-for-grids-too-dense-to-read"></a>
+</h3>
+<p>Reading a value off a continuous luminance ramp is the least accurate
+perceptual task there is, and every scalability study of glyph displays
+finds performance falling as the glyph count rises. Matching a patch to
+one of five labelled bins is much closer to a categorical lookup, and
+the legend then says exactly which values share a colour.</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>,</span>
+<span>              yin_scale  <span class="op">=</span> <span class="fu"><a href="../reference/scale_taichi.html">scale_taichi_yin_binned</a></span><span class="op">(</span>n.breaks <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
+<span>              yang_scale <span class="op">=</span> <span class="fu"><a href="../reference/scale_taichi.html">scale_taichi_yang_binned</a></span><span class="op">(</span>n.breaks <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
+<span>              shared_limits <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/remove_padding.html">remove_padding</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="ggtaichi_files/figure-html/binned-1.png" class="r-plt" alt="" width="840" style="display: block; margin: auto;"></p>
+<p><code>shared_limits</code> now reaches into the scales you supply, so
+both fish share one set of breaks and equal values land in the same bin
+— which is the whole point of binning a two-source display. The full
+family is <code><a href="../reference/scale_taichi.html">scale_taichi_yin_c()</a></code> / <code>_d()</code> /
+<code>_binned()</code> / <code>_viridis_c()</code> /
+<code>_viridis_d()</code> and their <code>yang</code> counterparts; see
+<code><a href="../reference/scale_taichi.html">?scale_taichi</a></code>.</p>
+</div>
+<div class="section level3">
+<h3 id="hovering-for-the-exact-values">Hovering for the exact values<a class="anchor" aria-label="anchor" href="#hovering-for-the-exact-values"></a>
+</h3>
+<p>Everything above is a way of coping with the fact that fill is an
+imprecise channel. Interactivity is the other way: it hands the reader
+the exact numbers without giving up the encoding.
+<code>interactive = TRUE</code> makes the fish (and their eyes) <a href="https://davidgohel.github.io/ggiraph/" class="external-link">ggiraph</a> grobs, and
+<code><a href="https://davidgohel.github.io/ggiraph/reference/girafe.html" class="external-link">ggiraph::girafe()</a></code> turns the plot into a widget:</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>, interactive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggiraph</span><span class="fu">::</span><span class="fu"><a href="https://davidgohel.github.io/ggiraph/reference/girafe.html" class="external-link">girafe</a></span><span class="op">(</span>ggobj <span class="op">=</span> <span class="va">p</span><span class="op">)</span></span></code></pre></div>
+<p>The default tooltip carries both values, their difference, and the
+cell’s coordinates. <code>data_id_by</code> decides what a hover
+highlights, and the interesting setting is <code>"source"</code>:
+hovering any yin fish lights up the yin fish in <em>every</em> cell,
+which turns the superposition display into a single-source display for
+as long as the pointer rests there. That is the one thing a static
+superposition cannot do — it lets the reader take the comparison apart
+instead of doing it in their head. <code>tooltip</code>,
+<code>data_id</code> and <code>onclick</code> take a data column when
+you want to say something else.</p>
+<p>There is a live example in the <a href="https://pursuitofdatascience.github.io/ggtaichi/articles/gallery.html">gallery</a>.
+<code>plotly</code> is not supported and will not be:
+<code>ggplotly()</code> cannot translate custom grobs, which is what
+this package draws.</p>
+</div>
+<div class="section level3">
+<h3 id="following-the-theme">Following the theme<a class="anchor" aria-label="anchor" href="#following-the-theme"></a>
+</h3>
+<p>ggplot2 4.0 lets a theme set geom defaults through
+<code>theme(geom = element_geom(ink, paper, accent))</code>. ggtaichi
+now reads them, so the fallback fish, the outlines and both eye colours
+follow a dark theme instead of disappearing into it. On any light theme
+the result is pixel for pixel what it always was. Legend keys are small
+taichi symbols now as well — each fish geom’s key fills its own half —
+with <code>key_glyph = "rect"</code> to get the old rectangles back.</p>
+</div>
+</div>
+<div class="section level2">
 <h2 id="when-not-to-use-taichi">When (not) to use taichi<a class="anchor" aria-label="anchor" href="#when-not-to-use-taichi"></a>
 </h2>
 <p>A taichi grid is at its best when <em>comparing two sources cell by
@@ -461,12 +716,21 @@ shared limits (<code>shared_limits = TRUE</code>) so at least the two
 fish are on the same footing, and consider printing the numbers
 alongside.</li>
 <li>
-<strong>Color-vision deficiency.</strong> The default grey ramp is
-luminance-only and safe, and the default red ramp varies strongly in
-luminance as well. For fully colorblind-safe plots, supply viridis
-scales: <code>yin_scale = ggplot2::scale_fill_viridis_c</code> (and a
-second option like <code>"magma"</code> for yang) — every figure in this
-vignette can be redrawn that way with one argument per fish.</li>
+<strong>The two ramps must be a fair pair.</strong> The defaults are
+not: run <code><a href="../reference/taichi_check_palette.html">taichi_check_palette()</a></code> and it reports a luminance
+mismatch of about 41 L* units between the grey and red ramps, which
+means equal values do not read as equal ink. Use
+<code>palette = "balanced"</code> when the comparison has to be fair,
+and see the palette section above.</li>
+<li>
+<strong>Colour-vision deficiency.</strong>
+<code><a href="../reference/taichi_check_palette.html">taichi_check_palette()</a></code> also simulates deuteranopia,
+protanopia and tritanopia; the default pair loses about half its
+separation under protanopia. <code>palette = "balanced"</code> holds up,
+<code>palette = "print_safe"</code> survives greyscale printing, and
+<code><a href="../reference/scale_taichi.html">scale_taichi_yin_viridis_c()</a></code> /
+<code><a href="../reference/scale_taichi.html">scale_taichi_yang_viridis_c()</a></code> are there if you prefer the
+viridis family.</li>
 <li>
 <strong>One source missing?</strong> An <code>NA</code> fish keeps
 its place (painted in <code>na.value</code>), so absence is visible
@@ -476,16 +740,11 @@ rather than silently dropped.</li>
 <div class="section level2">
 <h2 id="acknowledgement">Acknowledgement<a class="anchor" aria-label="anchor" href="#acknowledgement"></a>
 </h2>
-<p><code>ggtaichi</code> stands on the shoulders of the <a href="https://CRAN.R-project.org/package=ggDoubleHeat" class="external-link"><code>ggDoubleHeat</code></a>
-package, which pioneered the two-source “double” heat map through its
-<code>geom_heat_*()</code> family and supplies the example data used
-throughout this vignette. Please cite it alongside
-<code>ggtaichi</code>:</p>
-<blockquote>
-<p>Yu Y, Buskirk T (2025). <em>ggDoubleHeat: A Heatmap-Like
-Visualization Tool</em>. R package version 0.1.3. CRAN: <a href="https://CRAN.R-project.org/package=ggDoubleHeat" class="external-link uri">https://CRAN.R-project.org/package=ggDoubleHeat</a>, GitHub:
-<a href="https://github.com/PursuitOfDataScience/ggDoubleHeat" class="external-link uri">https://github.com/PursuitOfDataScience/ggDoubleHeat</a></p>
-</blockquote>
+<p><code>ggtaichi</code> is a spinoff of the <a href="https://CRAN.R-project.org/package=ggDoubleHeat" class="external-link"><code>ggDoubleHeat</code></a>
+package, which pioneered the two-source “double” heat map and supplies
+the example data used throughout this vignette. <code>ggtaichi</code>
+takes that two-scale design and re-imagines the per-cell glyph as a
+taichi diagram.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

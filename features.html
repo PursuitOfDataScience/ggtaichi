@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ggtaichi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -136,10 +136,10 @@
 <span>            explicit_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"eye_size"</span>, <span class="st">"angle"</span>, <span class="st">"border"</span>, <span class="st">"radius"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># or the standalone companion mark: one fish per cell, signed</span></span>
-<span><span class="fu">geom_taichi_diff</span><span class="op">(</span><span class="va">yin</span>, <span class="va">yang</span>, method <span class="op">=</span> <span class="st">"difference"</span>, palette <span class="op">=</span> <span class="st">"diverging"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/geom_taichi_diff.html">geom_taichi_diff</a></span><span class="op">(</span><span class="va">yin</span>, <span class="va">yang</span>, method <span class="op">=</span> <span class="st">"difference"</span>, palette <span class="op">=</span> <span class="st">"diverging"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># the numbers, tidily, for the reader who needs a table</span></span>
-<span><span class="fu">taichi_summary</span><span class="op">(</span><span class="va">data</span>, <span class="va">yin</span>, <span class="va">yang</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/taichi_summary.html">taichi_summary</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">yin</span>, <span class="va">yang</span><span class="op">)</span></span>
 <span><span class="co">#&gt; per cell: yin, yang, difference, ratio, dominant source, rank</span></span></code></pre></div>
 <p><strong>Design notes.</strong></p>
 <ul><li>
@@ -147,7 +147,7 @@
 <li>
 <strong><code>explicit_channel = "angle"</code> is the most <em>accurate</em> option</strong> (direction/angle is rank 3 vs colour’s rank 6), and rotation already exists. Encoding yin − yang as tilt would make the difference readable to a precision the fills can never reach. It costs the glyph’s upright orientation, so it belongs behind an explicit choice — but it is the highest-accuracy option available.</li>
 <li>
-<strong><code>geom_taichi_diff()</code> is the honest escape hatch</strong>: sometimes the right chart for “how much bigger” is a diverging heatmap, and a package that offers one next to its signature glyph is more trustworthy than one that insists on the glyph. Cheap to build (it is a <code>geom_tile()</code> with the package’s palette conventions) and it makes the <code>explicit</code> argument’s semantics concrete.</li>
+<strong><code><a href="reference/geom_taichi_diff.html">geom_taichi_diff()</a></code> is the honest escape hatch</strong>: sometimes the right chart for “how much bigger” is a diverging heatmap, and a package that offers one next to its signature glyph is more trustworthy than one that insists on the glyph. Cheap to build (it is a <code>geom_tile()</code> with the package’s palette conventions) and it makes the <code>explicit</code> argument’s semantics concrete.</li>
 <li>
 <code>ratio</code>/<code>log_ratio</code> need zero/negative handling defined up front — return <code>NA</code> with a warning, never <code>Inf</code>.</li>
 </ul><p><strong>Deps</strong> none. <strong>Effort</strong> M. <strong>Risk</strong> low. <strong>Value</strong> high — this is the structural gap in the design, named by the comparison taxonomy.</p>
@@ -169,7 +169,7 @@
 <span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Design notes.</strong></p>
 <ul><li>
-<strong>The vectorised <code>makeContent()</code> renderer built in 0.2.0 is what makes this natural</strong> — as the ledger anticipated. The id-batched <code>polygonGrob</code> maps directly onto <code>ggiraph::interactive_polygon_grob()</code> with vectors of <code>tooltip</code> and <code>data_id</code>, so this is a substitution inside one function rather than a second rendering path.</li>
+<strong>The vectorised <code>makeContent()</code> renderer built in 0.2.0 is what makes this natural</strong> — as the ledger anticipated. The id-batched <code>polygonGrob</code> maps directly onto <code><a href="https://davidgohel.github.io/ggiraph/reference/interactive_polygon_grob.html" class="external-link">ggiraph::interactive_polygon_grob()</a></code> with vectors of <code>tooltip</code> and <code>data_id</code>, so this is a substitution inside one function rather than a second rendering path.</li>
 <li>
 <strong>Per-fish <code>data_id</code> enables the feature that matters most</strong>: hovering the <em>yin</em> fish in any cell highlights the yin fish in <strong>every</strong> cell, turning a superposition display temporarily into a single-source display. That directly addresses superposition’s weakness (§2.1) — the reader can decompose the comparison interactively instead of mentally.</li>
 <li>
@@ -191,7 +191,7 @@
 <span></span>
 <span><span class="co"># 2. binned fills — match to legend bins instead of interpolating luminance</span></span>
 <span><span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span><span class="va">...</span>, yin_scale <span class="op">=</span> <span class="fu">scale_fill_fermenter</span><span class="op">(</span>n.breaks <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
-<span><span class="fu">scale_taichi_yin_binned</span><span class="op">(</span><span class="va">...</span><span class="op">)</span>; <span class="fu">scale_taichi_yang_binned</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/scale_taichi.html">scale_taichi_yin_binned</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>; <span class="fu"><a href="reference/scale_taichi.html">scale_taichi_yang_binned</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 3. on-glyph values, for small grids</span></span>
 <span><span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span><span class="va">...</span>, label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"both"</span>, <span class="st">"yin"</span>, <span class="st">"yang"</span>, <span class="st">"difference"</span><span class="op">)</span>,</span>
@@ -239,22 +239,22 @@
 <p><strong>Problem, and it is a real one.</strong> The default palettes are a grey ramp (<code>gray100</code> → <code>gray0</code>) for yin and a red ramp (<code>#FED7D8</code> → <code>#C20824</code>) for yang. Those two ramps do not span the same luminance range, so <strong>equal values do not produce equal visual weight</strong> — one fish will systematically appear to dominate. For a design whose entire purpose is comparing two sources fairly, palette pairing is not aesthetics; it is the chart’s validity. <code>shared_limits</code> fixed the <em>numeric</em> half of this problem in 0.2.0; the <em>perceptual</em> half is untouched.</p>
 <p><strong>Features.</strong></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">taichi_palette_pair</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span>, hues <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">250</span>, <span class="fl">20</span><span class="op">)</span>, luminance <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">90</span><span class="op">)</span>,</span>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/taichi_palette_pair.html">taichi_palette_pair</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span>, hues <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">250</span>, <span class="fl">20</span><span class="op">)</span>, luminance <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">90</span><span class="op">)</span>,</span>
 <span>                    chroma <span class="op">=</span> <span class="fl">60</span><span class="op">)</span></span>
 <span><span class="co">#&gt; two ramps, distinct in hue, matched in luminance and chroma trajectory</span></span>
 <span></span>
-<span><span class="fu">taichi_check_palette</span><span class="op">(</span><span class="va">yin_colors</span>, <span class="va">yang_colors</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/taichi_check_palette.html">taichi_check_palette</a></span><span class="op">(</span><span class="va">yin_colors</span>, <span class="va">yang_colors</span><span class="op">)</span></span>
 <span><span class="co">#&gt; per-step luminance and chroma of each ramp, the max luminance mismatch,</span></span>
 <span><span class="co">#&gt; CVD simulations (deutan/protan/tritan), and a pass/fail verdict</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span><span class="va">...</span>, palette <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"balanced"</span>, <span class="st">"viridis_pair"</span>, <span class="st">"brewer_pair"</span>,</span>
 <span>                             <span class="st">"diverging"</span>, <span class="st">"print_safe"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu">scale_taichi_yin_viridis_c</span><span class="op">(</span><span class="op">)</span>; <span class="fu">scale_taichi_yang_viridis_c</span><span class="op">(</span><span class="op">)</span>; <span class="va">...</span>   <span class="co"># §4c</span></span></code></pre></div>
+<span><span class="fu"><a href="reference/scale_taichi.html">scale_taichi_yin_viridis_c</a></span><span class="op">(</span><span class="op">)</span>; <span class="fu"><a href="reference/scale_taichi.html">scale_taichi_yang_viridis_c</a></span><span class="op">(</span><span class="op">)</span>; <span class="va">...</span>   <span class="co"># §4c</span></span></code></pre></div>
 <p><strong>Design notes.</strong></p>
 <ul><li>
 <strong><code>colorspace</code> is the right tool and it is on CRAN.</strong> Sequential HCL ramps with a shared luminance trajectory and different hues are exactly the construction needed, and <code>colorspace</code> also provides CVD simulation for the check function. <code>farver</code> handles the per-colour luminance arithmetic.</li>
 <li>
-<strong><code>taichi_check_palette()</code> should be runnable on the <em>current defaults</em> and the result documented honestly.</strong> If grey-vs-red is unbalanced, say so in the help page, offer <code>palette = "balanced"</code>, and consider changing the default at the next major version with a loud NEWS note. Do not silently change it — 0.2.0 already made “the default look must not change” a commitment.</li>
+<strong><code><a href="reference/taichi_check_palette.html">taichi_check_palette()</a></code> should be runnable on the <em>current defaults</em> and the result documented honestly.</strong> If grey-vs-red is unbalanced, say so in the help page, offer <code>palette = "balanced"</code>, and consider changing the default at the next major version with a loud NEWS note. Do not silently change it — 0.2.0 already made “the default look must not change” a commitment.</li>
 <li>
 <strong><code>shared_legend = TRUE</code> deserves a re-read in this light.</strong> It paints both fish with <code>yin_colors</code> so identical values read as identical ink — which is the <em>perceptually correct</em> answer for directly comparable sources, and arguably should be recommended more strongly than it currently is. The cost is that the two sources are then distinguished only by position within the glyph (top bulb vs bottom bulb), which is worth stating explicitly.</li>
 <li>A <strong><code>print_safe</code></strong> pair (works in greyscale) matters for journal figures, where a two-hue design collapses. Pair with <code>ggpattern</code> texture fills (§8) as the belt-and-braces option.</li>
@@ -355,7 +355,7 @@
 <li>
 <strong><code>theme(geom = element_geom(ink, paper, accent))</code>.</strong> ggplot2 4.0 lets themes set geom defaults, with <code>ink</code> (foreground), <code>paper</code> (background) and <code>accent</code> propagating automatically — and <code>from_theme()</code> lets a geom’s <code>default_aes</code> read them. <code>GeomYinFish</code>/<code>GeomYangFish</code> hard-code <code>fill = "grey20"</code>, <code>colour = NA</code>. <strong>Consequence: ggtaichi does not currently follow a dark theme</strong> — on a dark <code>paper</code>, a <code>grey20</code> fallback fish and NA outlines are close to invisible. Migrating the fallbacks to <code>from_theme(ink)</code> / <code>from_theme(paper)</code> is a small change that makes the package a good citizen of modern themes, and it interacts well with §7’s palette work.</li>
 <li>
-<strong><code>draw_key</code>.</strong> Both fish geoms use <code>draw_key_rect</code>. A <strong><code>draw_key_taichi()</code></strong> that draws a tiny yin-yang in the legend would be a small, delightful, on-brand touch — and it is exactly the kind of thing an extension package should do. (Consider a half-fish key for the individual fish geoms.)</li>
+<strong><code>draw_key</code>.</strong> Both fish geoms use <code>draw_key_rect</code>. A <strong><code><a href="reference/draw_key_taichi.html">draw_key_taichi()</a></code></strong> that draws a tiny yin-yang in the legend would be a small, delightful, on-brand touch — and it is exactly the kind of thing an extension package should do. (Consider a half-fish key for the individual fish geoms.)</li>
 <li>
 <strong>Guides.</strong> The guide system was rewritten in 3.5/4.0; if the eye legend (§8) is ever built, build it against the new guide API, not the old one.</li>
 <li>
@@ -388,7 +388,7 @@
 <hr></div>
 <div class="section level2">
 <h2 id="id_14-prioritisation">14. Prioritisation<a class="anchor" aria-label="anchor" href="#id_14-prioritisation"></a></h2>
-<p><strong>Wave 1 — close the structural gap and modernise (0.3.0).</strong> 1. <strong>§4 ggiraph interactivity</strong> — the deferred headline; the value-reading channel the encoding needs; the renderer is already shaped for it. 2. <strong>§3 explicit encoding</strong> (<code>explicit =</code> + <code>geom_taichi_diff()</code> + <code>taichi_summary()</code>) — the missing third comparison mode. 3. <strong>§12 ggplot2 4.x work</strong> — <code>from_theme(ink/paper)</code> so dark themes work, <code>draw_key_taichi()</code>, S7-dispatch tests, <code>inst/CITATION</code>, covr. 4. <strong>§7 <code>taichi_check_palette()</code> + <code>taichi_palette_pair()</code> + the <code>scale_taichi_*</code> constructors</strong> — palette pairing is chart validity, and the check function can be run on the current defaults immediately. 5. <strong>§5 binned-scale support and recommendation</strong> — the cheapest accuracy win.</p>
+<p><strong>Wave 1 — close the structural gap and modernise (0.3.0).</strong> 1. <strong>§4 ggiraph interactivity</strong> — the deferred headline; the value-reading channel the encoding needs; the renderer is already shaped for it. 2. <strong>§3 explicit encoding</strong> (<code>explicit =</code> + <code><a href="reference/geom_taichi_diff.html">geom_taichi_diff()</a></code> + <code><a href="reference/taichi_summary.html">taichi_summary()</a></code>) — the missing third comparison mode. 3. <strong>§12 ggplot2 4.x work</strong> — <code>from_theme(ink/paper)</code> so dark themes work, <code><a href="reference/draw_key_taichi.html">draw_key_taichi()</a></code>, S7-dispatch tests, <code>inst/CITATION</code>, covr. 4. <strong>§7 <code><a href="reference/taichi_check_palette.html">taichi_check_palette()</a></code> + <code><a href="reference/taichi_palette_pair.html">taichi_palette_pair()</a></code> + the <code>scale_taichi_*</code> constructors</strong> — palette pairing is chart validity, and the check function can be run on the current defaults immediately. 5. <strong>§5 binned-scale support and recommendation</strong> — the cheapest accuracy win.</p>
 <p><strong>Wave 2 — readability and placement (0.4.0).</strong> <code>taichi_seriate()</code> and labels with contrast-aware colour (§5); <code>stat_taichi()</code> and <code>taichi_check()</code> (§9); <code>na_style</code> incl. <code>"omit"</code> (§10); the map placement path + <code>countryatlas</code> recipe (§6); the <code>vignette("design")</code> and the comparison table (§13); MP4 export (§11).</p>
 <p><strong>Wave 3 — new channels, carefully (0.5.0).</strong> Settle the argument-grouping question (§13) <strong>first</strong>, then <code>split</code> (with the extended tiling proof) and <code>radius</code> (§8); pattern fills; scatter placement with collision resolution (§6); resolve the eye-legend question (§8/§15).</p>
 <p><strong>Wave 4 — ambitious and optional.</strong> Per-fish VSUP uncertainty palettes (§10); <code>taichi_layout()</code> structure-driven placement (§6); the stability cycle that earns a <code>stable</code> badge (§13).</p>
@@ -400,7 +400,7 @@
 <strong>Argument grouping, and when.</strong> ~20 arguments now, ~32 if §3–§8 all ship flat. Option-objects (<code>taichi_eyes()</code>, <code>taichi_scales()</code>, …) are the tidyverse-idiomatic fix, but they are a breaking-ish change and should land <em>before</em> the next channel wave, not after. <strong>This is the most consequential API decision in the document.</strong>
 </li>
 <li>
-<strong>Do the default palettes change?</strong> If <code>taichi_check_palette()</code> shows grey-vs-red is luminance-mismatched (§7), the defaults are producing subtly unfair comparisons. Changing them breaks every existing figure. Proposal: measure, document honestly, ship <code>palette = "balanced"</code>, and flip the default only at 1.0.0 with a prominent NEWS entry.</li>
+<strong>Do the default palettes change?</strong> If <code><a href="reference/taichi_check_palette.html">taichi_check_palette()</a></code> shows grey-vs-red is luminance-mismatched (§7), the defaults are producing subtly unfair comparisons. Changing them breaks every existing figure. Proposal: measure, document honestly, ship <code>palette = "balanced"</code>, and flip the default only at 1.0.0 with a prominent NEWS entry.</li>
 <li>
 <strong>Raise the ggplot2 floor to 4.0.0?</strong> Required for <code>from_theme()</code> (§12). Cleaner than runtime detection, but excludes older installs. Leaning: yes, at the same major version as the palette change.</li>
 <li>

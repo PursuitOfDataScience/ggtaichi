@@ -17,7 +17,7 @@ ggplot2."><meta property="og:image" content="https://pursuitofdatascience.github
 
     <a class="navbar-brand me-2" href="../index.html">ggtaichi</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,6 +62,15 @@ cell into a taichi diagram, much like <code><a href="https://ggplot2.tidyverse.o
 heatmap. It is supported by <code><a href="theme_taichi.html">theme_taichi()</a></code> and <code><a href="remove_padding.html">remove_padding()</a></code>
 for styling. Users should reference the documentation and run the examples in
 the help files when trying to understand what each argument means visually.</p>
+<p>Around it are the pieces that make a grid of glyphs readable:
+<code><a href="taichi_summary.html">taichi_summary()</a></code> and <code><a href="geom_taichi_diff.html">geom_taichi_diff()</a></code> put the relationship
+between the two sources into numbers and into a diverging heatmap;
+<code><a href="taichi_palette_pair.html">taichi_palette_pair()</a></code>, <code><a href="taichi_palette.html">taichi_palette()</a></code> and
+<code><a href="taichi_check_palette.html">taichi_check_palette()</a></code> build and audit the pair of colour ramps the
+comparison depends on; the <code>scale_taichi_*()</code> family supplies ready
+fill scales, including the binned ones worth reaching for on a dense grid;
+and <code>geom_taichi(interactive = TRUE)</code> hands the plot to
+<span class="pkg">ggiraph</span> so a reader can hover for the exact values.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

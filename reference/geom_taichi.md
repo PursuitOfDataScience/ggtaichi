@@ -19,14 +19,23 @@ geom_taichi(
   yang_name = NULL,
   yin_colors = c("gray100", "gray85", "gray50", "gray35", "gray0"),
   yang_colors = c("#FED7D8", "#FE8C91", "#F5636B", "#E72D3F", "#C20824"),
+  palette = NULL,
   yin_scale = NULL,
   yang_scale = NULL,
   angle = NULL,
   eyes = FALSE,
   yin_eye_size = 0.15,
   yang_eye_size = 0.15,
-  yin_eye_colour = "white",
-  yang_eye_colour = "black",
+  yin_eye_colour = NULL,
+  yang_eye_colour = NULL,
+  explicit = c("none", "difference", "ratio", "log_ratio", "z"),
+  explicit_channel = c("eye_size", "angle", "border", "radius"),
+  explicit_range = NULL,
+  interactive = FALSE,
+  tooltip = NULL,
+  data_id = NULL,
+  onclick = NULL,
+  data_id_by = c("cell", "fish", "source"),
   shared_limits = FALSE,
   shared_legend = FALSE,
   width = NULL,
@@ -37,6 +46,7 @@ geom_taichi(
   linewidth = 0.1,
   linetype = 1,
   show.legend = NA,
+  key_glyph = NULL,
   ...
 )
 ```
@@ -78,6 +88,18 @@ geom_taichi(
   a gradient for continuous data and as a discrete palette for
   factor/character data. Ignored if `yang_scale` is provided.
 
+- palette:
+
+  A matched pair of ramps to use instead of `yin_colors` /
+  `yang_colors`: the name of a
+  [`taichi_palette()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_palette.md)
+  preset (`"balanced"`, `"diverging"`, `"viridis_pair"`,
+  `"brewer_pair"`, `"print_safe"`, `"default"`) or a list with `yin` and
+  `yang` colour vectors, such as the result of
+  [`taichi_palette_pair()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_palette_pair.md).
+  Default `NULL`, which keeps the package's historical grey / seal-red
+  pair. See the Palettes section.
+
 - yin_scale:
 
   An optional fill scale for the yin fish: either a ready scale object
@@ -110,8 +132,56 @@ geom_taichi(
 
 - yin_eye_colour, yang_eye_colour:
 
-  Colour of each eye dot: a constant (defaults "white" and "black") or
-  an unquoted data column containing colour strings.
+  Colour of each eye dot: a constant, an unquoted data column containing
+  colour strings, or `NULL` (the default) to take the colour from the
+  theme — the yin eye from the theme's `paper` and the yang eye from its
+  `ink`, which is white and black on every light theme and swaps on a
+  dark one. On ggplot2 before 4.0.0, where themes cannot set geom
+  defaults, `NULL` falls back to the literal "white" and "black".
+
+- explicit:
+
+  Which relationship between the two sources to compute and show as a
+  third channel: `"none"` (the default), `"difference"`, `"ratio"`,
+  `"log_ratio"` or `"z"`. See the Explicit encoding section, and
+  [`taichi_summary()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_summary.md)
+  for the definitions.
+
+- explicit_channel:
+
+  Where the computed statistic goes: `"eye_size"` (the default),
+  `"angle"`, `"border"` or `"radius"`. Ignored when `explicit = "none"`.
+  The chosen channel cannot also be set by hand — e.g.
+  `explicit_channel = "angle"` together with an `angle` argument is an
+  error rather than a silent override.
+
+- explicit_range:
+
+  Two numbers giving the output range of `explicit_channel`, or `NULL`
+  (the default) for that channel's own sensible range.
+
+- interactive:
+
+  If `TRUE`, draw the fish (and their eyes) as ggiraph grobs carrying
+  `tooltip`, `data_id` and `onclick`, so that
+  [`ggiraph::girafe()`](https://davidgohel.github.io/ggiraph/reference/girafe.html)
+  turns the plot into a widget. Needs the ggiraph package. Default
+  `FALSE`, which renders exactly as before and does not touch ggiraph.
+  See the Interactivity section.
+
+- tooltip, data_id, onclick:
+
+  Optional unquoted data columns overriding the interactive attributes.
+  Used only when `interactive = TRUE`; by default `tooltip` is built
+  from the two values, their difference and the cell's coordinates,
+  `data_id` from `data_id_by`, and `onclick` is empty.
+
+- data_id_by:
+
+  Scope of the default `data_id`, i.e. what one hover highlights:
+  `"cell"` (both fish of that glyph; the default), `"fish"` (one fish),
+  or `"source"` (every fish of that source, in every cell). Ignored when
+  `data_id` is supplied.
 
 - shared_limits:
 
@@ -119,15 +189,24 @@ geom_taichi(
   both discrete), the two auto-built fill scales share common limits —
   the union range (or union of levels) of `yin` and `yang` — so equal
   values read as equal ink. Explicit `limits` passed through `...` take
-  precedence. Default `FALSE`.
+  precedence. As of 0.3.0 the shared limits are also pushed into a
+  custom `yin_scale` / `yang_scale` that does not set limits of its own,
+  so a supplied binned scale shares breaks too. Default `FALSE`.
 
 - shared_legend:
 
   If `TRUE`, treats the two sources as directly comparable: implies
   `shared_limits = TRUE`, paints both fish with `yin_colors`, and shows
   a single legend (the yang guide is dropped). Unless `yin_name` is
-  supplied, the legend is titled "`yin` / `yang`". Ignored when custom
-  `yin_scale` / `yang_scale` are given. Default `FALSE`.
+  supplied, the legend is titled "`yin` / `yang`". Default `FALSE`. This
+  is the perceptually correct choice whenever the two sources really are
+  directly comparable: one ramp means equal values are equal ink by
+  construction, with no palette pairing to get wrong (see the Palettes
+  section). The cost is that the sources are then told apart only by
+  their position inside the glyph — yin is the top bulb, yang the
+  bottom. When a custom `yang_scale` is supplied it is used as given, so
+  making the two palettes agree is then your business; the duplicate
+  yang guide is dropped either way.
 
 - width, height:
 
@@ -162,6 +241,16 @@ geom_taichi(
 
   Logical. Should the layer be included in the legend?
 
+- key_glyph:
+
+  The legend key glyph, passed on to
+  [`layer()`](https://ggplot2.tidyverse.org/reference/layer.html). Both
+  fish default to a small taichi with their own half filled (see
+  [`draw_key_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/draw_key_taichi.md));
+  pass `"rect"` for the plain ggplot2 rectangles of earlier versions.
+  Keys only appear for discrete fills — a continuous fill gets a
+  colourbar.
+
 - ...:
 
   Additional arguments passed to *both* auto-built fill scales (e.g.,
@@ -181,6 +270,13 @@ A `ggtaichi_plot` object: the two fish layers plus the fill scales they
 need, ready to be added to a
 [`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html) with
 `+`. It is not a plot on its own.
+
+## Details
+
+A seventh channel, `angle`, rotates the glyph, and `explicit` adds an
+eighth that is *computed* rather than mapped: the relationship between
+the two sources, shown as a third channel of the same mark. See the
+Explicit encoding section.
 
 ## Discrete and continuous fills
 
@@ -244,6 +340,107 @@ A fish whose fill value is `NA` is painted in the scale's `na.value`
 colour (pass e.g. `na.value = "transparent"` through `...` to change
 it), while `na.rm = TRUE` silently drops rows with missing positions.
 
+## Explicit encoding
+
+Two fish sharing one position is a *superposition* comparison. It is
+very good at "are these similar?" and "which is bigger here?", and it
+cannot answer "by how much?" — that needs the relationship itself to be
+computed and drawn. `explicit` does exactly that, turning one of
+`"difference"` (`yin - yang`), `"ratio"`, `"log_ratio"` or `"z"` into a
+third channel of the glyph. The statistics are the ones
+[`taichi_summary()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_summary.md)
+tabulates, including its rule that a ratio of a non-positive value is
+`NA` rather than `Inf`.
+
+`explicit_channel` chooses where it goes:
+
+- `"eye_size"`:
+
+  The default, and the tidiest: the eyes already exist and are visually
+  subordinate to the fills, so the two fish keep carrying the two
+  sources while eye size carries the gap between them. A big eye reads
+  as "look here", which is what a big gap means. Cells where the two
+  sources agree exactly get no eye at all, so a plain glyph means
+  agreement. Implies `eyes = TRUE`.
+
+- `"angle"`:
+
+  The most *accurate* option. Direction and angle are read far more
+  precisely than shading, so encoding the gap as tilt makes it legible
+  to a precision the fills can never reach: an upright glyph means the
+  two sources agree and the lean shows which way and how far. The cost
+  is the symbol's upright orientation, which is why it is a choice
+  rather than the default.
+
+- `"border"`:
+
+  Outline width. Unobtrusive, and it composes with everything else, but
+  the least precise of the four. Because the default `colour` is `NA` —
+  no outline at all — this channel gives the outline a visible colour
+  unless you set `colour` yourself.
+
+- `"radius"`:
+
+  Glyph size, scaled by area (radius proportional to the square root of
+  the statistic) so that the eye's area-based reading is the correct
+  one. Cells where the sources agree shrink; use it when the interesting
+  thing is *where* they disagree.
+
+`explicit_range` sets the channel's output range; each channel has a
+sensible default (`c(0, 0.3)` of the glyph radius for eyes, `c(-45, 45)`
+degrees for angle, `c(0, 1)` mm for the border, `c(0.4, 1)` of the cell
+for radius). The statistic is rescaled across the whole layer, so the
+mapping is comparable between facets.
+
+[`geom_taichi_diff()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi_diff.md)
+draws the same statistic as a diverging heatmap when the glyph is not
+the right chart for the question, and
+[`taichi_summary()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_summary.md)
+returns it as a table.
+
+## Palettes
+
+The two ramps are compared against each other, so they need to be
+matched: if one spans a wider luminance range than the other then equal
+values do not read as equal ink and one fish looks heavier wherever the
+data says the sources are level. The default grey-and-red pair is *not*
+matched (run
+[`taichi_check_palette()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_check_palette.md)
+with no arguments to see the numbers) and is kept only for continuity.
+`palette` selects a matched pair instead — `"balanced"` is the
+recommended one — and also accepts the output of
+[`taichi_palette_pair()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_palette_pair.md).
+It is a shorthand for setting `yin_colors` and `yang_colors` together,
+so passing both is an error.
+
+## Interactivity
+
+Fill is the least accurate channel there is, which is why an interactive
+version of a taichi grid is not a gimmick: hovering supplies the exact
+values without giving up the encoding. With `interactive = TRUE` the
+layers emit ggiraph grobs, and the plot becomes a widget when it is
+passed to
+[`ggiraph::girafe()`](https://davidgohel.github.io/ggiraph/reference/girafe.html):
+
+      p <- ggplot(cafes_tg, aes(week, neighbourhood)) +
+        geom_taichi(yin = matcha, yang = espresso, interactive = TRUE)
+      ggiraph::girafe(ggobj = p)
+
+The default tooltip carries both values, their difference, and the
+cell's coordinates. `data_id_by` decides what a hover highlights:
+`"cell"` (the default) lights up both fish of one glyph, `"fish"` one
+fish at a time, and `"source"` every fish of one source at once — which
+turns the superposition display into a single-source display for as long
+as the pointer rests there, letting a reader decompose the comparison
+instead of doing it in their head. `tooltip`, `data_id` and `onclick`
+take a data column to override any of it.
+
+The static rendering is unchanged: with `interactive = FALSE` the
+package does not touch ggiraph at all, and with it `TRUE` the same
+geometry is drawn, only in grobs that carry the extra attributes. plotly
+is not and will not be supported — `ggplotly()` cannot translate custom
+grobs, which is exactly what this package draws.
+
 ## Examples
 
 ``` r
@@ -280,4 +477,33 @@ ggplot(data, aes(x, y)) +
               yin_eye_size = yang_values,
               angle = 45)
 
+
+# a matched palette pair, and the gap between the sources as eye size
+
+ggplot(data, aes(x, y)) +
+  geom_taichi(yin = yin_values,
+              yang = yang_values,
+              palette = "balanced",
+              shared_limits = TRUE,
+              explicit = "difference")
+
+
+# the same gap as tilt: the most accurate channel available
+
+ggplot(data, aes(x, y)) +
+  geom_taichi(yin = yin_values,
+              yang = yang_values,
+              explicit = "difference",
+              explicit_channel = "angle")
+
+
+# tooltips carry the exact values; needs ggiraph to view
+
+p <- ggplot(data, aes(x, y)) +
+  geom_taichi(yin = yin_values, yang = yang_values,
+              interactive = TRUE, data_id_by = "source")
+if (requireNamespace("ggiraph", quietly = TRUE)) {
+  # ggiraph::girafe(ggobj = p)
+}
+#> NULL
 ```

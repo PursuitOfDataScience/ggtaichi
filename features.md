@@ -256,12 +256,13 @@ taichi_summary(data, yin, yang)
   to a precision the fills can never reach. It costs the glyph’s upright
   orientation, so it belongs behind an explicit choice — but it is the
   highest-accuracy option available.
-- **`geom_taichi_diff()` is the honest escape hatch**: sometimes the
-  right chart for “how much bigger” is a diverging heatmap, and a
-  package that offers one next to its signature glyph is more
-  trustworthy than one that insists on the glyph. Cheap to build (it is
-  a `geom_tile()` with the package’s palette conventions) and it makes
-  the `explicit` argument’s semantics concrete.
+- **[`geom_taichi_diff()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi_diff.md)
+  is the honest escape hatch**: sometimes the right chart for “how much
+  bigger” is a diverging heatmap, and a package that offers one next to
+  its signature glyph is more trustworthy than one that insists on the
+  glyph. Cheap to build (it is a `geom_tile()` with the package’s
+  palette conventions) and it makes the `explicit` argument’s semantics
+  concrete.
 - `ratio`/`log_ratio` need zero/negative handling defined up front —
   return `NA` with a warning, never `Inf`.
 
@@ -297,7 +298,8 @@ girafe(ggobj = p, options = list(
 
 - **The vectorised `makeContent()` renderer built in 0.2.0 is what makes
   this natural** — as the ledger anticipated. The id-batched
-  `polygonGrob` maps directly onto `ggiraph::interactive_polygon_grob()`
+  `polygonGrob` maps directly onto
+  [`ggiraph::interactive_polygon_grob()`](https://davidgohel.github.io/ggiraph/reference/interactive_polygon_grob.html)
   with vectors of `tooltip` and `data_id`, so this is a substitution
   inside one function rather than a second rendering path.
 - **Per-fish `data_id` enables the feature that matters most**: hovering
@@ -464,12 +466,12 @@ scale_taichi_yin_viridis_c(); scale_taichi_yang_viridis_c(); ...   # §4c
   exactly the construction needed, and `colorspace` also provides CVD
   simulation for the check function. `farver` handles the per-colour
   luminance arithmetic.
-- **`taichi_check_palette()` should be runnable on the *current
-  defaults* and the result documented honestly.** If grey-vs-red is
-  unbalanced, say so in the help page, offer `palette = "balanced"`, and
-  consider changing the default at the next major version with a loud
-  NEWS note. Do not silently change it — 0.2.0 already made “the default
-  look must not change” a commitment.
+- **[`taichi_check_palette()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_check_palette.md)
+  should be runnable on the *current defaults* and the result documented
+  honestly.** If grey-vs-red is unbalanced, say so in the help page,
+  offer `palette = "balanced"`, and consider changing the default at the
+  next major version with a loud NEWS note. Do not silently change it —
+  0.2.0 already made “the default look must not change” a commitment.
 - **`shared_legend = TRUE` deserves a re-read in this light.** It paints
   both fish with `yin_colors` so identical values read as identical ink
   — which is the *perceptually correct* answer for directly comparable
@@ -696,10 +698,11 @@ package should be deliberate about it rather than merely passing checks.
     the package a good citizen of modern themes, and it interacts well
     with §7’s palette work.
 3.  **`draw_key`.** Both fish geoms use `draw_key_rect`. A
-    **`draw_key_taichi()`** that draws a tiny yin-yang in the legend
-    would be a small, delightful, on-brand touch — and it is exactly the
-    kind of thing an extension package should do. (Consider a half-fish
-    key for the individual fish geoms.)
+    **[`draw_key_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/draw_key_taichi.md)**
+    that draws a tiny yin-yang in the legend would be a small,
+    delightful, on-brand touch — and it is exactly the kind of thing an
+    extension package should do. (Consider a half-fish key for the
+    individual fish geoms.)
 4.  **Guides.** The guide system was rewritten in 3.5/4.0; if the eye
     legend (§8) is ever built, build it against the new guide API, not
     the old one.
@@ -777,15 +780,19 @@ debt.
 **Wave 1 — close the structural gap and modernise (0.3.0).** 1. **§4
 ggiraph interactivity** — the deferred headline; the value-reading
 channel the encoding needs; the renderer is already shaped for it. 2.
-**§3 explicit encoding** (`explicit =` + `geom_taichi_diff()` +
-`taichi_summary()`) — the missing third comparison mode. 3. **§12
-ggplot2 4.x work** — `from_theme(ink/paper)` so dark themes work,
-`draw_key_taichi()`, S7-dispatch tests, `inst/CITATION`, covr. 4. **§7
-`taichi_check_palette()` + `taichi_palette_pair()` + the
-`scale_taichi_*` constructors** — palette pairing is chart validity, and
-the check function can be run on the current defaults immediately. 5.
-**§5 binned-scale support and recommendation** — the cheapest accuracy
-win.
+**§3 explicit encoding** (`explicit =` +
+[`geom_taichi_diff()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi_diff.md) +
+[`taichi_summary()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_summary.md))
+— the missing third comparison mode. 3. **§12 ggplot2 4.x work** —
+`from_theme(ink/paper)` so dark themes work,
+[`draw_key_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/draw_key_taichi.md),
+S7-dispatch tests, `inst/CITATION`, covr. 4. **§7
+[`taichi_check_palette()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_check_palette.md) +
+[`taichi_palette_pair()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_palette_pair.md) +
+the `scale_taichi_*` constructors** — palette pairing is chart validity,
+and the check function can be run on the current defaults immediately.
+5. **§5 binned-scale support and recommendation** — the cheapest
+accuracy win.
 
 **Wave 2 — readability and placement (0.4.0).** `taichi_seriate()` and
 labels with contrast-aware colour (§5); `stat_taichi()` and
@@ -819,7 +826,8 @@ are for, and the docs should say so).
     are the tidyverse-idiomatic fix, but they are a breaking-ish change
     and should land *before* the next channel wave, not after. **This is
     the most consequential API decision in the document.**
-2.  **Do the default palettes change?** If `taichi_check_palette()`
+2.  **Do the default palettes change?** If
+    [`taichi_check_palette()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_check_palette.md)
     shows grey-vs-red is luminance-mismatched (§7), the defaults are
     producing subtly unfair comparisons. Changing them breaks every
     existing figure. Proposal: measure, document honestly, ship
