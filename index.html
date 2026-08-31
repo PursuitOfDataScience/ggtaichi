@@ -54,23 +54,22 @@
 </div>
 <!-- badges: start -->
 
-<p><code>ggtaichi</code> is a <code>ggplot2</code> extension that compares data from two sources on a single grid of taichi (yin-yang) diagrams. A regular heat map made with <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile()</a></code> encodes three dimensions (the <code>x</code>, <code>y</code> position and one value); <code><a href="reference/geom_taichi.html">geom_taichi()</a></code> turns every cell into a taichi symbol whose two interlocking fish are filled by <strong>two</strong> sources at once, so four dimensions are expressed on one plot – and with the optional data-driven eyes, up to <strong>six</strong>, plus rotation for a seventh and a computed comparison between the two sources for an eighth.</p>
+<p><strong>Two data sources. One grid of yin-yang glyphs. Both halves at a glance.</strong></p>
+<p>A <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile()</a></code> heatmap gives you one number per cell. <code><a href="reference/geom_taichi.html">geom_taichi()</a></code> gives you two.</p>
 <div class="section level2">
-<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+<h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
 </h2>
-<p>Install the released version from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"ggtaichi"</span><span class="op">)</span></span></code></pre></div>
-<p>Or the development version from GitHub with:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"ggtaichi"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># development version</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"PursuitOfDataScience/ggtaichi"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="anatomy-of-a-taichi">Anatomy of a taichi<a class="anchor" aria-label="anchor" href="#anatomy-of-a-taichi"></a>
+<h2 id="one-glyph-two-numbers">One glyph, two numbers<a class="anchor" aria-label="anchor" href="#one-glyph-two-numbers"></a>
 </h2>
-<p>Each symbol is a circle split by an S-curve into two interlocking fish. The <strong>yang</strong> (light) fish is shaded by one source and the <strong>yin</strong> (dark) fish by the other, each on its own gradient. By default there are no decorative dots – every drop of ink is data – and the classic eyes, when you enable them, are data channels too (see below).</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<p>Yin takes one source, yang the other. No decoration – every drop of ink is data.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pursuitofdatascience.github.io/ggtaichi/">ggtaichi</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span></span>
@@ -83,79 +82,39 @@
 <p><img src="reference/figures/README-anatomy-1.png" alt="A single large taichi diagram whose red (yang) half encodes one data source and grey (yin) half the other." style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
-<h2 id="a-clear-small-grid">A clear, small grid<a class="anchor" aria-label="anchor" href="#a-clear-small-grid"></a>
+<h2 id="now-a-grid-of-them">Now a grid of them<a class="anchor" aria-label="anchor" href="#now-a-grid-of-them"></a>
 </h2>
-<p>The built-in <code>pitts_tg</code> dataset holds the 30-week COVID-related Google and Twitter incidence rates for 9 categories in the Pittsburgh Metropolitan Statistical Area. With many weeks the symbols shrink, so it is often easier to read a slice. Here are the first six weeks, where each taichi is big enough to compare the two halves at a glance.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pitts_small</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">pitts_tg</span>, <span class="va">week</span> <span class="op">&lt;=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">pitts_small</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">category</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">pitts_small</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">week</span>, <span class="va">category</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">Twitter</span>, yang <span class="op">=</span> <span class="va">Google</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Pittsburgh: Google (yang) vs Twitter (yin), weeks 1-6"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-pitts-small-1.png" alt="A six-week grid of taichi diagrams for nine Pittsburgh COVID categories, the yang fish shaded red by Google and the yin fish grey by Twitter." style="display: block; margin: auto;"></p>
-<p>The legend titles default to the column names you supply. Note how <code>Covid</code> and <code>Masks</code> lean dark (high Twitter) while staying pink (moderate Google).</p>
-</div>
-<div class="section level2">
-<h2 id="your-own-gradients">Your own gradients<a class="anchor" aria-label="anchor" href="#your-own-gradients"></a>
-</h2>
-<p>Each fish gets its own gradient, and any extra argument is passed straight to <code><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">ggplot2::scale_fill_gradientn()</a></code>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">pitts_small</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">category</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span></span>
-<span>    yin  <span class="op">=</span> <span class="va">Twitter</span>, yin_name  <span class="op">=</span> <span class="st">"Twitter (%)"</span>,</span>
-<span>    yin_colors  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#deebf7"</span>, <span class="st">"#3182bd"</span>, <span class="st">"#08306b"</span><span class="op">)</span>,</span>
-<span>    yang <span class="op">=</span> <span class="va">Google</span>,  yang_name <span class="op">=</span> <span class="st">"Google (%)"</span>,</span>
-<span>    yang_colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#fee6ce"</span>, <span class="st">"#e6550d"</span>, <span class="st">"#7f2704"</span><span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-palettes-1.png" alt="The same six-week Pittsburgh grid of taichi diagrams drawn with a blue gradient for Twitter and an orange gradient for Google." style="display: block; margin: auto;"></p>
+<p><img src="reference/figures/README-pitts-1.png" alt="A six-week grid of taichi diagrams for nine Pittsburgh COVID categories, the yang fish shaded red by Google and the yin fish grey by Twitter." style="display: block; margin: auto;"></p>
+<p><code>Covid</code> and <code>Masks</code> lean dark – lots of Twitter – while staying pink, so only moderate Google.</p>
 </div>
 <div class="section level2">
-<h2 id="comparing-places">Comparing places<a class="anchor" aria-label="anchor" href="#comparing-places"></a>
+<h2 id="the-eyes-are-data-too">The eyes are data too<a class="anchor" aria-label="anchor" href="#the-eyes-are-data-too"></a>
 </h2>
-<p>Because <code><a href="reference/geom_taichi.html">geom_taichi()</a></code> is an ordinary layer, faceting just works. The <code>states_tg</code> dataset repeats the same measurements across four states; showing two of them over a handful of weeks keeps the glyphs large and legible.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">two_states</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">states_tg</span>, <span class="va">state</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"New York"</span>, <span class="st">"Texas"</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">week</span> <span class="op">&lt;=</span> <span class="fl">6</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">two_states</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">category</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">Twitter</span>, yang <span class="op">=</span> <span class="va">Google</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">state</span>, ncol <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="reference/remove_padding.html">remove_padding</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"c"</span>, y <span class="op">=</span> <span class="st">"d"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"New York vs Texas, weeks 1-6"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-states-1.png" alt="Two faceted taichi grids comparing New York and Texas over six weeks, the yang fish red for Google and the yin fish grey for Twitter." style="display: block; margin: auto;"></p>
-</div>
-<div class="section level2">
-<h2 id="eyes-that-carry-data">Eyes that carry data<a class="anchor" aria-label="anchor" href="#eyes-that-carry-data"></a>
-</h2>
-<p><code>eyes = TRUE</code> draws the classic taichi dots, each centred in its own fish’s head. The eye arguments accept a constant <em>or a data column</em>: mapped eye sizes (rescaled to sensible radii) and colours make the glyph a genuine <strong>six-dimensional</strong> mark – <code>x</code>, <code>y</code>, two fills, two eyes.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">quad</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
-<span>  y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>  yin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">5</span>, <span class="fl">7</span>, <span class="fl">9</span><span class="op">)</span>,</span>
-<span>  yang <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">7</span>, <span class="fl">5</span>, <span class="fl">3</span><span class="op">)</span>,</span>
-<span>  reach <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">40</span>, <span class="fl">25</span>, <span class="fl">5</span><span class="op">)</span>,</span>
-<span>  quality <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">4</span>, <span class="fl">8</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
+<p>Six dimensions in one mark: <code>x</code>, <code>y</code>, two fills, two eyes.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">quad</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>                   yin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">5</span>, <span class="fl">7</span>, <span class="fl">9</span><span class="op">)</span>, yang <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">7</span>, <span class="fl">5</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>                   reach <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">40</span>, <span class="fl">25</span>, <span class="fl">5</span><span class="op">)</span>, quality <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">4</span>, <span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">quad</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">yin</span>, yang <span class="op">=</span> <span class="va">yang</span>,</span>
-<span>              eyes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>              yin_eye_size <span class="op">=</span> <span class="va">reach</span>,</span>
-<span>              yang_eye_size <span class="op">=</span> <span class="va">quality</span>,</span>
-<span>              limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>  <span class="co"># shared limits keep the palest fish visible</span></span>
+<span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">yin</span>, yang <span class="op">=</span> <span class="va">yang</span>, eyes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>              yin_eye_size <span class="op">=</span> <span class="va">reach</span>, yang_eye_size <span class="op">=</span> <span class="va">quality</span>,</span>
+<span>              limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Eye sizes encode a 5th and 6th variable"</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-eyes-1.png" alt="A two-by-two grid of taichi diagrams with classic eyes whose sizes vary from cell to cell, encoding two extra variables." style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
-<h2 id="rotation">Rotation<a class="anchor" aria-label="anchor" href="#rotation"></a>
+<h2 id="spin-it">Spin it<a class="anchor" aria-label="anchor" href="#spin-it"></a>
 </h2>
-<p><code>angle</code> rotates each glyph by a constant or by a column, so orientation can encode a directional or temporal variable – and, combined with <a href="https://gganimate.com" class="external-link">gganimate</a>, produces the iconic spinning taichi (see <code><a href="articles/animations.html">vignette("animations")</a></code>).</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p><code>angle</code> takes a constant or a column – a seventh channel.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, y <span class="op">=</span> <span class="fl">1</span>, yin <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, yang <span class="op">=</span> <span class="fl">4</span><span class="op">:</span><span class="fl">1</span>,</span>
 <span>                  turn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">45</span>, <span class="fl">90</span>, <span class="fl">135</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -165,58 +124,77 @@
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-rotation-1.png" alt="Four taichi diagrams rotated by 0, 45, 90, and 135 degrees read from a data column." style="display: block; margin: auto;"></p>
+<p>Hand <code>angle</code> to <a href="https://gganimate.com" class="external-link">gganimate</a> and it actually spins.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://gganimate.com" class="external-link">gganimate</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">spin</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, f <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">48</span><span class="op">)</span></span>
+<span><span class="va">spin</span><span class="op">$</span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
+<span><span class="va">spin</span><span class="op">$</span><span class="va">turn</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">spin</span><span class="op">$</span><span class="va">f</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fl">7.5</span> <span class="op">+</span> <span class="op">(</span><span class="va">spin</span><span class="op">$</span><span class="va">x</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fl">45</span>   <span class="co"># each one out of phase</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">spin</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="fl">1</span>, yang <span class="op">=</span> <span class="fl">2</span>, angle <span class="op">=</span> <span class="va">turn</span>, eyes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>              yin_colors <span class="op">=</span> <span class="st">"grey15"</span>, yang_colors <span class="op">=</span> <span class="st">"#C20824"</span>,</span>
+<span>              show.legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_void</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://gganimate.com/reference/transition_states.html" class="external-link">transition_states</a></span><span class="op">(</span><span class="va">f</span>, transition_length <span class="op">=</span> <span class="fl">1</span>, state_length <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-spin-1.gif" alt="Four taichi glyphs rotating steadily, each a quarter turn out of phase with the last." style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
-<h2 id="categorical-fills">Categorical fills<a class="anchor" aria-label="anchor" href="#categorical-fills"></a>
+<h2 id="watch-a-season-go-by">Watch a season go by<a class="anchor" aria-label="anchor" href="#watch-a-season-go-by"></a>
 </h2>
-<p>Factor, character, and logical columns now get a discrete fill scale automatically (v0.1.0 could only draw continuous values); computed expressions like <code>factor(week)</code> work too, and <code>yin_scale</code> / <code>yang_scale</code> accept any custom fill scale.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">disc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
-<span>  y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"A"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  outcome <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"win"</span>, <span class="st">"loss"</span>, <span class="st">"win"</span>, <span class="st">"loss"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
+<p><code>cafes_tg</code> follows espresso and matcha across twelve weeks. Espresso cools off, matcha warms up.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">neighbourhood</span>, <span class="st">""</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>, shared_legend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>              yin_name <span class="op">=</span> <span class="st">"orders / 100 customers"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">30</span>, hjust <span class="op">=</span> <span class="fl">1</span>, size <span class="op">=</span> <span class="fl">9</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Week {closest_state}"</span>, x <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://gganimate.com/reference/transition_states.html" class="external-link">transition_states</a></span><span class="op">(</span><span class="va">week</span>, transition_length <span class="op">=</span> <span class="fl">2</span>, state_length <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-season-1.gif" alt="Eight taichi glyphs, one per neighbourhood, animating week by week as the espresso half lightens and the matcha half darkens." style="display: block; margin: auto;"></p>
+</div>
+<div class="section level2">
+<h2 id="categories-work-too">Categories work too<a class="anchor" aria-label="anchor" href="#categories-work-too"></a>
+</h2>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">disc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>                   method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"A"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                   outcome <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"win"</span>, <span class="st">"loss"</span>, <span class="st">"win"</span>, <span class="st">"loss"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">disc</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">method</span>, yang <span class="op">=</span> <span class="va">outcome</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Discrete yin &amp; yang"</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-categorical-1.png" alt="A two-by-two grid of taichi diagrams whose fish are filled by discrete categories: methods A to C for yin and win or loss for yang." style="display: block; margin: auto;"></p>
+<p>The legend keys are little taichi as well.</p>
 </div>
 <div class="section level2">
-<h2 id="one-legend-two-fish">One legend, two fish<a class="anchor" aria-label="anchor" href="#one-legend-two-fish"></a>
+<h2 id="same-units-one-legend">Same units? One legend.<a class="anchor" aria-label="anchor" href="#same-units-one-legend"></a>
 </h2>
-<p>When both sources share units, <code>shared_legend = TRUE</code> puts them on a single scale and a single legend (<code>shared_limits = TRUE</code> aligns limits while keeping separate palettes). The bundled synthetic <code>cafes_tg</code> data – espresso vs matcha orders across eight neighbourhoods – is made for it:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>,</span>
-<span>              shared_legend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">week</span>, <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>, shared_legend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>              yin_name <span class="op">=</span> <span class="st">"orders / 100 customers"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="reference/remove_padding.html">remove_padding</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Espresso (yang) vs matcha (yin)"</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-shared-1.png" alt="A 12-week by 8-neighbourhood grid of taichi diagrams comparing espresso and matcha orders on one shared grey scale with a single legend." style="display: block; margin: auto;"></p>
-<p>The building blocks <code><a href="reference/geom_yin_fish.html">geom_yin_fish()</a></code> / <code><a href="reference/geom_yin_fish.html">geom_yang_fish()</a></code> are exported for fully manual scale control, and each layer is drawn as one batched polygon – a 1200-cell grid renders about 15x faster than the per-cell grob building of v0.1.0, pixel-for-pixel identically.</p>
 </div>
 <div class="section level2">
-<h2 id="new-in-030-how-much-bigger-not-just-which">New in 0.3.0: how much bigger, not just which<a class="anchor" aria-label="anchor" href="#new-in-030-how-much-bigger-not-just-which"></a>
+<h2 id="bigger-sure--but-by-how-much">Bigger, sure – but by how much?<a class="anchor" aria-label="anchor" href="#bigger-sure--but-by-how-much"></a>
 </h2>
-<p>Two fish sharing one position is a <em>superposition</em> comparison. It is very good at “are these similar?” and “which is bigger here?”, and it simply cannot answer “by how much?” – for that the relationship has to be computed and drawn. <code>explicit</code> does that, turning the difference (or ratio, log ratio, or standardised difference) into a third channel of the same mark.</p>
-<p>The default channel is eye size, because the eyes already exist and are visually subordinate to the fills: the two fish keep carrying the two sources while the eye carries the gap. A cell where the sources agree exactly gets no eye, so a plain glyph <em>means</em> agreement.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>,</span>
-<span>              shared_legend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<p>Two fish in one spot tell you <em>which</em>. <code>explicit</code> computes the gap and shows you <em>how much</em>. Cells where the two agree get no eye at all.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">week</span>, <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>, shared_legend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>              yin_name <span class="op">=</span> <span class="st">"orders / 100 customers"</span>,</span>
 <span>              explicit <span class="op">=</span> <span class="st">"difference"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="reference/remove_padding.html">remove_padding</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Eye size = how far apart the two sources are"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-explicit-eye-1.png" alt="A 12-week by 8-neighbourhood taichi grid where each glyph's eyes grow with the gap between espresso and matcha orders, and cells where the two agree have no eyes at all." style="display: block; margin: auto;"></p>
-<p><code>explicit_channel = "angle"</code> is the most <em>accurate</em> option: direction is read far more precisely than shading, so an upright glyph means the two sources agree and the lean shows which way and how far. <code>"border"</code> and <code>"radius"</code> are the other two.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-explicit-eye-1.png" alt="The espresso versus matcha grid where each glyph's eyes grow with the gap between the two sources, and cells where they agree have no eyes." style="display: block; margin: auto;"></p>
+<p>Or as tilt, which the eye reads far more precisely. Upright means they agree.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tilt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, y <span class="op">=</span> <span class="fl">1</span>, yin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">5</span>, <span class="fl">7</span>, <span class="fl">9</span><span class="op">)</span>, yang <span class="op">=</span> <span class="fl">9</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">tilt</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -224,91 +202,64 @@
 <span>              explicit <span class="op">=</span> <span class="st">"difference"</span>, explicit_channel <span class="op">=</span> <span class="st">"angle"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-explicit-angle-1.png" alt="Five taichi diagrams tilting progressively from left-leaning to right-leaning as the difference between the two sources goes from negative to positive." style="display: block; margin: auto;"></p>
-<p>And when the glyph is not the right chart for the question, <code><a href="reference/geom_taichi_diff.html">geom_taichi_diff()</a></code> draws the same statistic as a diverging heatmap, while <code><a href="reference/taichi_summary.html">taichi_summary()</a></code> returns it as a table:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="reference/taichi_summary.html">taichi_summary</a></span><span class="op">(</span><span class="va">cafes_tg</span>, yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>,</span>
-<span>                    x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">neighbourhood</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb14"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="do">##   x        y  yin yang difference     ratio  log_ratio          z dominant rank</span></span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="do">## 1 1 Old Town 32.8 48.5      -15.7 0.6762887 -0.5642889 -1.3891789 espresso   55</span></span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="do">## 2 2 Old Town 40.5 52.9      -12.4 0.7655955 -0.3853458 -1.1336049 espresso   66</span></span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="do">## 3 3 Old Town 38.4 50.9      -12.5 0.7544204 -0.4065593 -1.1321353 espresso   63</span></span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="do">## 4 4 Old Town 36.6 45.2       -8.6 0.8097345 -0.3044791 -0.7762886 espresso   72</span></span></code></pre></div>
+<p><img src="reference/figures/README-explicit-angle-1.png" alt="Five taichi diagrams tilting from left-leaning to right-leaning as the difference between the two sources goes from negative to positive." style="display: block; margin: auto;"></p>
+<p>Animate it and the eyes blink shut exactly where the two sources cross.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">neighbourhood</span>, <span class="st">""</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>, shared_legend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>              yin_name <span class="op">=</span> <span class="st">"orders / 100 customers"</span>,</span>
+<span>              explicit <span class="op">=</span> <span class="st">"difference"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">30</span>, hjust <span class="op">=</span> <span class="fl">1</span>, size <span class="op">=</span> <span class="fl">9</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Week {closest_state}"</span>, x <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://gganimate.com/reference/transition_states.html" class="external-link">transition_states</a></span><span class="op">(</span><span class="va">week</span>, transition_length <span class="op">=</span> <span class="fl">2</span>, state_length <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-crossover-1.gif" alt="Eight taichi glyphs animating across a season; their eyes shrink to nothing as espresso and matcha cross over, then swell again." style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
-<h2 id="new-in-030-palettes-you-can-check">New in 0.3.0: palettes you can check<a class="anchor" aria-label="anchor" href="#new-in-030-palettes-you-can-check"></a>
+<h2 id="is-your-palette-fair">Is your palette fair?<a class="anchor" aria-label="anchor" href="#is-your-palette-fair"></a>
 </h2>
-<p>The two ramps are compared against each other, so they have to be matched: if one spans a wider luminance range than the other, equal values do not read as equal ink and one fish looks heavier wherever the data says the two sources are level. That makes palette pairing a correctness question, and <code><a href="reference/taichi_check_palette.html">taichi_check_palette()</a></code> answers it with numbers. Run on the package’s own defaults, it fails them:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/taichi_check_palette.html">taichi_check_palette</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb16"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="do">## &lt;ggtaichi palette check&gt;</span></span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="do">##   step yin            L      C   yang           L      C       dL</span></span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="do">##   1    #FFFFFF    100.0    0.0   #FED7D8     89.2   14.5     10.8</span></span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="do">##   2    #EBEBEB     93.0    0.0   #FFB2B3     79.8   30.2     13.2</span></span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="do">##   3    #D8D8D8     86.3    0.0   #FE8C91     70.8   46.6     15.6</span></span>
-<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="do">##   4    #AAAAAA     69.6    0.0   #F9787D     65.8   53.9      3.8</span></span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="do">##   5    #7F7F7F     53.2    0.0   #F4636B     61.0   61.4     -7.8</span></span>
-<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="do">##   6    #6B6B6B     45.2    0.0   #EE4B54     55.9   70.0    -10.7</span></span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="do">##   7    #595959     37.8    0.0   #E62C3F     50.7   78.1    -12.8</span></span>
-<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="do">##   8    #2D2D2D     18.5    0.0   #D41D31     45.8   77.1    -27.3</span></span>
-<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="do">##   9    #000000      0.0    0.0   #C10724     40.6   75.7    -40.6</span></span>
-<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="do">##   largest luminance mismatch : 40.6 L* (tolerance 5.0)</span></span>
-<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a><span class="do">##   largest chroma mismatch    : 78.1</span></span>
-<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="do">##   how far apart the ramps stay (median distance, step for step)</span></span>
-<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="do">##       normal       27.2  </span></span>
-<span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a><span class="do">##       deutan       20.9  </span></span>
-<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="do">##       protan       12.7  (much worse than normal vision)</span></span>
-<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="do">##       tritan       28.4  </span></span>
-<span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a><span class="do">##   Verdict: FAIL</span></span>
-<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="do">##   the two ramps do not share a luminance trajectory, so equal</span></span>
-<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a><span class="do">##   values do NOT read as equal ink and one fish will appear to</span></span>
-<span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a><span class="do">##   dominate. Consider `palette = "balanced"` or `taichi_palette_pair()`.</span></span></code></pre></div>
-<p><code>palette = "balanced"</code> is a pair built to be matched — same luminance and chroma trajectory, different hue — and there are presets for viridis-family, ColorBrewer, diverging and greyscale-safe pairs, plus <code><a href="reference/taichi_palette_pair.html">taichi_palette_pair()</a></code> to build your own. The defaults are unchanged, so no existing figure moves.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<p>If the two ramps don’t span the same luminance, equal values don’t <em>look</em> equal and one fish quietly wins. Ask:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/taichi_check_palette.html">taichi_check_palette</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   largest luminance mismatch : 40.6 L* (tolerance 5.0)</span></span>
+<span><span class="co">#&gt;   Verdict: FAIL</span></span></code></pre></div>
+<p>Yes – the defaults fail their own check, and are kept only so old figures don’t move. <code>palette = "balanced"</code> passes.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">week</span>, <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>,</span>
 <span>              palette <span class="op">=</span> <span class="st">"balanced"</span>, shared_limits <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="reference/remove_padding.html">remove_padding</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"A luminance-matched pair: equal values, equal weight"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-balanced-1.png" alt="The espresso-versus-matcha taichi grid drawn with a luminance-matched blue and brick-red palette pair, so equal values carry equal visual weight." style="display: block; margin: auto;"></p>
+<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-balanced-1.png" alt="The espresso versus matcha grid drawn with a luminance-matched blue and brick-red palette pair, so equal values carry equal visual weight." style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
-<h2 id="new-in-030-binned-fills-for-dense-grids">New in 0.3.0: binned fills for dense grids<a class="anchor" aria-label="anchor" href="#new-in-030-binned-fills-for-dense-grids"></a>
+<h2 id="too-many-cells-bin-it">Too many cells? Bin it.<a class="anchor" aria-label="anchor" href="#too-many-cells-bin-it"></a>
 </h2>
-<p>Reading a value off a continuous luminance ramp is the least accurate perceptual task there is, and it gets worse as a grid grows. Matching a patch to one of five labelled bins is much closer to a categorical lookup, and <code>shared_limits</code> now pushes its limits into the scales you supply, so both fish share one set of breaks and equal values land in the same bin.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">week</span>, <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>,</span>
 <span>              yin_scale  <span class="op">=</span> <span class="fu"><a href="reference/scale_taichi.html">scale_taichi_yin_binned</a></span><span class="op">(</span>n.breaks <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
 <span>              yang_scale <span class="op">=</span> <span class="fu"><a href="reference/scale_taichi.html">scale_taichi_yang_binned</a></span><span class="op">(</span>n.breaks <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
 <span>              shared_limits <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="reference/remove_padding.html">remove_padding</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-binned-1.png" alt="The espresso-versus-matcha grid with both fish filled from four discrete colour steps rather than a continuous ramp." style="display: block; margin: auto;"></p>
+<p><img src="reference/figures/README-binned-1.png" alt="The espresso versus matcha grid with both fish filled from four discrete colour steps rather than a continuous ramp." style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
-<h2 id="new-in-030-hover-for-the-exact-numbers">New in 0.3.0: hover for the exact numbers<a class="anchor" aria-label="anchor" href="#new-in-030-hover-for-the-exact-numbers"></a>
+<h2 id="hover-for-the-exact-numbers">Hover for the exact numbers<a class="anchor" aria-label="anchor" href="#hover-for-the-exact-numbers"></a>
 </h2>
-<p>Fill is an imprecise channel by nature, so the honest fix is to give the reader a second, accurate route to the values rather than to pretend otherwise. <code>interactive = TRUE</code> makes the fish <a href="https://davidgohel.github.io/ggiraph/" class="external-link">ggiraph</a> grobs, so <code><a href="https://davidgohel.github.io/ggiraph/reference/girafe.html" class="external-link">ggiraph::girafe()</a></code> turns the plot into a widget whose tooltips carry both values and their difference:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>, interactive <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>              data_id_by <span class="op">=</span> <span class="st">"source"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">week</span>, <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>,</span>
+<span>              interactive <span class="op">=</span> <span class="cn">TRUE</span>, data_id_by <span class="op">=</span> <span class="st">"source"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">ggiraph</span><span class="fu">::</span><span class="fu"><a href="https://davidgohel.github.io/ggiraph/reference/girafe.html" class="external-link">girafe</a></span><span class="op">(</span>ggobj <span class="op">=</span> <span class="va">p</span><span class="op">)</span></span></code></pre></div>
-<p><code>data_id_by = "source"</code> is the interesting one: hovering any yin fish highlights the yin fish in <em>every</em> cell, temporarily turning the superposition display into a single-source one. A live version is in the <a href="https://pursuitofdatascience.github.io/ggtaichi/articles/gallery.html">gallery</a>.</p>
-<p>Legend keys are now small taichi symbols too, and the geoms follow ggplot2 4.0 themes, so a dark <code>theme(geom = element_geom(ink = ..., paper = ...))</code> no longer leaves the fallback fish invisible.</p>
+<p>Hover one yin fish and <em>every</em> yin fish lights up. Live version in the <a href="https://pursuitofdatascience.github.io/ggtaichi/articles/gallery.html">gallery</a>.</p>
 </div>
 <div class="section level2">
-<h2 id="animation">Animation<a class="anchor" aria-label="anchor" href="#animation"></a>
+<h2 id="more">More<a class="anchor" aria-label="anchor" href="#more"></a>
 </h2>
-<p>The taichi is a cyclical symbol, so motion suits it: <code><a href="reference/geom_taichi.html">geom_taichi()</a></code> composes cleanly with <code>gganimate</code> – turn a third variable into animation frames instead of an axis, or spin the glyphs via <code>angle</code>. Full recipes live in <code><a href="articles/animations.html">vignette("animations")</a></code>.</p>
-<p>See <code><a href="articles/ggtaichi.html">vignette("ggtaichi")</a></code> for the full tour, and the <a href="https://pursuitofdatascience.github.io/ggtaichi/articles/gallery.html">gallery</a> for more looks.</p>
+<p><code><a href="articles/ggtaichi.html">vignette("ggtaichi")</a></code> for the full tour, <code><a href="articles/animations.html">vignette("animations")</a></code> for motion, and the <a href="https://pursuitofdatascience.github.io/ggtaichi/articles/gallery.html">gallery</a> for the rest.</p>
 </div>
 <div class="section level2">
 <h2 id="acknowledgement">Acknowledgement<a class="anchor" aria-label="anchor" href="#acknowledgement"></a>

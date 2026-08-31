@@ -170,6 +170,36 @@ so `0.5` draws a half-size glyph in the same cell), `border` (a per-cell
 outline width in mm, overriding `linewidth`), and `tooltip` / `data_id`
 / `onclick`. Both gain `interactive` and `key_glyph` arguments.
 
+### Bug fixes
+
+- **gganimate transitions collapsed to a single frame.** Every animation
+  this package has ever been able to produce was static. gganimate
+  tracks which rows belong to which frame by encoding the frame into the
+  `group` column, as a `"<id>"` suffix; the geom’s `setup_data()` reset
+  `group` to `seq_len(nrow(data))` and threw that away, so
+  [`transition_states()`](https://gganimate.com/reference/transition_states.html),
+  [`transition_manual()`](https://gganimate.com/reference/transition_manual.html)
+  and the rest all rendered one frame. The rewrite was dead code from
+  the package’s first commit — nothing in the draw path reads `group`,
+  since each panel is batched into one polygon that numbers its own
+  vertices — and removing it changes no static output (every vdiffr
+  snapshot is unchanged). It went unnoticed because
+  [`vignette("animations")`](https://pursuitofdatascience.github.io/ggtaichi/articles/animations.md)
+  builds the `gganim` object but leaves every
+  [`animate()`](https://gganimate.com/reference/animate.html) call
+  commented out for CI, so the frames were never rendered. There is now
+  a test that renders frames with
+  [`gganimate::file_renderer()`](https://gganimate.com/reference/renderers.html),
+  which needs no gifski and no system libraries, and asserts the count.
+- **The yin eye vanished on a theme with no background.**
+  [`theme_void()`](https://ggplot2.tidyverse.org/reference/ggtheme.html),
+  and any theme built with `rect = element_blank()`, leaves the theme’s
+  `paper` fully transparent, so the new theme-aware default painted the
+  yin eye `#00000000`. A fully transparent `paper` now falls back to
+  white (and a transparent `ink` to black), which also stops the
+  fallback fill being mixed towards transparency instead of towards the
+  page.
+
 ### Deprecations and notes
 
 - The `size` argument of
