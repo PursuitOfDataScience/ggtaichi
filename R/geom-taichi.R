@@ -9,6 +9,11 @@
 #' (see \code{eyes}, \code{yin_eye_size}, \code{yang_eye_size}), a single glyph
 #' can carry up to six dimensions.
 #'
+#' A seventh channel, \code{angle}, rotates the glyph, and \code{explicit}
+#' adds an eighth that is \emph{computed} rather than mapped: the relationship
+#' between the two sources, shown as a third channel of the same mark. See
+#' the Explicit encoding section.
+#'
 #' @section Discrete and continuous fills:
 #' \code{geom_taichi()} inspects the plot data at \code{+} time. A numeric
 #' \code{yin} / \code{yang} column gets a continuous
@@ -65,6 +70,90 @@
 #' \code{...} to change it), while \code{na.rm = TRUE} silently drops rows
 #' with missing positions.
 #'
+#' @section Explicit encoding:
+#' Two fish sharing one position is a \emph{superposition} comparison. It is
+#' very good at "are these similar?" and "which is bigger here?", and it
+#' cannot answer "by how much?" --- that needs the relationship itself to be
+#' computed and drawn. \code{explicit} does exactly that, turning one of
+#' \code{"difference"} (\code{yin - yang}), \code{"ratio"},
+#' \code{"log_ratio"} or \code{"z"} into a third channel of the glyph. The
+#' statistics are the ones \code{\link{taichi_summary}()} tabulates, including
+#' its rule that a ratio of a non-positive value is \code{NA} rather than
+#' \code{Inf}.
+#'
+#' \code{explicit_channel} chooses where it goes:
+#' \describe{
+#'   \item{\code{"eye_size"}}{The default, and the tidiest: the eyes already
+#'     exist and are visually subordinate to the fills, so the two fish keep
+#'     carrying the two sources while eye size carries the gap between them.
+#'     A big eye reads as "look here", which is what a big gap means. Cells
+#'     where the two sources agree exactly get no eye at all, so a plain glyph
+#'     means agreement. Implies \code{eyes = TRUE}.}
+#'   \item{\code{"angle"}}{The most \emph{accurate} option. Direction and
+#'     angle are read far more precisely than shading, so encoding the gap as
+#'     tilt makes it legible to a precision the fills can never reach: an
+#'     upright glyph means the two sources agree and the lean shows which way
+#'     and how far. The cost is the symbol's upright orientation, which is why
+#'     it is a choice rather than the default.}
+#'   \item{\code{"border"}}{Outline width. Unobtrusive, and it composes with
+#'     everything else, but the least precise of the four. Because the default
+#'     \code{colour} is \code{NA} --- no outline at all --- this channel gives
+#'     the outline a visible colour unless you set \code{colour} yourself.}
+#'   \item{\code{"radius"}}{Glyph size, scaled by area (radius proportional to
+#'     the square root of the statistic) so that the eye's area-based reading
+#'     is the correct one. Cells where the sources agree shrink; use it when
+#'     the interesting thing is \emph{where} they disagree.}
+#' }
+#'
+#' \code{explicit_range} sets the channel's output range; each channel has a
+#' sensible default (\code{c(0, 0.3)} of the glyph radius for eyes,
+#' \code{c(-45, 45)} degrees for angle, \code{c(0, 1)} mm for the border,
+#' \code{c(0.4, 1)} of the cell for radius). The statistic is rescaled across
+#' the whole layer, so the mapping is comparable between facets.
+#'
+#' \code{\link{geom_taichi_diff}()} draws the same statistic as a diverging
+#' heatmap when the glyph is not the right chart for the question, and
+#' \code{\link{taichi_summary}()} returns it as a table.
+#'
+#' @section Palettes:
+#' The two ramps are compared against each other, so they need to be matched:
+#' if one spans a wider luminance range than the other then equal values do
+#' not read as equal ink and one fish looks heavier wherever the data says the
+#' sources are level. The default grey-and-red pair is \emph{not} matched
+#' (run \code{\link{taichi_check_palette}()} with no arguments to see the
+#' numbers) and is kept only for continuity. \code{palette} selects a
+#' matched pair instead --- \code{"balanced"} is the recommended one --- and
+#' also accepts the output of \code{\link{taichi_palette_pair}()}. It is a
+#' shorthand for setting \code{yin_colors} and \code{yang_colors} together,
+#' so passing both is an error.
+#'
+#' @section Interactivity:
+#' Fill is the least accurate channel there is, which is why an interactive
+#' version of a taichi grid is not a gimmick: hovering supplies the exact
+#' values without giving up the encoding. With \code{interactive = TRUE} the
+#' layers emit \pkg{ggiraph} grobs, and the plot becomes a widget when it is
+#' passed to \code{ggiraph::girafe()}:
+#'
+#' \preformatted{  p <- ggplot(cafes_tg, aes(week, neighbourhood)) +
+#'     geom_taichi(yin = matcha, yang = espresso, interactive = TRUE)
+#'   ggiraph::girafe(ggobj = p)}
+#'
+#' The default tooltip carries both values, their difference, and the cell's
+#' coordinates. \code{data_id_by} decides what a hover highlights:
+#' \code{"cell"} (the default) lights up both fish of one glyph,
+#' \code{"fish"} one fish at a time, and \code{"source"} every fish of one
+#' source at once --- which turns the superposition display into a
+#' single-source display for as long as the pointer rests there, letting a
+#' reader decompose the comparison instead of doing it in their head.
+#' \code{tooltip}, \code{data_id} and \code{onclick} take a data column to
+#' override any of it.
+#'
+#' The static rendering is unchanged: with \code{interactive = FALSE} the
+#' package does not touch \pkg{ggiraph} at all, and with it \code{TRUE} the
+#' same geometry is drawn, only in grobs that carry the extra attributes.
+#' \pkg{plotly} is not and will not be supported --- \code{ggplotly()} cannot
+#' translate custom grobs, which is exactly what this package draws.
+#'
 #' @param yin The unquoted column name (or a literal string naming a column)
 #'   for the yin (dark) fish of the taichi symbol. To pass a name held in a
 #'   variable, use \code{.data[[nm]]} or \code{!!rlang::sym(nm)} --- a bare
@@ -82,6 +171,14 @@
 #' @param yang_colors A color vector, usually as hex codes, for the yang fish
 #'   fill. Used as a gradient for continuous data and as a discrete palette
 #'   for factor/character data. Ignored if \code{yang_scale} is provided.
+#' @param palette A matched pair of ramps to use instead of
+#'   \code{yin_colors} / \code{yang_colors}: the name of a
+#'   \code{\link{taichi_palette}()} preset (\code{"balanced"},
+#'   \code{"diverging"}, \code{"viridis_pair"}, \code{"brewer_pair"},
+#'   \code{"print_safe"}, \code{"default"}) or a list with \code{yin} and
+#'   \code{yang} colour vectors, such as the result of
+#'   \code{\link{taichi_palette_pair}()}. Default \code{NULL}, which keeps the
+#'   package's historical grey / seal-red pair. See the Palettes section.
 #' @param yin_scale An optional fill scale for the yin fish: either a ready
 #'   scale object or a scale constructor function (e.g.
 #'   \code{ggplot2::scale_fill_viridis_d}). Overrides auto-detection. It must
@@ -99,20 +196,62 @@
 #' @param yin_eye_size,yang_eye_size Size of each eye as a proportion of the
 #'   glyph radius: a constant (default 0.15) or an unquoted data column to
 #'   encode a variable (see the Eyes section for the rescaling rule).
-#' @param yin_eye_colour,yang_eye_colour Colour of each eye dot: a constant
-#'   (defaults "white" and "black") or an unquoted data column containing
-#'   colour strings.
+#' @param yin_eye_colour,yang_eye_colour Colour of each eye dot: a constant,
+#'   an unquoted data column containing colour strings, or \code{NULL} (the
+#'   default) to take the colour from the theme --- the yin eye from the
+#'   theme's \code{paper} and the yang eye from its \code{ink}, which is white
+#'   and black on every light theme and swaps on a dark one. On ggplot2 before
+#'   4.0.0, where themes cannot set geom defaults, \code{NULL} falls back to
+#'   the literal "white" and "black".
+#' @param explicit Which relationship between the two sources to compute and
+#'   show as a third channel: \code{"none"} (the default), \code{"difference"},
+#'   \code{"ratio"}, \code{"log_ratio"} or \code{"z"}. See the Explicit
+#'   encoding section, and \code{\link{taichi_summary}()} for the definitions.
+#' @param explicit_channel Where the computed statistic goes:
+#'   \code{"eye_size"} (the default), \code{"angle"}, \code{"border"} or
+#'   \code{"radius"}. Ignored when \code{explicit = "none"}. The chosen
+#'   channel cannot also be set by hand --- e.g. \code{explicit_channel =
+#'   "angle"} together with an \code{angle} argument is an error rather than a
+#'   silent override.
+#' @param explicit_range Two numbers giving the output range of
+#'   \code{explicit_channel}, or \code{NULL} (the default) for that channel's
+#'   own sensible range.
+#' @param interactive If \code{TRUE}, draw the fish (and their eyes) as
+#'   \pkg{ggiraph} grobs carrying \code{tooltip}, \code{data_id} and
+#'   \code{onclick}, so that \code{ggiraph::girafe()} turns the plot into a
+#'   widget. Needs the \pkg{ggiraph} package. Default \code{FALSE}, which
+#'   renders exactly as before and does not touch \pkg{ggiraph}. See the
+#'   Interactivity section.
+#' @param tooltip,data_id,onclick Optional unquoted data columns overriding
+#'   the interactive attributes. Used only when \code{interactive = TRUE}; by
+#'   default \code{tooltip} is built from the two values, their difference and
+#'   the cell's coordinates, \code{data_id} from \code{data_id_by}, and
+#'   \code{onclick} is empty.
+#' @param data_id_by Scope of the default \code{data_id}, i.e. what one hover
+#'   highlights: \code{"cell"} (both fish of that glyph; the default),
+#'   \code{"fish"} (one fish), or \code{"source"} (every fish of that source,
+#'   in every cell). Ignored when \code{data_id} is supplied.
 #' @param shared_limits If \code{TRUE} and both sources are of the same type
 #'   (both continuous, or both discrete), the two auto-built fill scales share
 #'   common limits --- the union range (or union of levels) of \code{yin} and
 #'   \code{yang} --- so equal values read as equal ink. Explicit \code{limits}
-#'   passed through \code{...} take precedence. Default \code{FALSE}.
+#'   passed through \code{...} take precedence. As of 0.3.0 the shared limits
+#'   are also pushed into a custom \code{yin_scale} / \code{yang_scale} that
+#'   does not set limits of its own, so a supplied binned scale shares breaks
+#'   too. Default \code{FALSE}.
 #' @param shared_legend If \code{TRUE}, treats the two sources as directly
 #'   comparable: implies \code{shared_limits = TRUE}, paints both fish with
 #'   \code{yin_colors}, and shows a single legend (the yang guide is
 #'   dropped). Unless \code{yin_name} is supplied, the legend is titled
-#'   "\code{yin} / \code{yang}". Ignored when custom \code{yin_scale} /
-#'   \code{yang_scale} are given. Default \code{FALSE}.
+#'   "\code{yin} / \code{yang}". Default \code{FALSE}. This is the
+#'   perceptually correct choice whenever the two sources really are
+#'   directly comparable: one ramp means equal values are equal ink by
+#'   construction, with no palette pairing to get wrong (see the Palettes
+#'   section). The cost is that the sources are then told apart only by their
+#'   position inside the glyph --- yin is the top bulb, yang the bottom. When
+#'   a custom \code{yang_scale} is supplied it is used as given, so making the
+#'   two palettes agree is then your business; the duplicate yang guide is
+#'   dropped either way.
 #' @param width,height Width and height of each cell. Typically omitted.
 #' @param alpha Alpha transparency for the fish fills. A single value for the
 #'   whole layer (see the Styling section).
@@ -125,6 +264,11 @@
 #' @param linetype Outline linetype of the fish. A single value for the whole
 #'   layer (see the Styling section).
 #' @param show.legend Logical. Should the layer be included in the legend?
+#' @param key_glyph The legend key glyph, passed on to
+#'   \code{\link[ggplot2]{layer}()}. Both fish default to a small taichi with
+#'   their own half filled (see \code{\link{draw_key_taichi}()}); pass
+#'   \code{"rect"} for the plain ggplot2 rectangles of earlier versions. Keys
+#'   only appear for discrete fills --- a continuous fill gets a colourbar.
 #' @param ... Additional arguments passed to \emph{both} auto-built fill
 #'   scales (e.g., shared \code{limits} or \code{na.value}). Because they go
 #'   to both, an argument that suits only one kind of scale will be rejected by
@@ -178,6 +322,32 @@
 #'               yin_eye_size = yang_values,
 #'               angle = 45)
 #'
+#' # a matched palette pair, and the gap between the sources as eye size
+#'
+#' ggplot(data, aes(x, y)) +
+#'   geom_taichi(yin = yin_values,
+#'               yang = yang_values,
+#'               palette = "balanced",
+#'               shared_limits = TRUE,
+#'               explicit = "difference")
+#'
+#' # the same gap as tilt: the most accurate channel available
+#'
+#' ggplot(data, aes(x, y)) +
+#'   geom_taichi(yin = yin_values,
+#'               yang = yang_values,
+#'               explicit = "difference",
+#'               explicit_channel = "angle")
+#'
+#' # tooltips carry the exact values; needs ggiraph to view
+#'
+#' p <- ggplot(data, aes(x, y)) +
+#'   geom_taichi(yin = yin_values, yang = yang_values,
+#'               interactive = TRUE, data_id_by = "source")
+#' if (requireNamespace("ggiraph", quietly = TRUE)) {
+#'   # ggiraph::girafe(ggobj = p)
+#' }
+#'
 
 geom_taichi <- function(
   yin, yang,
@@ -185,14 +355,23 @@ geom_taichi <- function(
   yang_name = NULL,
   yin_colors = c("gray100", "gray85", "gray50", "gray35", "gray0"),
   yang_colors = c("#FED7D8", "#FE8C91", "#F5636B", "#E72D3F", "#C20824"),
+  palette = NULL,
   yin_scale = NULL,
   yang_scale = NULL,
   angle = NULL,
   eyes = FALSE,
   yin_eye_size = 0.15,
   yang_eye_size = 0.15,
-  yin_eye_colour = "white",
-  yang_eye_colour = "black",
+  yin_eye_colour = NULL,
+  yang_eye_colour = NULL,
+  explicit = c("none", "difference", "ratio", "log_ratio", "z"),
+  explicit_channel = c("eye_size", "angle", "border", "radius"),
+  explicit_range = NULL,
+  interactive = FALSE,
+  tooltip = NULL,
+  data_id = NULL,
+  onclick = NULL,
+  data_id_by = c("cell", "fish", "source"),
   shared_limits = FALSE,
   shared_legend = FALSE,
   width = NULL,
@@ -203,6 +382,7 @@ geom_taichi <- function(
   linewidth = 0.1,
   linetype = 1,
   show.legend = NA,
+  key_glyph = NULL,
   ...) {
 
   if (rlang::quo_is_missing(rlang::enquo(yin))) {
@@ -231,7 +411,61 @@ geom_taichi <- function(
   if (!rlang::is_bool(shared_legend)) {
     rlang::abort("`shared_legend` must be TRUE or FALSE.")
   }
+  if (!rlang::is_bool(interactive)) {
+    rlang::abort("`interactive` must be TRUE or FALSE.")
+  }
   if (shared_legend) shared_limits <- TRUE
+
+  explicit <- rlang::arg_match0(explicit, explicit_methods,
+                                arg_nm = "explicit")
+  explicit_channel <- rlang::arg_match0(explicit_channel, explicit_channels,
+                                        arg_nm = "explicit_channel")
+  data_id_by <- rlang::arg_match0(data_id_by, data_id_scopes,
+                                  arg_nm = "data_id_by")
+  if (!is.null(explicit_range)) {
+    if (!is.numeric(explicit_range) || length(explicit_range) != 2 ||
+        anyNA(explicit_range)) {
+      rlang::abort("`explicit_range` must be two numbers, or NULL.")
+    }
+  }
+  if (explicit == "none") {
+    explicit_channel <- NULL
+  } else {
+    # Refuse to quietly overwrite a channel the caller is also driving:
+    # `explicit` and a hand-set version of the same channel are two answers to
+    # the same question, and silently picking one is how a plot ends up saying
+    # something nobody asked it to.
+    conflict <- switch(explicit_channel,
+      eye_size = if (!missing(yin_eye_size) || !missing(yang_eye_size)) {
+        "`yin_eye_size` / `yang_eye_size`"
+      },
+      angle = if (!rlang::quo_is_null(angle_quo)) "`angle`",
+      border = if (!missing(linewidth)) "`linewidth`",
+      radius = NULL
+    )
+    if (!is.null(conflict)) {
+      rlang::abort(paste0(
+        "`explicit_channel = \"", explicit_channel, "\"` drives the same ",
+        "channel as ", conflict, "; drop one of them."
+      ))
+    }
+    if (explicit_channel == "eye_size") {
+      if (!missing(eyes) && !isTRUE(eyes)) {
+        rlang::abort(paste0(
+          "`explicit_channel = \"eye_size\"` needs the eyes; drop ",
+          "`eyes = FALSE` or pick another `explicit_channel`."
+        ))
+      }
+      eyes <- TRUE
+    }
+    if (explicit_channel == "border" && missing(colour)) {
+      # An outline of any width is invisible in the default colour (NA), so
+      # the border channel has to bring its own.
+      colour <- "grey20"
+    }
+  }
+
+  if (isTRUE(interactive)) check_ggiraph()
 
   if (shared_legend && is.null(yin_name)) {
     yin_name <- paste(rlang::as_label(yin_quo), "/", rlang::as_label(yang_quo))
@@ -263,6 +497,27 @@ geom_taichi <- function(
   }
   check_scale_arg(yin_scale, "yin_scale")
   check_scale_arg(yang_scale, "yang_scale")
+
+  # `palette` is shorthand for setting both colour vectors at once, so having
+  # both would leave two answers for one fish.
+  colors_user <- !missing(yin_colors)
+  yang_colors_user <- !missing(yang_colors)
+  if (!is.null(palette)) {
+    if (colors_user || yang_colors_user) {
+      rlang::abort(paste0(
+        "Supply either `palette` or `yin_colors` / `yang_colors`, not both."
+      ))
+    }
+    pair <- as_palette_pair(palette, "palette")
+    yin_colors <- pair$yin
+    yang_colors <- pair$yang
+    # A preset's colours are used verbatim for discrete fills, exactly as an
+    # explicit colour vector is -- except "default", which is the built-in
+    # ramp and keeps the built-in ramp's behaviour of skipping its palest end.
+    named_default <- is.character(palette) && identical(palette, "default")
+    colors_user <- !named_default
+    yang_colors_user <- !named_default
+  }
 
   # These are supplied to the auto-built scales by geom_taichi() itself, so
   # passing them through `...` would collide; say which per-fish argument to
@@ -298,35 +553,90 @@ geom_taichi <- function(
     alpha = alpha, na.rm = na.rm,
     colour = colour, linewidth = linewidth, linetype = linetype,
     show.legend = show.legend,
-    eyes = eyes
+    eyes = eyes,
+    interactive = interactive
   )
   if (!is.null(width))  shared_params$width  <- width
   if (!is.null(height)) shared_params$height <- height
+
+  # The explicit statistic is computed by the layer's own aes evaluation, so
+  # it follows the layer's data (including replaced data and every facet), and
+  # is turned into channel units in setup_data() where the whole column is
+  # visible at once.
+  if (!is.null(explicit_channel)) {
+    stat_quo <- rlang::quo(
+      taichi_explicit_stat(!!yin_quo, !!yang_quo, !!explicit)
+    )
+    # `border` gets its own aesthetic rather than reusing `linewidth`:
+    # ggplot2 owns `linewidth`, so a mapped one would be re-ranged by
+    # scale_linewidth_continuous() (defeating `explicit_range`) and would
+    # raise a second legend nobody asked for.
+    channel_aes <- switch(explicit_channel,
+      eye_size = "eye_size", angle = "angle",
+      border = "border", radius = "radius"
+    )
+    yin_aes_args[[channel_aes]] <- stat_quo
+    yang_aes_args[[channel_aes]] <- stat_quo
+    # A parameter beats a mapping, so the channel's constant has to go.
+    shared_params[[channel_aes]] <- NULL
+    shared_params$explicit <- explicit
+    shared_params$explicit_channel <- explicit_channel
+    shared_params$explicit_range <- explicit_range
+  }
+  if (!is.null(key_glyph)) shared_params$key_glyph <- key_glyph
 
   yin_params <- shared_params
   yang_params <- shared_params
 
   # Eye size and colour accept a constant or a data column: constants become
-  # layer parameters, columns become per-fish aesthetic mappings.
-  if (is_constant_quo(yin_eye_size_quo)) {
-    yin_params$eye_size <- check_eye_size(rlang::eval_tidy(yin_eye_size_quo), "yin_eye_size")
-  } else {
-    yin_aes_args$eye_size <- yin_eye_size_quo
-  }
-  if (is_constant_quo(yang_eye_size_quo)) {
-    yang_params$eye_size <- check_eye_size(rlang::eval_tidy(yang_eye_size_quo), "yang_eye_size")
-  } else {
-    yang_aes_args$eye_size <- yang_eye_size_quo
+  # layer parameters, columns become per-fish aesthetic mappings. An eye
+  # colour of NULL sets neither, which leaves the geom's theme-aware default
+  # to supply it.
+  if (!identical(explicit_channel, "eye_size")) {
+    if (is_constant_quo(yin_eye_size_quo)) {
+      yin_params$eye_size <- check_eye_size(rlang::eval_tidy(yin_eye_size_quo), "yin_eye_size")
+    } else {
+      yin_aes_args$eye_size <- yin_eye_size_quo
+    }
+    if (is_constant_quo(yang_eye_size_quo)) {
+      yang_params$eye_size <- check_eye_size(rlang::eval_tidy(yang_eye_size_quo), "yang_eye_size")
+    } else {
+      yang_aes_args$eye_size <- yang_eye_size_quo
+    }
   }
   if (is_constant_quo(yin_eye_colour_quo)) {
-    yin_params$eye_colour <- rlang::eval_tidy(yin_eye_colour_quo)
+    yin_params$eye_colour <- eye_colour_param(
+      rlang::eval_tidy(yin_eye_colour_quo), "white"
+    )
   } else {
     yin_aes_args$eye_colour <- yin_eye_colour_quo
   }
   if (is_constant_quo(yang_eye_colour_quo)) {
-    yang_params$eye_colour <- rlang::eval_tidy(yang_eye_colour_quo)
+    yang_params$eye_colour <- eye_colour_param(
+      rlang::eval_tidy(yang_eye_colour_quo), "black"
+    )
   } else {
     yang_aes_args$eye_colour <- yang_eye_colour_quo
+  }
+
+  # The interactive attributes need the plot's x / y mapping to name a cell,
+  # which is only known at `+` time; the columns the user supplied are wired
+  # up here, and the defaults are filled in by ggplot_add().
+  tooltip_quo <- rlang::enquo(tooltip)
+  data_id_quo <- rlang::enquo(data_id)
+  onclick_quo <- rlang::enquo(onclick)
+  for (nm in c("tooltip", "data_id", "onclick")) {
+    quo <- switch(nm, tooltip = tooltip_quo, data_id = data_id_quo,
+                  onclick = onclick_quo)
+    if (rlang::quo_is_null(quo)) next
+    if (!isTRUE(interactive)) {
+      rlang::abort(paste0(
+        "`", nm, "` only has an effect with `interactive = TRUE`."
+      ))
+    }
+    quo <- as_column_quo(quo)
+    yin_aes_args[[nm]] <- quo
+    yang_aes_args[[nm]] <- quo
   }
 
   yin_aes <- ggplot2::aes(!!!yin_aes_args)
@@ -346,19 +656,25 @@ geom_taichi <- function(
     yin_layer = yin_layer,
     yin_mapping = yin_aes,
     yin_colors = yin_colors,
-    yin_colors_user = !missing(yin_colors),
+    yin_colors_user = colors_user,
     yin_name = yin_name,
     yin_scale = yin_scale,
     scale_dots = scale_dots,
     yang_layer = yang_layer,
     yang_mapping = yang_aes,
     yang_colors = if (shared_legend) yin_colors else yang_colors,
-    yang_colors_user = if (shared_legend) !missing(yin_colors) else !missing(yang_colors),
+    yang_colors_user = if (shared_legend) colors_user else yang_colors_user,
     yang_name = yang_name,
     yang_scale = yang_scale,
     shared_limits = shared_limits,
     shared_legend = shared_legend,
-    eyes = eyes
+    eyes = eyes,
+    explicit = explicit,
+    explicit_channel = explicit_channel,
+    interactive = interactive,
+    data_id_by = data_id_by,
+    has_tooltip = !rlang::quo_is_null(tooltip_quo),
+    has_data_id = !rlang::quo_is_null(data_id_quo)
   )
   class(result) <- c("ggtaichi_plot", "list")
   result
@@ -371,6 +687,12 @@ print.ggtaichi_plot <- function(x, ...) {
   cat("  yin  : ", x$yin_name, "\n", sep = "")
   cat("  yang : ", x$yang_name, "\n", sep = "")
   cat("  eyes : ", if (isTRUE(x$eyes)) "on" else "off", "\n", sep = "")
+  if (!identical(x$explicit, "none") && !is.null(x$explicit)) {
+    cat("  gap  : ", x$explicit, " -> ", x$explicit_channel, "\n", sep = "")
+  }
+  if (isTRUE(x$interactive)) {
+    cat("  hover: interactive, highlighting by ", x$data_id_by, "\n", sep = "")
+  }
   if (isTRUE(x$shared_legend)) {
     cat("  scale: shared limits, single legend\n")
   } else if (isTRUE(x$shared_limits)) {
@@ -378,6 +700,19 @@ print.ggtaichi_plot <- function(x, ...) {
   }
   cat("Add it to a plot: ggplot(data, aes(x, y)) + geom_taichi(...)\n")
   invisible(x)
+}
+
+
+# An eye colour of NULL means "let the theme decide", which is done by not
+# passing the parameter at all so that the geom's default_aes applies. On a
+# ggplot2 too old for theme-driven geom defaults there is nothing to defer to,
+# so fall back to the literal colour the package has always used.
+eye_colour_param <- function(value, fallback) {
+  if (is.null(value)) {
+    if (has_themed_aes()) return(NULL)
+    return(fallback)
+  }
+  value
 }
 
 
@@ -482,11 +817,27 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
   build_scale <- function(vals, colors, name, custom_scale, user_palette,
                           extra = list(), arg) {
     if (!is.null(custom_scale)) {
+      # The options ggtaichi computes for this fish -- the shared limits and
+      # the dropped duplicate guide -- have to reach a supplied scale too, or
+      # `shared_limits` silently does nothing as soon as anyone brings their
+      # own (binned, viridis, ...) scale. A limit the scale sets itself wins.
       if (inherits(custom_scale, "Scale")) {
-        return(check_fill_scale(custom_scale, arg))
+        scale <- check_fill_scale(custom_scale, arg)
+        if (!is.null(extra$limits) && is.null(scale$limits)) {
+          scale$limits <- extra$limits
+        }
+        # `shared_legend` means "one legend", so the yang guide goes whatever
+        # the supplied scale asked for -- that is the request, not an
+        # accident.
+        if (identical(extra$guide, "none")) scale$guide <- "none"
+        return(scale)
       }
       return(check_fill_scale(
-        do.call(custom_scale, c(list(name = name), scale_dots)), arg
+        do.call(custom_scale, c(
+          list(name = name), extra,
+          scale_dots[setdiff(names(scale_dots), names(extra))]
+        )),
+        arg
       ))
     }
     # Options ggtaichi computes for this fish (shared limits, the dropped yang
@@ -555,12 +906,49 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
                                 object$yang_scale, isTRUE(object$yang_colors_user),
                                 yang_extra, "yang_scale")
 
+  yin_layer <- object$yin_layer
+  yang_layer <- object$yang_layer
+  if (isTRUE(object$interactive)) {
+    yin_layer <- add_interactive_aes(yin_layer, object, plot, "yin")
+    yang_layer <- add_interactive_aes(yang_layer, object, plot, "yang")
+  }
+
   plot +
-    object$yin_layer +
+    yin_layer +
     yin_scale_obj +
     ggnewscale::new_scale_fill() +
-    object$yang_layer +
+    yang_layer +
     yang_scale_obj
+}
+
+
+# Fill in the interactive attributes the user did not supply. This happens at
+# `+` time because the default tooltip names the cell, and the cell's x / y
+# come from the *plot's* mapping, which geom_taichi() cannot see. The layer's
+# mapping is completed before the layer is added, so ggplot2 still computes
+# everything itself at build time.
+add_interactive_aes <- function(layer, object, plot, fish) {
+  mapping <- layer$mapping
+  yin_quo <- object$yin_mapping$fill
+  yang_quo <- object$yang_mapping$fill
+  x_quo <- plot$mapping$x
+  y_quo <- plot$mapping$y
+  x_lab <- if (is.null(x_quo)) NULL else rlang::as_label(x_quo)
+  y_lab <- if (is.null(y_quo)) NULL else rlang::as_label(y_quo)
+
+  if (!isTRUE(object$has_tooltip)) {
+    mapping$tooltip <- rlang::quo(taichi_tooltip(
+      !!yin_quo, !!yang_quo, !!object$yin_name, !!object$yang_name,
+      !!x_quo, !!y_quo, !!x_lab, !!y_lab
+    ))
+  }
+  if (!isTRUE(object$has_data_id)) {
+    mapping$data_id <- rlang::quo(taichi_data_id(
+      !!x_quo, !!y_quo, !!yin_quo, !!fish, !!object$data_id_by
+    ))
+  }
+  layer$mapping <- mapping
+  layer
 }
 
 
@@ -642,7 +1030,7 @@ rescale_eye_size <- function(x) {
 # makeContent.taichi_cells(), where the per-cell radius can be resolved
 # against the physical panel size (keeping every glyph round under resize)
 # and all cells collapse into one id-batched polygon plus one circle grob.
-draw_taichi <- function(coords, fish, eyes = FALSE) {
+draw_taichi <- function(coords, fish, eyes = FALSE, interactive = FALSE) {
 
   n <- nrow(coords)
   if (n == 0) return(grid::nullGrob())
@@ -652,8 +1040,20 @@ draw_taichi <- function(coords, fish, eyes = FALSE) {
   # cos()/sin() and turn every vertex of that glyph into NaN.
   angles[!is.finite(angles)] <- 0
 
-  lwd_vals <- coords$linewidth %||% rep(0.1, n)
+  # A per-cell `border` (the explicit-encoding channel) overrides the
+  # layer-wide `linewidth`; both are millimetres.
+  lwd_vals <- coords$border
+  if (is.null(lwd_vals) || all(is.na(lwd_vals))) {
+    lwd_vals <- coords$linewidth %||% rep(0.1, n)
+  }
   lwd_vals[is.na(lwd_vals)] <- 0.1
+
+  # The radius channel is a proportion of the cell's own radius. A non-finite
+  # or out-of-range value is not a proportion, so clamp rather than ask grid
+  # for a negative radius.
+  radius <- coords$radius %||% rep(1, n)
+  radius[!is.finite(radius)] <- 1
+  radius <- pmin(pmax(radius, 0), 1)
 
   eye_sizes <- coords$eye_size %||% rep(0.15, n)
   eye_cols  <- as.character(coords$eye_colour %||%
@@ -665,6 +1065,7 @@ draw_taichi <- function(coords, fish, eyes = FALSE) {
     w  = coords$xmax - coords$xmin,
     h  = coords$ymax - coords$ymin,
     angle = angles,
+    radius = radius,
     fill = alpha(coords$fill, coords$alpha),
     col = coords$colour,
     lwd = lwd_vals * .pt,
@@ -673,6 +1074,8 @@ draw_taichi <- function(coords, fish, eyes = FALSE) {
     eyes = isTRUE(eyes),
     eye_size = eye_sizes,
     eye_colour = eye_cols,
+    interactive = isTRUE(interactive),
+    ipar = interactive_params(coords),
     cl = "taichi_cells"
   )
 }
@@ -689,7 +1092,7 @@ makeContent.taichi_cells <- function(x) {
   h_pt <- grid::convertHeight(grid::unit(x$h, "npc"), "pt", valueOnly = TRUE)
   cx_pt <- grid::convertX(grid::unit(x$cx, "npc"), "pt", valueOnly = TRUE)
   cy_pt <- grid::convertY(grid::unit(x$cy, "npc"), "pt", valueOnly = TRUE)
-  r_pt <- pmin(w_pt, h_pt) / 2
+  r_pt <- pmin(w_pt, h_pt) / 2 * (x$radius %||% 1)
 
   # The unit fish is built once at angle 0 and then rotated here, vectorised
   # over every cell of the panel -- which is what makes one id-batched polygon
@@ -710,7 +1113,11 @@ makeContent.taichi_cells <- function(x) {
   vx <- rep(cx_pt, each = m) + r_rep * (ux * cs - uy * sn)
   vy <- rep(cy_pt, each = m) + r_rep * (ux * sn + uy * cs)
 
-  fish_grob <- grid::polygonGrob(
+  # One id-batched polygon per layer either way: with `interactive` the same
+  # arguments go to ggiraph's constructor, which adds the hover / tooltip
+  # attributes and otherwise draws identically -- so there is one renderer,
+  # not two.
+  poly_args <- list(
     x = grid::unit(vx, "pt"),
     y = grid::unit(vy, "pt"),
     id = rep(seq_len(n), each = m),
@@ -721,6 +1128,12 @@ makeContent.taichi_cells <- function(x) {
       lty = x$lty
     )
   )
+  fish_grob <- if (isTRUE(x$interactive) && ggiraph_installed()) {
+    do.call(ggiraph::interactive_polygon_grob,
+            c(poly_args, x$ipar %||% list()))
+  } else {
+    do.call(grid::polygonGrob, poly_args)
+  }
   children <- grid::gList(fish_grob)
 
   if (isTRUE(x$eyes)) {
@@ -735,12 +1148,20 @@ makeContent.taichi_cells <- function(x) {
       th <- x$angle[keep] * pi / 180
       ex <- -ey0 * sin(th)
       ey <-  ey0 * cos(th)
-      eye_grob <- grid::circleGrob(
+      eye_args <- list(
         x = grid::unit(cx_pt[keep] + r_pt[keep] * ex, "pt"),
         y = grid::unit(cy_pt[keep] + r_pt[keep] * ey, "pt"),
         r = grid::unit(r_pt[keep] * x$eye_size[keep], "pt"),
         gp = grid::gpar(fill = x$eye_colour[keep], col = x$eye_colour[keep])
       )
+      # The eyes carry their cell's attributes too, so that hovering the dot
+      # is not a dead spot in the middle of the glyph.
+      eye_grob <- if (isTRUE(x$interactive) && ggiraph_installed()) {
+        do.call(ggiraph::interactive_circle_grob,
+                c(eye_args, lapply(x$ipar %||% list(), function(v) v[keep])))
+      } else {
+        do.call(grid::circleGrob, eye_args)
+      }
       children <- grid::gList(fish_grob, eye_grob)
     }
   }
@@ -767,7 +1188,21 @@ taichi_setup_data <- function(data, params) {
   data$width <- NULL
   data$height <- NULL
 
-  if (!is.null(data$eye_size) && is.null(params$eye_size)) {
+  # The explicit statistic arrives here in its own units -- a difference, a
+  # ratio -- and is turned into channel units now, while the whole column is
+  # in one place: rescaling per panel would make facets incomparable.
+  channel <- params$explicit_channel
+  channel_col <- if (is.null(channel)) NULL else switch(channel,
+    eye_size = "eye_size", angle = "angle",
+    border = "border", radius = "radius"
+  )
+  if (!is.null(channel_col) && !is.null(data[[channel_col]])) {
+    data[[channel_col]] <- rescale_explicit(data[[channel_col]], channel,
+                                            params$explicit_range)
+  }
+
+  if (!identical(channel, "eye_size") &&
+      !is.null(data$eye_size) && is.null(params$eye_size)) {
     if (!is.numeric(data$eye_size)) {
       rlang::abort("Eye sizes must be numeric when mapped to a data column.")
     }
@@ -780,6 +1215,13 @@ taichi_setup_data <- function(data, params) {
   if (!is.null(data$angle) && !is.numeric(data$angle)) {
     rlang::abort(
       "Rotation angles must be numeric when mapped to a data column."
+    )
+  }
+
+  # Same reasoning as `angle`: a mapped radius is arithmetic at draw time.
+  if (!is.null(data$radius) && !is.numeric(data$radius)) {
+    rlang::abort(
+      "Glyph radii must be numeric when mapped to a data column."
     )
   }
 
@@ -803,27 +1245,38 @@ taichi_setup_data <- function(data, params) {
 #' @name ggtaichi-ggproto
 #' @export
 GeomYinFish <- ggplot2::ggproto("GeomYinFish", ggplot2::Geom,
-  extra_params = c("na.rm", "eyes"),
+  extra_params = c("na.rm", "eyes", "interactive",
+                   "explicit", "explicit_channel", "explicit_range"),
 
   rename_size = TRUE,
 
   setup_data = function(data, params) taichi_setup_data(data, params),
 
-  draw_panel = function(data, panel_params, coord, eyes = FALSE) {
+  draw_panel = function(data, panel_params, coord, eyes = FALSE,
+                        interactive = FALSE) {
     coords <- coord$transform(data, panel_params)
-    draw_taichi(coords, "yin", eyes = eyes)
+    draw_taichi(coords, "yin", eyes = eyes, interactive = interactive)
   },
 
+  # These literal fallbacks are replaced at load time with theme-aware ones
+  # on ggplot2 >= 4.0.0 (see zzz.R); the values there resolve to exactly
+  # these on any light theme.
   default_aes = ggplot2::aes(fill = "grey20", colour = NA,
                               linewidth = 0.1, linetype = 1,
                               alpha = NA, width = NA, height = NA,
-                              angle = 0,
-                              eye_size = 0.15, eye_colour = "white"),
+                              angle = 0, radius = 1, border = NA,
+                              eye_size = 0.15, eye_colour = "white",
+                              tooltip = NA, data_id = NA, onclick = NA),
 
   required_aes = c("x", "y"),
   non_missing_aes = c("xmin", "xmax", "ymin", "ymax"),
 
-  draw_key = ggplot2::draw_key_rect
+  # A closure rather than the bare function so that the reference is
+  # resolved at draw time, independently of the order R sources the
+  # package's files in.
+  draw_key = function(data, params, size) {
+    draw_key_taichi(data, params, size, fish = "yin")
+  }
 )
 
 
@@ -838,16 +1291,26 @@ GeomYinFish <- ggplot2::ggproto("GeomYinFish", ggplot2::Geom,
 #'
 #' Both geoms understand the aesthetics `x`, `y`, `fill`, `colour`,
 #' `linewidth`, `linetype`, `alpha`, `width`, `height`, `angle` (degrees,
-#' counter-clockwise), `eye_size`, and `eye_colour` (the latter two only
-#' matter when `eyes = TRUE`). At `angle = 0` the yin fish is the left half
-#' of the circle plus the top bulb (its head); the yang fish is the right
-#' half plus the bottom bulb.
+#' counter-clockwise), `radius` (a proportion of the cell's own radius, so
+#' `0.5` draws a half-size glyph in the same cell), `border` (a per-cell
+#' outline width in mm, overriding `linewidth`), `eye_size`, and
+#' `eye_colour` (the latter two only matter when `eyes = TRUE`), plus
+#' `tooltip`, `data_id` and `onclick`, which are only read when
+#' `interactive = TRUE`. At `angle = 0` the yin fish is the left half of the
+#' circle plus the top bulb (its head); the yang fish is the right half plus
+#' the bottom bulb.
 #'
 #' @param mapping,data,stat,position,inherit.aes See [ggplot2::layer()].
 #' @param width,height Cell size; defaults to the resolution of the data.
 #' @param eyes Logical. Draw the classic eye dot inside this fish's head?
+#' @param interactive Logical. Draw \pkg{ggiraph} grobs carrying the
+#'   `tooltip`, `data_id` and `onclick` aesthetics, so that
+#'   `ggiraph::girafe()` can turn the plot into a widget. Needs the
+#'   \pkg{ggiraph} package.
 #' @param na.rm If `TRUE`, silently removes rows with missing values.
 #' @param show.legend Logical. Should this layer be included in the legends?
+#' @param key_glyph Legend key glyph; defaults to this fish's half of a
+#'   taichi symbol (see [draw_key_taichi()]). Passed to [ggplot2::layer()].
 #' @param ... Other arguments passed to [ggplot2::layer()]: either aesthetics
 #'   used as constant parameters (e.g. `eye_size = 0.2`) or geom parameters.
 #' @return A ggplot2 layer drawing one fish per cell.
@@ -872,13 +1335,17 @@ geom_yin_fish <- function(mapping = NULL, data = NULL,
                           stat = "identity", position = "identity",
                           width = NULL, height = NULL,
                           eyes = FALSE,
+                          interactive = FALSE,
                           na.rm = FALSE,
                           show.legend = NA,
                           inherit.aes = TRUE,
+                          key_glyph = NULL,
                           ...) {
+  if (isTRUE(interactive)) check_ggiraph()
   params <- list(
     na.rm = na.rm,
     eyes = eyes,
+    interactive = interactive,
     ...
   )
   if (!is.null(width))  params$width  <- width
@@ -891,6 +1358,7 @@ geom_yin_fish <- function(mapping = NULL, data = NULL,
     position = position,
     show.legend = show.legend,
     inherit.aes = inherit.aes,
+    key_glyph = key_glyph %||% draw_key_yin_fish,
     params = params
   )
 }
@@ -902,16 +1370,22 @@ geom_yin_fish <- function(mapping = NULL, data = NULL,
 #' @export
 GeomYangFish <- ggplot2::ggproto("GeomYangFish", GeomYinFish,
 
-  draw_panel = function(data, panel_params, coord, eyes = FALSE) {
+  draw_panel = function(data, panel_params, coord, eyes = FALSE,
+                        interactive = FALSE) {
     coords <- coord$transform(data, panel_params)
-    draw_taichi(coords, "yang", eyes = eyes)
+    draw_taichi(coords, "yang", eyes = eyes, interactive = interactive)
   },
 
   default_aes = ggplot2::aes(fill = "grey20", colour = NA,
                               linewidth = 0.1, linetype = 1,
                               alpha = NA, width = NA, height = NA,
-                              angle = 0,
-                              eye_size = 0.15, eye_colour = "black")
+                              angle = 0, radius = 1, border = NA,
+                              eye_size = 0.15, eye_colour = "black",
+                              tooltip = NA, data_id = NA, onclick = NA),
+
+  draw_key = function(data, params, size) {
+    draw_key_taichi(data, params, size, fish = "yang")
+  }
 )
 
 
@@ -921,13 +1395,17 @@ geom_yang_fish <- function(mapping = NULL, data = NULL,
                            stat = "identity", position = "identity",
                            width = NULL, height = NULL,
                            eyes = FALSE,
+                           interactive = FALSE,
                            na.rm = FALSE,
                            show.legend = NA,
                            inherit.aes = TRUE,
+                           key_glyph = NULL,
                            ...) {
+  if (isTRUE(interactive)) check_ggiraph()
   params <- list(
     na.rm = na.rm,
     eyes = eyes,
+    interactive = interactive,
     ...
   )
   if (!is.null(width))  params$width  <- width
@@ -940,6 +1418,7 @@ geom_yang_fish <- function(mapping = NULL, data = NULL,
     position = position,
     show.legend = show.legend,
     inherit.aes = inherit.aes,
+    key_glyph = key_glyph %||% draw_key_yang_fish,
     params = params
   )
 }

@@ -315,42 +315,8 @@ test_that("NA values in yang are handled", {
 # Rendering verification (eyes actually appear in the drawn scene)
 # ------------------------------------------------------------------
 
-# The taichi cells materialize their children at draw time (makeContent), so
-# render the plot on a null device and grab the forced scene.
-forced_scene <- function(p) {
-  path <- tempfile(fileext = ".pdf")
-  grDevices::pdf(path)
-  on.exit({
-    grDevices::dev.off()
-    unlink(path)
-  }, add = TRUE)
-  print(p)
-  grid::grid.force()
-  grid::grid.grab()
-}
-
-# Helper: collect all grobs of a class inside a gTree
-collect_grobs <- function(g, type) {
-  out <- list()
-  walk <- function(gr) {
-    if (inherits(gr, type)) out[[length(out) + 1]] <<- gr
-    if (inherits(gr, "gTree")) for (ch in gr$children) walk(ch)
-  }
-  walk(g)
-  out
-}
-
-# Circles drawn in a scene: circle grobs are batched, so count the points
-count_circles <- function(g) {
-  sum(vapply(collect_grobs(g, "circle"), function(ci) length(ci$x), integer(1)))
-}
-
-# Fish polygons drawn in a scene: one id-batched polygon grob per layer
-count_polygons <- function(g) {
-  sum(vapply(collect_grobs(g, "polygon"), function(pg) {
-    if (is.null(pg$id)) 1L else length(unique(pg$id))
-  }, integer(1)))
-}
+# forced_scene(), collect_grobs(), count_circles() and count_polygons() live
+# in helper-scene.R, since several test files need them.
 
 test_that("eyes = TRUE produces circles for both fish", {
   d <- data.frame(x = 1, y = 1, yin = 1, yang = 2)

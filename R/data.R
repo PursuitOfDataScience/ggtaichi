@@ -15,9 +15,9 @@
 #'   \item{category}{One of 9 COVID-related categories: Covid, General Virus,
 #'   Masks, Sanitizing, Social Distancing, Symptoms, Tests, Treatment,
 #'   Working.}
-#'   \item{Twitter}{weekly tweets percentage (\%) in the MSA falling into each
+#'   \item{Twitter}{weekly tweets percentage (%) in the MSA falling into each
 #'   category.}
-#'   \item{Google}{weekly Google search percentage (\%) in the MSA falling into
+#'   \item{Google}{weekly Google search percentage (%) in the MSA falling into
 #'   each category.}
 #' }
 #' @source Just like \code{states_tg}, Google is processed from Google Health
@@ -44,9 +44,9 @@
 #'   \item{category}{One of 9 COVID-related categories: Covid, General Virus,
 #'   Masks, Sanitizing, Social Distancing, Symptoms, Tests, Treatment,
 #'   Working.}
-#'   \item{Twitter}{weekly tweets percentage (\%) in state falling into each
+#'   \item{Twitter}{weekly tweets percentage (%) in state falling into each
 #'   category.}
-#'   \item{Google}{weekly Google search percentage (\%) in state falling into
+#'   \item{Google}{weekly Google search percentage (%) in state falling into
 #'   each category.}
 #' }
 #' @source Just like \code{pitts_tg}, Google is processed from Google Health

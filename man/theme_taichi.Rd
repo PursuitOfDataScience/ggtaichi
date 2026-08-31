@@ -22,7 +22,7 @@ theme_taichi(
 }
 \value{
 A \code{\link[ggplot2]{theme}} object that can be added to any
-  ggplot, in the same way as \code{\link[ggplot2]{theme_bw}()}.
+ggplot, in the same way as \code{\link[ggplot2]{theme_bw}()}.
 }
 \description{
 A light theme tuned for the taichi grid: it bottoms the legends, drops the

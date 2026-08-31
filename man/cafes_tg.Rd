@@ -7,10 +7,10 @@
 \format{
 A data frame with 96 rows and 4 columns:
 \describe{
-  \item{week}{Week of the season, 1 to 12.}
-  \item{neighbourhood}{One of eight fictional neighbourhoods (factor).}
-  \item{espresso}{Weekly espresso orders per 100 customers.}
-  \item{matcha}{Weekly matcha orders per 100 customers.}
+\item{week}{Week of the season, 1 to 12.}
+\item{neighbourhood}{One of eight fictional neighbourhoods (factor).}
+\item{espresso}{Weekly espresso orders per 100 customers.}
+\item{matcha}{Weekly matcha orders per 100 customers.}
 }
 }
 \source{

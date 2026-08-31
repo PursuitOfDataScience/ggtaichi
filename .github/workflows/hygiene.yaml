@@ -1,0 +1,62 @@
+# Scheduled hygiene checks: spelling and URL liveness.
+#
+# Both are things CRAN eventually complains about but that no ordinary check
+# run catches, and both go stale on their own -- a URL that worked at
+# submission time can rot months later. Running them weekly means the report
+# is waiting when it matters rather than arriving with a CRAN email.
+#
+# Neither is allowed to fail the run: a spell checker will always flag some
+# legitimate jargon, and a transient 503 from a journal's site is not a bug in
+# this package. Read the log; act if it is real.
+on:
+  schedule:
+    # Mondays, 05:17 UTC
+    - cron: '17 5 * * 1'
+  workflow_dispatch:
+
+name: hygiene.yaml
+
+permissions: read-all
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::spelling, any::urlchecker
+          needs: check
+
+      - name: Spell check
+        continue-on-error: true
+        run: |
+          res <- spelling::spell_check_package(".")
+          if (nrow(res) == 0) {
+            cat("No spelling problems found.\n")
+          } else {
+            print(res)
+            cat("\nAdd any of these that are real words to inst/WORDLIST.\n")
+          }
+        shell: Rscript {0}
+
+      - name: URL check
+        continue-on-error: true
+        run: |
+          res <- urlchecker::url_check(".")
+          if (nrow(res) == 0) {
+            cat("All URLs resolved.\n")
+          } else {
+            print(res)
+          }
+        shell: Rscript {0}

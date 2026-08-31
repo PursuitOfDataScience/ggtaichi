@@ -20,6 +20,16 @@ cell into a taichi diagram, much like \code{geom_tile()} draws a regular
 heatmap. It is supported by \code{theme_taichi()} and \code{remove_padding()}
 for styling. Users should reference the documentation and run the examples in
 the help files when trying to understand what each argument means visually.
+
+Around it are the pieces that make a grid of glyphs readable:
+\code{taichi_summary()} and \code{geom_taichi_diff()} put the relationship
+between the two sources into numbers and into a diverging heatmap;
+\code{taichi_palette_pair()}, \code{taichi_palette()} and
+\code{taichi_check_palette()} build and audit the pair of colour ramps the
+comparison depends on; the \code{scale_taichi_*()} family supplies ready
+fill scales, including the binned ones worth reaching for on a dense grid;
+and \code{geom_taichi(interactive = TRUE)} hands the plot to
+\pkg{ggiraph} so a reader can hover for the exact values.
 }
 
 \seealso{

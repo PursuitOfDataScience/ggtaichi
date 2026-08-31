@@ -1,8 +1,9 @@
 # Geometry tests for taichi_fish()
 #
-# The next_release.md confirms the fish geometry is provably exact (no overlap,
-# no gap) via a 20k-point Monte-Carlo test.  These formal unit tests reify that
-# check and add boundary-closure verification.
+# The fish geometry is provably exact -- every point of the circle falls in
+# exactly one fish, no overlap and no gap -- and a 20k-point Monte-Carlo test is
+# what establishes it.  These formal unit tests reify that check and add
+# boundary-closure verification.
 
 test_that("taichi_fish returns the correct number of points", {
   yin <- ggtaichi:::taichi_fish(0, 0, 1, "yin", n = 50)

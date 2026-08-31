@@ -6,7 +6,7 @@
 \title{Popular Emojis}
 \format{
 A character vector of 270 HTML \code{<img>} tags (90 distinct
-  emoji), one per row of \code{\link{pitts_tg}}.
+emoji), one per row of \code{\link{pitts_tg}}.
 }
 \source{
 The most frequent emoji per week and category in the Meltwater

@@ -7,32 +7,32 @@
 remove_padding(x = NULL, y = NULL, ...)
 }
 \arguments{
-\item{x, y}{`NULL` (the default) to auto-detect the scale type of that axis
-from the plot's data and mapping, `"c"` for a continuous axis, or `"d"`
-for a discrete one. Auto-detection reads the *plot's* mapping, so name the
-type explicitly when `x` / `y` are mapped in a layer rather than in
-`ggplot()`, or when the mapping is a computed expression the plot data
+\item{x, y}{\code{NULL} (the default) to auto-detect the scale type of that axis
+from the plot's data and mapping, \code{"c"} for a continuous axis, or \code{"d"}
+for a discrete one. Auto-detection reads the \emph{plot's} mapping, so name the
+type explicitly when \code{x} / \code{y} are mapped in a layer rather than in
+\code{ggplot()}, or when the mapping is a computed expression the plot data
 cannot answer for.}
 
 \item{...}{Additional arguments passed on to the underlying
-[ggplot2::scale_x_continuous()] / [ggplot2::scale_x_discrete()] (and y)
-calls. They go to *both* scales, so when the two axes are of different
-types only arguments that continuous and discrete scales share (`name`,
-`breaks`, `labels`, `guide`, ...) can be used here --- a continuous-only
-argument such as `n.breaks` would be rejected by the discrete scale with
+\code{\link[ggplot2:scale_continuous]{ggplot2::scale_x_continuous()}} / \code{\link[ggplot2:scale_discrete]{ggplot2::scale_x_discrete()}} (and y)
+calls. They go to \emph{both} scales, so when the two axes are of different
+types only arguments that continuous and discrete scales share (\code{name},
+\code{breaks}, \code{labels}, \code{guide}, ...) can be used here --- a continuous-only
+argument such as \code{n.breaks} would be rejected by the discrete scale with
 an "unused argument" error. For per-axis options, add your own
-`scale_x_*(expand = c(0, 0))` call instead.}
+\code{scale_x_*(expand = c(0, 0))} call instead.}
 }
 \value{
 An object that, added to a ggplot, replaces both position scales
-  with padding-free ones.
+with padding-free ones.
 }
 \description{
 ggplot2 pads both continuous and discrete axes with a little expansion,
-which can make a taichi grid look like it is floating. `remove_padding()`
+which can make a taichi grid look like it is floating. \code{remove_padding()}
 trims that space. Called with no arguments it inspects the plot it is
 added to and figures out for itself whether each axis is continuous or
-discrete; pass `"c"` (continuous) or `"d"` (discrete) explicitly to
+discrete; pass \code{"c"} (continuous) or \code{"d"} (discrete) explicitly to
 override the detection, e.g. when the axis mapping is a computed
 expression the plot data cannot answer for.
 }

@@ -7,8 +7,8 @@
 \alias{GeomYangFish}
 \title{ggtaichi's ggproto classes}
 \description{
-The [ggplot2::ggproto()] objects powering [geom_yin_fish()] and
-[geom_yang_fish()]. Exported so that extension packages can inherit from
+The \code{\link[ggplot2:ggproto]{ggplot2::ggproto()}} objects powering \code{\link[=geom_yin_fish]{geom_yin_fish()}} and
+\code{\link[=geom_yang_fish]{geom_yang_fish()}}. Exported so that extension packages can inherit from
 them; most users never need to touch these.
 }
 \keyword{datasets}

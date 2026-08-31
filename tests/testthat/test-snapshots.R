@@ -91,3 +91,74 @@ test_that("taichi with a shared legend snapshot", {
     coord_fixed()
   vdiffr::expect_doppelganger("taichi-shared-legend", p)
 })
+
+# --- 0.3.0 channels -------------------------------------------------------
+
+test_that("explicit difference as eye size snapshot", {
+  p <- ggplot(snap_data, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, explicit = "difference") +
+    coord_fixed()
+  vdiffr::expect_doppelganger("taichi-explicit-eye", p)
+})
+
+test_that("explicit difference as tilt snapshot", {
+  p <- ggplot(snap_data, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, explicit = "difference",
+                explicit_channel = "angle") +
+    coord_fixed()
+  vdiffr::expect_doppelganger("taichi-explicit-angle", p)
+})
+
+test_that("explicit difference as outline width snapshot", {
+  p <- ggplot(snap_data, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, explicit = "difference",
+                explicit_channel = "border") +
+    coord_fixed()
+  vdiffr::expect_doppelganger("taichi-explicit-border", p)
+})
+
+test_that("explicit difference as glyph radius snapshot", {
+  p <- ggplot(snap_data, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, explicit = "difference",
+                explicit_channel = "radius") +
+    coord_fixed()
+  vdiffr::expect_doppelganger("taichi-explicit-radius", p)
+})
+
+test_that("balanced palette snapshot", {
+  p <- ggplot(snap_data, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, palette = "balanced",
+                shared_limits = TRUE) +
+    coord_fixed()
+  vdiffr::expect_doppelganger("taichi-palette-balanced", p)
+})
+
+test_that("binned fills snapshot", {
+  p <- ggplot(snap_data, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang,
+                yin_scale = scale_taichi_yin_binned(n.breaks = 4),
+                yang_scale = scale_taichi_yang_binned(n.breaks = 4),
+                shared_limits = TRUE) +
+    coord_fixed()
+  vdiffr::expect_doppelganger("taichi-binned", p)
+})
+
+test_that("taichi legend keys snapshot", {
+  d <- data.frame(
+    x = c(1, 2, 1, 2),
+    y = c(2, 2, 1, 1),
+    yin = factor(c("A", "B", "C", "A")),
+    yang = factor(c("win", "loss", "win", "loss"))
+  )
+  p <- ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, eyes = TRUE) +
+    coord_fixed()
+  vdiffr::expect_doppelganger("taichi-key-glyph", p)
+})
+
+test_that("difference heatmap snapshot", {
+  p <- ggplot(snap_data, aes(x, y)) +
+    geom_taichi_diff(yin = yin, yang = yang) +
+    coord_fixed()
+  vdiffr::expect_doppelganger("taichi-diff-tiles", p)
+})

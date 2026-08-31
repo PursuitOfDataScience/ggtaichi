@@ -1,0 +1,9 @@
+bibentry(
+  bibtype  = "Manual",
+  title    = "ggtaichi: Taichi-Diagram Visualization for Two Data Sources",
+  author   = person(given = "Youzhi", family = "Yu"),
+  year     = "2026",
+  note     = paste("R package version", meta$Version),
+  url      = "https://CRAN.R-project.org/package=ggtaichi",
+  header   = "To cite ggtaichi in publications, use:"
+)

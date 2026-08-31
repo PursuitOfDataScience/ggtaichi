@@ -13,9 +13,11 @@ geom_yin_fish(
   width = NULL,
   height = NULL,
   eyes = FALSE,
+  interactive = FALSE,
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
+  key_glyph = NULL,
   ...
 )
 
@@ -27,44 +29,58 @@ geom_yang_fish(
   width = NULL,
   height = NULL,
   eyes = FALSE,
+  interactive = FALSE,
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE,
+  key_glyph = NULL,
   ...
 )
 }
 \arguments{
-\item{mapping, data, stat, position, inherit.aes}{See [ggplot2::layer()].}
+\item{mapping, data, stat, position, inherit.aes}{See \code{\link[ggplot2:layer]{ggplot2::layer()}}.}
 
 \item{width, height}{Cell size; defaults to the resolution of the data.}
 
 \item{eyes}{Logical. Draw the classic eye dot inside this fish's head?}
 
-\item{na.rm}{If `TRUE`, silently removes rows with missing values.}
+\item{interactive}{Logical. Draw \pkg{ggiraph} grobs carrying the
+\code{tooltip}, \code{data_id} and \code{onclick} aesthetics, so that
+\code{ggiraph::girafe()} can turn the plot into a widget. Needs the
+\pkg{ggiraph} package.}
+
+\item{na.rm}{If \code{TRUE}, silently removes rows with missing values.}
 
 \item{show.legend}{Logical. Should this layer be included in the legends?}
 
-\item{...}{Other arguments passed to [ggplot2::layer()]: either aesthetics
-used as constant parameters (e.g. `eye_size = 0.2`) or geom parameters.}
+\item{key_glyph}{Legend key glyph; defaults to this fish's half of a
+taichi symbol (see \code{\link[=draw_key_taichi]{draw_key_taichi()}}). Passed to \code{\link[ggplot2:layer]{ggplot2::layer()}}.}
+
+\item{...}{Other arguments passed to \code{\link[ggplot2:layer]{ggplot2::layer()}}: either aesthetics
+used as constant parameters (e.g. \code{eye_size = 0.2}) or geom parameters.}
 }
 \value{
 A ggplot2 layer drawing one fish per cell.
 }
 \description{
-`geom_yin_fish()` and `geom_yang_fish()` each draw one of the two
-interlocking fish of a taichi symbol per `(x, y)` cell. They are the
-building blocks that [geom_taichi()] assembles (together with two fill
-scales and a [ggnewscale::new_scale_fill()] break); use them directly when
+\code{geom_yin_fish()} and \code{geom_yang_fish()} each draw one of the two
+interlocking fish of a taichi symbol per \verb{(x, y)} cell. They are the
+building blocks that \code{\link[=geom_taichi]{geom_taichi()}} assembles (together with two fill
+scales and a \code{\link[ggnewscale:new_scale]{ggnewscale::new_scale_fill()}} break); use them directly when
 you want full control --- e.g. to bring your own fill scale for a single
 fish, to stack scales differently, or to draw only one source.
 }
 \details{
-Both geoms understand the aesthetics `x`, `y`, `fill`, `colour`,
-`linewidth`, `linetype`, `alpha`, `width`, `height`, `angle` (degrees,
-counter-clockwise), `eye_size`, and `eye_colour` (the latter two only
-matter when `eyes = TRUE`). At `angle = 0` the yin fish is the left half
-of the circle plus the top bulb (its head); the yang fish is the right
-half plus the bottom bulb.
+Both geoms understand the aesthetics \code{x}, \code{y}, \code{fill}, \code{colour},
+\code{linewidth}, \code{linetype}, \code{alpha}, \code{width}, \code{height}, \code{angle} (degrees,
+counter-clockwise), \code{radius} (a proportion of the cell's own radius, so
+\code{0.5} draws a half-size glyph in the same cell), \code{border} (a per-cell
+outline width in mm, overriding \code{linewidth}), \code{eye_size}, and
+\code{eye_colour} (the latter two only matter when \code{eyes = TRUE}), plus
+\code{tooltip}, \code{data_id} and \code{onclick}, which are only read when
+\code{interactive = TRUE}. At \code{angle = 0} the yin fish is the left half of the
+circle plus the top bulb (its head); the yang fish is the right half plus
+the bottom bulb.
 }
 \examples{
 library(ggplot2)

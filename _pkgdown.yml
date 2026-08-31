@@ -32,3 +32,55 @@ navbar:
   - icon: fa-github fa-lg
     href: https://github.com/PursuitOfDataScience/ggtaichi
     aria-label: GitHub
+
+reference:
+- title: Drawing the glyph
+  desc: >
+    The main layer, and the two fish it is assembled from.
+  contents:
+  - geom_taichi
+  - geom_yin_fish
+  - ggtaichi-ggproto
+
+- title: The relationship between the two sources
+  desc: >
+    A taichi grid shows two sources in one position, which answers "which is
+    bigger here?" and not "by how much?". These compute the second question's
+    answer -- inside the glyph, as a table, or as a heatmap of its own.
+  contents:
+  - taichi_summary
+  - geom_taichi_diff
+
+- title: Palettes
+  desc: >
+    The two fill ramps are compared against each other, so pairing them is a
+    correctness question rather than a matter of taste. These build a matched
+    pair and measure any pair.
+  contents:
+  - taichi_palette_pair
+  - taichi_palette
+  - taichi_check_palette
+
+- title: Scales
+  desc: >
+    Ready fill scales in the package's conventions, including the binned ones
+    worth reaching for on a dense grid.
+  contents:
+  - scale_taichi
+
+- title: Styling
+  contents:
+  - theme_taichi
+  - remove_padding
+  - draw_key_taichi
+
+- title: Data
+  contents:
+  - cafes_tg
+  - pitts_tg
+  - states_tg
+  - pitts_emojis
+
+- title: Package
+  contents:
+  - ggtaichi-package

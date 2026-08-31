@@ -131,3 +131,117 @@ ggplot(d, aes(x, y)) +
   coord_fixed() +
   theme_taichi()
 ```
+
+## The gap, drawn three ways
+
+`explicit` computes the relationship between the two sources and shows it as a
+third channel. The eyes are the default --- subordinate to the fills, so the
+two sources stay the story, and absent altogether where the sources agree:
+
+```{r explicit-eye, fig.height = 6, fig.alt="The espresso versus matcha grid with eyes whose size grows with the gap between the two sources; cells where they agree have no eyes."}
+ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
+  geom_taichi(yin = matcha, yang = espresso,
+              shared_legend = TRUE, yin_name = "orders / 100 customers",
+              explicit = "difference") +
+  remove_padding() +
+  theme_taichi() +
+  ggtitle("Eye size = the gap")
+```
+
+Tilt is the most accurate of the four channels, because direction is read far
+more precisely than shading. Upright means the two sources agree:
+
+```{r explicit-angle, fig.height = 6, fig.alt="The espresso versus matcha grid where each glyph leans left or right in proportion to which source is larger."}
+ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
+  geom_taichi(yin = matcha, yang = espresso,
+              shared_legend = TRUE, yin_name = "orders / 100 customers",
+              explicit = "difference", explicit_channel = "angle") +
+  remove_padding() +
+  theme_taichi() +
+  ggtitle("Tilt = the gap")
+```
+
+Or drop the glyph entirely when the gap *is* the question:
+
+```{r diff, fig.height = 5, fig.alt="A diverging heatmap of matcha minus espresso orders, red where espresso leads and blue where matcha does."}
+ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
+  geom_taichi_diff(yin = matcha, yang = espresso) +
+  remove_padding() +
+  theme_taichi() +
+  ggtitle("matcha - espresso")
+```
+
+## A fair pair of palettes
+
+First the package defaults, then `palette = "balanced"`. The data is
+symmetric --- both fish carry the same value in every cell --- so a fair pair
+should make the two halves of every glyph look equally heavy. Only one of them
+does:
+
+```{r pair, fig.width = 9, fig.height = 3.6, fig.alt="Two rows of taichi diagrams drawn from identical data, the default grey and red palette above and a luminance-matched blue and brick-red pair below; only the matched pair makes the two halves look equally weighted."}
+same <- data.frame(x = 1:6, y = 1, a = seq(1, 10, length.out = 6))
+same$b <- same$a
+
+both <- function(pal, title) {
+  ggplot(same, aes(x, y)) +
+    geom_taichi(yin = a, yang = b, palette = pal, shared_limits = TRUE,
+                show.legend = FALSE) +
+    coord_fixed() +
+    theme_taichi() +
+    ggtitle(title)
+}
+
+both("default", "palette = \"default\"")
+both("balanced", "palette = \"balanced\"")
+```
+
+And the measurement behind it:
+
+```{r check}
+taichi_check_palette()
+```
+
+## Binned fills
+
+On a grid too dense to compare cell by cell, matching a patch to one of a few
+labelled bins beats reading a continuous ramp:
+
+```{r binned, fig.height = 7, fig.alt="The dense two-state weekly grid with both fish filled from five discrete colour steps."}
+ggplot(subset(states_tg, state %in% c("New York", "Texas")),
+       aes(x = week, y = category)) +
+  geom_taichi(yin = Twitter, yang = Google,
+              yin_scale  = scale_taichi_yin_binned(n.breaks = 5),
+              yang_scale = scale_taichi_yang_binned(n.breaks = 5),
+              shared_limits = TRUE) +
+  facet_wrap(~ state, ncol = 1) +
+  remove_padding() +
+  theme_taichi()
+```
+
+## Interactive: hover one source, highlight it everywhere
+
+`interactive = TRUE` hands the layers to [ggiraph](https://davidgohel.github.io/ggiraph/). Hover a cell for the
+exact values and their difference; with `data_id_by = "source"`, hovering any
+yin fish highlights the yin fish in *every* cell, which turns the
+superposition display into a single-source display for as long as you hold the
+pointer there.
+
+```{r girafe, eval = requireNamespace("ggiraph", quietly = TRUE), fig.height = 6}
+p <- ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
+  geom_taichi(yin = matcha, yang = espresso,
+              shared_legend = TRUE, yin_name = "orders / 100 customers",
+              interactive = TRUE, data_id_by = "source") +
+  remove_padding() +
+  theme_taichi()
+
+ggiraph::girafe(
+  ggobj = p,
+  width_svg = 7, height_svg = 6,
+  options = list(
+    ggiraph::opts_hover(css = "stroke:#C20824;stroke-width:1.5px;"),
+    ggiraph::opts_tooltip(
+      css = "background:#f3efe6;border:1px solid #222;padding:6px;border-radius:3px;"
+    )
+  )
+)
+```
