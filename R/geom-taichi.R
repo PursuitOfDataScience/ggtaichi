@@ -1225,9 +1225,12 @@ taichi_setup_data <- function(data, params) {
     )
   }
 
-  if (anyDuplicated(data$group)) {
-    data$group <- seq_len(nrow(data))
-  }
+  # `group` is deliberately left alone. Nothing in this geom reads it --
+  # draw_panel() batches every row of a panel into one polygon and numbers the
+  # vertices itself -- but gganimate *encodes the frame into `group`*, as a
+  # "<id>" suffix, and anything that overwrites it collapses every transition
+  # to a single frame. Versions up to 0.3.0 reset it to seq_len(nrow(data)),
+  # which is why no animation ever advanced.
 
   data
 }

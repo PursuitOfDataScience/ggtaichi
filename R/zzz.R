@@ -26,26 +26,26 @@ utils::globalVariables(c(
   if (!has_themed_aes()) return(invisible())
 
   GeomYinFish$default_aes <- ggplot2::aes(
-    fill = from_theme(fill %||% mix_ink(ink, paper, 0.2)),
+    fill = from_theme(fill %||% mix_ink(ink, solid_colour(paper, "white"), 0.2)),
     colour = from_theme(colour %||% NA),
     linewidth = from_theme(0.2 * borderwidth),
     linetype = from_theme(bordertype),
     alpha = NA, width = NA, height = NA,
     angle = 0, radius = 1, border = NA,
     eye_size = 0.15,
-    eye_colour = from_theme(paper),
+    eye_colour = from_theme(solid_colour(paper, "white")),
     tooltip = NA, data_id = NA, onclick = NA
   )
 
   GeomYangFish$default_aes <- ggplot2::aes(
-    fill = from_theme(fill %||% mix_ink(ink, paper, 0.2)),
+    fill = from_theme(fill %||% mix_ink(ink, solid_colour(paper, "white"), 0.2)),
     colour = from_theme(colour %||% NA),
     linewidth = from_theme(0.2 * borderwidth),
     linetype = from_theme(bordertype),
     alpha = NA, width = NA, height = NA,
     angle = 0, radius = 1, border = NA,
     eye_size = 0.15,
-    eye_colour = from_theme(ink),
+    eye_colour = from_theme(solid_colour(ink, "black")),
     tooltip = NA, data_id = NA, onclick = NA
   )
 

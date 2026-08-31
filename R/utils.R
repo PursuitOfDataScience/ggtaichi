@@ -27,3 +27,16 @@ has_themed_aes <- function() {
   isTRUE(utils::packageVersion("ggplot2") >= "4.0.0") &&
     "from_theme" %in% getNamespaceExports("ggplot2")
 }
+
+# A theme need not have a background. theme_void() and any theme built with
+# `rect = element_blank()` leave `paper` fully transparent, and both of the
+# places ggtaichi reads it then misbehave: a transparent yin eye is an
+# invisible eye, and mixing a fill towards a transparent paper darkens it
+# instead of lightening it. Treat an alpha-zero colour as absent and fall back
+# to the concrete colour the output will almost always be viewed against.
+solid_colour <- function(col, fallback) {
+  if (length(col) != 1 || is.na(col)) return(fallback)
+  alpha <- tryCatch(grDevices::col2rgb(col, alpha = TRUE)[4, 1],
+                    error = function(e) 255)
+  if (alpha == 0) fallback else col
+}

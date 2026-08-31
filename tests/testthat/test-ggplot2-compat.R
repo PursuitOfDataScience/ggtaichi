@@ -120,6 +120,32 @@ test_that("linewidth follows the theme's borderwidth", {
   expect_equal(unique(b$data[[1]]$linewidth), 0.2)
 })
 
+test_that("a theme with no background still gets visible eyes", {
+  skip_if_not(ggtaichi:::has_themed_aes(), "ggplot2 < 4.0.0")
+  # theme_void() leaves `paper` fully transparent; from_theme(paper) would
+  # then paint the yin eye #00000000 and it would silently disappear
+  for (th in list(theme_void(), theme(rect = element_blank()))) {
+    b <- ggplot_build(ggplot(d, aes(x, y)) +
+      geom_taichi(yin = yin, yang = yang, eyes = TRUE) + th)
+    expect_equal(unique(b$data[[1]]$eye_colour), "white")
+    expect_equal(unique(b$data[[2]]$eye_colour), "black")
+  }
+})
+
+test_that("a transparent paper does not darken the fallback fill", {
+  skip_if_not(ggtaichi:::has_themed_aes(), "ggplot2 < 4.0.0")
+  b <- ggplot_build(ggplot(d, aes(x, y)) + geom_yin_fish() + theme_void())
+  expect_equal(unname(grDevices::col2rgb(unique(b$data[[1]]$fill))[, 1]),
+               unname(grDevices::col2rgb("grey20")[, 1]))
+})
+
+test_that("solid_colour only replaces fully transparent colours", {
+  expect_equal(ggtaichi:::solid_colour("#00000000", "white"), "white")
+  expect_equal(ggtaichi:::solid_colour("red", "white"), "red")
+  expect_equal(ggtaichi:::solid_colour(NA, "white"), "white")
+  expect_equal(ggtaichi:::solid_colour("#FF000080", "white"), "#FF000080")
+})
+
 test_that("has_themed_aes agrees with the installed ggplot2", {
   expect_equal(ggtaichi:::has_themed_aes(),
                utils::packageVersion("ggplot2") >= "4.0.0")
