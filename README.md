@@ -7,9 +7,7 @@
 [![CRAN
 status](https://www.r-pkg.org/badges/version/ggtaichi)](https://CRAN.R-project.org/package=ggtaichi)
 [![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![Codecov test
-coverage](https://codecov.io/gh/PursuitOfDataScience/ggtaichi/graph/badge.svg)](https://app.codecov.io/gh/PursuitOfDataScience/ggtaichi)
+stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 <!-- badges: end -->
 
 **Two data sources. One grid of yin-yang glyphs. Both halves at a

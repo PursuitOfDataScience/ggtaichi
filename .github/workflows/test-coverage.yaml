@@ -25,7 +25,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::covr, any::xml2
+          extra-packages: any::covr
           needs: coverage
 
       - name: Test coverage
@@ -36,30 +36,14 @@ jobs:
             install_path = file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package")
           )
           print(cov)
-          covr::to_cobertura(cov)
-          ## Put the number in the run summary too, so this job says something
-          ## useful whether or not the upload below can run.
+          ## This project does not use Codecov, so the number goes in the run
+          ## summary and the per-file breakdown in the log. Nothing is
+          ## uploaded anywhere.
           cat(
             sprintf("## Test coverage: %.1f%%\n", covr::percent_coverage(cov)),
             file = Sys.getenv("GITHUB_STEP_SUMMARY"), append = TRUE
           )
         shell: Rscript {0}
-
-      - uses: codecov/codecov-action@v5
-        with:
-          ## Best effort, deliberately not fatal. This repository has no
-          ## CODECOV_TOKEN secret, and Codecov rejects tokenless uploads on a
-          ## protected branch ("Token required - not valid tokenless upload"),
-          ## which failed this whole job while the coverage measurement itself
-          ## had succeeded. The percentage in the step summary above is the
-          ## output that matters; the upload and the README badge start
-          ## working the moment a CODECOV_TOKEN is added as a repository
-          ## secret, at which point set this back to true.
-          fail_ci_if_error: false
-          files: ./cobertura.xml
-          plugins: noop
-          disable_search: true
-          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Show testthat output
         if: always()

@@ -170,9 +170,11 @@ arguments.
   the roadmap has flagged. Grouping them into option objects
   (`taichi_eyes()`, `taichi_scales()`, ...) is intended to land *before* the
   next wave of glyph channels, not after.
-- The lifecycle badge stays `experimental`. The gate for `stable` is one
-  release cycle with no new arguments to `geom_taichi()`, which this is
-  emphatically not.
+- **The lifecycle badge moves to `stable`.** The API has been through three
+  releases without a breaking change: 0.3.0 added arguments but removed and
+  altered nothing, and every plot written against 0.1.0 or 0.2.0 still draws
+  the same picture. `stable` is a promise about breakage, not a promise to
+  stop adding features, and that promise the package can keep.
 
 # ggtaichi 0.2.0
 
