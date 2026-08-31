@@ -20,41 +20,28 @@ knitr::opts_chunk$set(echo = TRUE,
                       fig.path = "man/figures/README-",
                       fig.align = "center",
                       dpi = 120)
+has_gganimate <- requireNamespace("gganimate", quietly = TRUE)
 ```
 
-`ggtaichi` is a `ggplot2` extension that compares data from two sources on a
-single grid of taichi (yin-yang) diagrams. A regular heat map made with
-`geom_tile()` encodes three dimensions (the `x`, `y` position and one value);
-`geom_taichi()` turns every cell into a taichi symbol whose two interlocking
-fish are filled by **two** sources at once, so four dimensions are expressed on
-one plot -- and with the optional data-driven eyes, up to **six**, plus
-rotation for a seventh and a computed comparison between the two sources for an
-eighth.
+**Two data sources. One grid of yin-yang glyphs. Both halves at a glance.**
 
-## Installation
+A `geom_tile()` heatmap gives you one number per cell. `geom_taichi()` gives
+you two.
 
-Install the released version from CRAN:
+## Install
 
 ``` r
 install.packages("ggtaichi")
-```
 
-Or the development version from GitHub with:
-
-``` r
-# install.packages("devtools")
+# development version
 devtools::install_github("PursuitOfDataScience/ggtaichi")
 ```
 
-## Anatomy of a taichi
+## One glyph, two numbers
 
-Each symbol is a circle split by an S-curve into two interlocking fish. The
-**yang** (light) fish is shaded by one source and the **yin** (dark) fish by the
-other, each on its own gradient. By default there are no decorative dots --
-every drop of ink is data -- and the classic eyes, when you enable them, are
-data channels too (see below).
+Yin takes one source, yang the other. No decoration -- every drop of ink is data.
 
-```{r anatomy, fig.width=4.5, fig.height=4.5, fig.alt="A single large taichi diagram whose red (yang) half encodes one data source and grey (yin) half the other."}
+```{r anatomy, fig.width=4, fig.height=4, fig.alt="A single large taichi diagram whose red (yang) half encodes one data source and grey (yin) half the other."}
 library(ggtaichi)
 library(ggplot2)
 
@@ -66,95 +53,41 @@ ggplot(one, aes(x, y)) +
   theme_taichi()
 ```
 
-## A clear, small grid
+## Now a grid of them
 
-The built-in `pitts_tg` dataset holds the 30-week COVID-related Google and
-Twitter incidence rates for 9 categories in the Pittsburgh Metropolitan
-Statistical Area. With many weeks the symbols shrink, so it is often easier to
-read a slice. Here are the first six weeks, where each taichi is big enough to
-compare the two halves at a glance.
-
-```{r pitts-small, fig.width=7, fig.height=8, fig.alt="A six-week grid of taichi diagrams for nine Pittsburgh COVID categories, the yang fish shaded red by Google and the yin fish grey by Twitter."}
+```{r pitts, fig.width=7, fig.height=7, fig.alt="A six-week grid of taichi diagrams for nine Pittsburgh COVID categories, the yang fish shaded red by Google and the yin fish grey by Twitter."}
 pitts_small <- subset(pitts_tg, week <= 6)
 
-ggplot(pitts_small, aes(x = week, y = category)) +
+ggplot(pitts_small, aes(week, category)) +
   geom_taichi(yin = Twitter, yang = Google) +
-  theme_taichi() +
-  ggtitle("Pittsburgh: Google (yang) vs Twitter (yin), weeks 1-6")
-```
-
-The legend titles default to the column names you supply. Note how `Covid` and
-`Masks` lean dark (high Twitter) while staying pink (moderate Google).
-
-## Your own gradients
-
-Each fish gets its own gradient, and any extra argument is passed straight to
-`ggplot2::scale_fill_gradientn()`.
-
-```{r palettes, fig.width=7, fig.height=8, fig.alt="The same six-week Pittsburgh grid of taichi diagrams drawn with a blue gradient for Twitter and an orange gradient for Google."}
-ggplot(pitts_small, aes(x = week, y = category)) +
-  geom_taichi(
-    yin  = Twitter, yin_name  = "Twitter (%)",
-    yin_colors  = c("#deebf7", "#3182bd", "#08306b"),
-    yang = Google,  yang_name = "Google (%)",
-    yang_colors = c("#fee6ce", "#e6550d", "#7f2704")
-  ) +
   theme_taichi()
 ```
 
-## Comparing places
+`Covid` and `Masks` lean dark -- lots of Twitter -- while staying pink, so only
+moderate Google.
 
-Because `geom_taichi()` is an ordinary layer, faceting just works. The
-`states_tg` dataset repeats the same measurements across four states; showing two
-of them over a handful of weeks keeps the glyphs large and legible.
+## The eyes are data too
 
-```{r states, fig.width=7, fig.height=8, fig.alt="Two faceted taichi grids comparing New York and Texas over six weeks, the yang fish red for Google and the yin fish grey for Twitter."}
-two_states <- subset(states_tg, state %in% c("New York", "Texas") & week <= 6)
+Six dimensions in one mark: `x`, `y`, two fills, two eyes.
 
-ggplot(two_states, aes(x = week, y = category)) +
-  geom_taichi(yin = Twitter, yang = Google) +
-  facet_wrap(~ state, ncol = 1) +
-  remove_padding(x = "c", y = "d") +
-  theme_taichi() +
-  ggtitle("New York vs Texas, weeks 1-6")
-```
-
-## Eyes that carry data
-
-`eyes = TRUE` draws the classic taichi dots, each centred in its own fish's
-head. The eye arguments accept a constant *or a data column*: mapped eye sizes
-(rescaled to sensible radii) and colours make the glyph a genuine
-**six-dimensional** mark -- `x`, `y`, two fills, two eyes.
-
-```{r eyes, fig.width=6, fig.height=6, fig.alt="A two-by-two grid of taichi diagrams with classic eyes whose sizes vary from cell to cell, encoding two extra variables."}
-quad <- data.frame(
-  x = c(1, 2, 1, 2),
-  y = c(2, 2, 1, 1),
-  yin = c(3, 5, 7, 9),
-  yang = c(9, 7, 5, 3),
-  reach = c(10, 40, 25, 5),
-  quality = c(2, 1, 4, 8)
-)
+```{r eyes, fig.width=5, fig.height=5, fig.alt="A two-by-two grid of taichi diagrams with classic eyes whose sizes vary from cell to cell, encoding two extra variables."}
+quad <- data.frame(x = c(1, 2, 1, 2), y = c(2, 2, 1, 1),
+                   yin = c(3, 5, 7, 9), yang = c(9, 7, 5, 3),
+                   reach = c(10, 40, 25, 5), quality = c(2, 1, 4, 8))
 
 ggplot(quad, aes(x, y)) +
-  geom_taichi(yin = yin, yang = yang,
-              eyes = TRUE,
-              yin_eye_size = reach,
-              yang_eye_size = quality,
-              limits = c(0, 10)) +  # shared limits keep the palest fish visible
+  geom_taichi(yin = yin, yang = yang, eyes = TRUE,
+              yin_eye_size = reach, yang_eye_size = quality,
+              limits = c(0, 10)) +
   coord_fixed() +
-  theme_taichi() +
-  ggtitle("Eye sizes encode a 5th and 6th variable")
+  theme_taichi()
 ```
 
-## Rotation
+## Spin it
 
-`angle` rotates each glyph by a constant or by a column, so orientation can
-encode a directional or temporal variable -- and, combined with
-[gganimate](https://gganimate.com), produces the iconic spinning taichi (see
-`vignette("animations")`).
+`angle` takes a constant or a column -- a seventh channel.
 
-```{r rotation, fig.width=7, fig.height=3, fig.alt="Four taichi diagrams rotated by 0, 45, 90, and 135 degrees read from a data column."}
+```{r rotation, fig.width=7, fig.height=2.6, fig.alt="Four taichi diagrams rotated by 0, 45, 90, and 135 degrees read from a data column."}
 rot <- data.frame(x = 1:4, y = 1, yin = 1:4, yang = 4:1,
                   turn = c(0, 45, 90, 135))
 
@@ -165,80 +98,81 @@ ggplot(rot, aes(x, y)) +
   theme_taichi()
 ```
 
-## Categorical fills
+Hand `angle` to [gganimate](https://gganimate.com) and it actually spins.
 
-Factor, character, and logical columns now get a discrete fill scale
-automatically (v0.1.0 could only draw continuous values); computed
-expressions like `factor(week)` work too, and `yin_scale` / `yang_scale`
-accept any custom fill scale.
+```{r spin, eval=has_gganimate, fig.width=6, fig.height=1.9, gganimate=list(nframes=48, fps=14), fig.alt="Four taichi glyphs rotating steadily, each a quarter turn out of phase with the last."}
+library(gganimate)
 
-```{r categorical, fig.width=6, fig.height=6, fig.alt="A two-by-two grid of taichi diagrams whose fish are filled by discrete categories: methods A to C for yin and win or loss for yang."}
-disc <- data.frame(
-  x = c(1, 2, 1, 2),
-  y = c(2, 2, 1, 1),
-  method = factor(c("A", "B", "C", "A")),
-  outcome = factor(c("win", "loss", "win", "loss"))
-)
+spin <- expand.grid(x = 1:4, f = 1:48)
+spin$y <- 1
+spin$turn <- (spin$f - 1) * 7.5 + (spin$x - 1) * 45   # each one out of phase
+
+ggplot(spin, aes(x, y)) +
+  geom_taichi(yin = 1, yang = 2, angle = turn, eyes = TRUE,
+              yin_colors = "grey15", yang_colors = "#C20824",
+              show.legend = FALSE) +
+  coord_fixed() +
+  theme_void() +
+  transition_states(f, transition_length = 1, state_length = 0)
+```
+
+## Watch a season go by
+
+`cafes_tg` follows espresso and matcha across twelve weeks. Espresso cools off,
+matcha warms up.
+
+```{r season, eval=has_gganimate, fig.width=8, fig.height=3.6, gganimate=list(nframes=48, fps=8), fig.alt="Eight taichi glyphs, one per neighbourhood, animating week by week as the espresso half lightens and the matcha half darkens."}
+ggplot(cafes_tg, aes(neighbourhood, "")) +
+  geom_taichi(yin = matcha, yang = espresso, shared_legend = TRUE,
+              yin_name = "orders / 100 customers") +
+  theme_taichi() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 9)) +
+  labs(title = "Week {closest_state}", x = NULL) +
+  transition_states(week, transition_length = 2, state_length = 1)
+```
+
+## Categories work too
+
+```{r categorical, fig.width=5, fig.height=5, fig.alt="A two-by-two grid of taichi diagrams whose fish are filled by discrete categories: methods A to C for yin and win or loss for yang."}
+disc <- data.frame(x = c(1, 2, 1, 2), y = c(2, 2, 1, 1),
+                   method = factor(c("A", "B", "C", "A")),
+                   outcome = factor(c("win", "loss", "win", "loss")))
 
 ggplot(disc, aes(x, y)) +
   geom_taichi(yin = method, yang = outcome) +
   coord_fixed() +
-  theme_taichi() +
-  ggtitle("Discrete yin & yang")
+  theme_taichi()
 ```
 
-## One legend, two fish
+The legend keys are little taichi as well.
 
-When both sources share units, `shared_legend = TRUE` puts them on a single
-scale and a single legend (`shared_limits = TRUE` aligns limits while keeping
-separate palettes). The bundled synthetic `cafes_tg` data -- espresso vs
-matcha orders across eight neighbourhoods -- is made for it:
+## Same units? One legend.
 
-```{r shared, fig.width=7, fig.height=6, fig.alt="A 12-week by 8-neighbourhood grid of taichi diagrams comparing espresso and matcha orders on one shared grey scale with a single legend."}
-ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
-  geom_taichi(yin = matcha, yang = espresso,
-              shared_legend = TRUE,
+```{r shared, fig.width=7, fig.height=5.5, fig.alt="A 12-week by 8-neighbourhood grid of taichi diagrams comparing espresso and matcha orders on one shared grey scale with a single legend."}
+ggplot(cafes_tg, aes(week, neighbourhood)) +
+  geom_taichi(yin = matcha, yang = espresso, shared_legend = TRUE,
               yin_name = "orders / 100 customers") +
   remove_padding() +
-  theme_taichi() +
-  ggtitle("Espresso (yang) vs matcha (yin)")
+  theme_taichi()
 ```
 
-The building blocks `geom_yin_fish()` / `geom_yang_fish()` are exported for
-fully manual scale control, and each layer is drawn as one batched polygon --
-a 1200-cell grid renders about 15x faster than the per-cell grob building of
-v0.1.0, pixel-for-pixel identically.
+## Bigger, sure -- but by how much?
 
-## New in 0.3.0: how much bigger, not just which
+Two fish in one spot tell you *which*. `explicit` computes the gap and shows
+you *how much*. Cells where the two agree get no eye at all.
 
-Two fish sharing one position is a *superposition* comparison. It is very good
-at "are these similar?" and "which is bigger here?", and it simply cannot
-answer "by how much?" -- for that the relationship has to be computed and
-drawn. `explicit` does that, turning the difference (or ratio, log ratio, or
-standardised difference) into a third channel of the same mark.
-
-The default channel is eye size, because the eyes already exist and are
-visually subordinate to the fills: the two fish keep carrying the two sources
-while the eye carries the gap. A cell where the sources agree exactly gets no
-eye, so a plain glyph *means* agreement.
-
-```{r explicit-eye, fig.width=7, fig.height=6, fig.alt="A 12-week by 8-neighbourhood taichi grid where each glyph's eyes grow with the gap between espresso and matcha orders, and cells where the two agree have no eyes at all."}
-ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
-  geom_taichi(yin = matcha, yang = espresso,
-              shared_legend = TRUE,
+```{r explicit-eye, fig.width=7, fig.height=5.5, fig.alt="The espresso versus matcha grid where each glyph's eyes grow with the gap between the two sources, and cells where they agree have no eyes."}
+ggplot(cafes_tg, aes(week, neighbourhood)) +
+  geom_taichi(yin = matcha, yang = espresso, shared_legend = TRUE,
               yin_name = "orders / 100 customers",
               explicit = "difference") +
   remove_padding() +
-  theme_taichi() +
-  ggtitle("Eye size = how far apart the two sources are")
+  theme_taichi()
 ```
 
-`explicit_channel = "angle"` is the most *accurate* option: direction is read
-far more precisely than shading, so an upright glyph means the two sources
-agree and the lean shows which way and how far. `"border"` and `"radius"` are
-the other two.
+Or as tilt, which the eye reads far more precisely. Upright means they agree.
 
-```{r explicit-angle, fig.width=7, fig.height=3, fig.alt="Five taichi diagrams tilting progressively from left-leaning to right-leaning as the difference between the two sources goes from negative to positive."}
+```{r explicit-angle, fig.width=7, fig.height=2.4, fig.alt="Five taichi diagrams tilting from left-leaning to right-leaning as the difference between the two sources goes from negative to positive."}
 tilt <- data.frame(x = 1:5, y = 1, yin = c(1, 3, 5, 7, 9), yang = 9:5)
 
 ggplot(tilt, aes(x, y)) +
@@ -248,52 +182,45 @@ ggplot(tilt, aes(x, y)) +
   theme_taichi()
 ```
 
-And when the glyph is not the right chart for the question, `geom_taichi_diff()`
-draws the same statistic as a diverging heatmap, while `taichi_summary()`
-returns it as a table:
+Animate it and the eyes blink shut exactly where the two sources cross.
 
-```{r summary}
-head(taichi_summary(cafes_tg, yin = matcha, yang = espresso,
-                    x = week, y = neighbourhood), 4)
+```{r crossover, eval=has_gganimate, fig.width=8, fig.height=3.6, gganimate=list(nframes=48, fps=8), fig.alt="Eight taichi glyphs animating across a season; their eyes shrink to nothing as espresso and matcha cross over, then swell again."}
+ggplot(cafes_tg, aes(neighbourhood, "")) +
+  geom_taichi(yin = matcha, yang = espresso, shared_legend = TRUE,
+              yin_name = "orders / 100 customers",
+              explicit = "difference") +
+  theme_taichi() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 9)) +
+  labs(title = "Week {closest_state}", x = NULL) +
+  transition_states(week, transition_length = 2, state_length = 1)
 ```
 
-## New in 0.3.0: palettes you can check
+## Is your palette fair?
 
-The two ramps are compared against each other, so they have to be matched: if
-one spans a wider luminance range than the other, equal values do not read as
-equal ink and one fish looks heavier wherever the data says the two sources are
-level. That makes palette pairing a correctness question, and
-`taichi_check_palette()` answers it with numbers. Run on the package's own
-defaults, it fails them:
+If the two ramps don't span the same luminance, equal values don't *look* equal
+and one fish quietly wins. Ask:
 
-```{r check-palette}
+``` r
 taichi_check_palette()
+#>   largest luminance mismatch : 40.6 L* (tolerance 5.0)
+#>   Verdict: FAIL
 ```
 
-`palette = "balanced"` is a pair built to be matched --- same luminance and
-chroma trajectory, different hue --- and there are presets for viridis-family,
-ColorBrewer, diverging and greyscale-safe pairs, plus `taichi_palette_pair()`
-to build your own. The defaults are unchanged, so no existing figure moves.
+Yes -- the defaults fail their own check, and are kept only so old figures
+don't move. `palette = "balanced"` passes.
 
-```{r balanced, fig.width=7, fig.height=6, fig.alt="The espresso-versus-matcha taichi grid drawn with a luminance-matched blue and brick-red palette pair, so equal values carry equal visual weight."}
-ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
+```{r balanced, fig.width=7, fig.height=5.5, fig.alt="The espresso versus matcha grid drawn with a luminance-matched blue and brick-red palette pair, so equal values carry equal visual weight."}
+ggplot(cafes_tg, aes(week, neighbourhood)) +
   geom_taichi(yin = matcha, yang = espresso,
               palette = "balanced", shared_limits = TRUE) +
   remove_padding() +
-  theme_taichi() +
-  ggtitle("A luminance-matched pair: equal values, equal weight")
+  theme_taichi()
 ```
 
-## New in 0.3.0: binned fills for dense grids
+## Too many cells? Bin it.
 
-Reading a value off a continuous luminance ramp is the least accurate
-perceptual task there is, and it gets worse as a grid grows. Matching a patch
-to one of five labelled bins is much closer to a categorical lookup, and
-`shared_limits` now pushes its limits into the scales you supply, so both fish
-share one set of breaks and equal values land in the same bin.
-
-```{r binned, fig.width=7, fig.height=6, fig.alt="The espresso-versus-matcha grid with both fish filled from four discrete colour steps rather than a continuous ramp."}
-ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
+```{r binned, fig.width=7, fig.height=5.5, fig.alt="The espresso versus matcha grid with both fish filled from four discrete colour steps rather than a continuous ramp."}
+ggplot(cafes_tg, aes(week, neighbourhood)) +
   geom_taichi(yin = matcha, yang = espresso,
               yin_scale  = scale_taichi_yin_binned(n.breaks = 4),
               yang_scale = scale_taichi_yang_binned(n.breaks = 4),
@@ -302,42 +229,25 @@ ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
   theme_taichi()
 ```
 
-## New in 0.3.0: hover for the exact numbers
-
-Fill is an imprecise channel by nature, so the honest fix is to give the reader
-a second, accurate route to the values rather than to pretend otherwise.
-`interactive = TRUE` makes the fish [ggiraph](https://davidgohel.github.io/ggiraph/)
-grobs, so `ggiraph::girafe()` turns the plot into a widget whose tooltips carry
-both values and their difference:
+## Hover for the exact numbers
 
 ``` r
-p <- ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
-  geom_taichi(yin = matcha, yang = espresso, interactive = TRUE,
-              data_id_by = "source") +
-  theme_taichi()
+p <- ggplot(cafes_tg, aes(week, neighbourhood)) +
+  geom_taichi(yin = matcha, yang = espresso,
+              interactive = TRUE, data_id_by = "source")
 
 ggiraph::girafe(ggobj = p)
 ```
 
-`data_id_by = "source"` is the interesting one: hovering any yin fish
-highlights the yin fish in *every* cell, temporarily turning the superposition
-display into a single-source one. A live version is in the
+Hover one yin fish and *every* yin fish lights up. Live version in the
 [gallery](https://pursuitofdatascience.github.io/ggtaichi/articles/gallery.html).
 
-Legend keys are now small taichi symbols too, and the geoms follow ggplot2 4.0
-themes, so a dark `theme(geom = element_geom(ink = ..., paper = ...))` no
-longer leaves the fallback fish invisible.
+## More
 
-## Animation
-
-The taichi is a cyclical symbol, so motion suits it: `geom_taichi()` composes
-cleanly with `gganimate` -- turn a third variable into animation frames
-instead of an axis, or spin the glyphs via `angle`. Full recipes live in
-`vignette("animations")`.
-
-See `vignette("ggtaichi")` for the full tour, and the
+`vignette("ggtaichi")` for the full tour, `vignette("animations")` for motion,
+and the
 [gallery](https://pursuitofdatascience.github.io/ggtaichi/articles/gallery.html)
-for more looks.
+for the rest.
 
 ## Acknowledgement
 
