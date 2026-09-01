@@ -10,7 +10,6 @@
 ^pkgdown$
 ^r-lib$
 ^r-lib-43$
-^features\.md$
 ^ggtaichi\.Rcheck$
 ^ggtaichi_.*\.tar\.gz$
 ^tmp_lib$
