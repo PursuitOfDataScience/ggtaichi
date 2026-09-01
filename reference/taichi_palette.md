@@ -18,7 +18,7 @@ taichi_palette(name = "balanced", n = 5)
 - name:
 
   Name of the preset: one of `"default"`, `"balanced"`, `"diverging"`,
-  `"viridis_pair"`, `"brewer_pair"`, `"print_safe"`.
+  `"viridis_pair"`, `"brewer_pair"`, `"greyscale_safe"`.
 
 - n:
 
@@ -69,14 +69,17 @@ A list of two character vectors of hex colours, `yin` and `yang`.
   ColorBrewer's sequential Blues and Oranges. Familiar and
   print-friendly; less exactly matched than `"balanced"`.
 
-- `"print_safe"`:
+- `"greyscale_safe"`:
 
   A grey yin ramp and a hued yang ramp on the *same* luminance
   trajectory. In colour the two fish are told apart by hue; in greyscale
   they collapse to the same ink, so equal values still read as equal —
   the two sources are then distinguished by their position in the glyph
   (yin is the top bulb, yang the bottom). The right choice for a journal
-  figure that may be printed in black and white.
+  figure that may be printed in black and white. Note the promise
+  precisely: it is about **greyscale**, not about the CMYK gamut. A hued
+  ramp can still shift when converted for offset printing; if that
+  matters, soft-proof the figure.
 
 ## See also
 
@@ -93,7 +96,7 @@ taichi_palette("balanced")
 #> $yang
 #> [1] "#EEDFDE" "#D2B1AD" "#B6857E" "#985A4F" "#7A2F19"
 #> 
-taichi_palette("print_safe", n = 3)
+taichi_palette("greyscale_safe", n = 3)
 #> $yin
 #> [1] "#F1F1F1" "#919191" "#3B3B3B"
 #> 
@@ -103,7 +106,7 @@ taichi_palette("print_safe", n = 3)
 
 # every preset, measured
 for (p in c("default", "balanced", "diverging", "viridis_pair",
-            "brewer_pair", "print_safe")) {
+            "brewer_pair", "greyscale_safe")) {
   cat(p, ": max |dL| = ",
       round(taichi_check_palette(palette = p)$max_luminance_diff, 1),
       "\n", sep = "")
@@ -113,5 +116,5 @@ for (p in c("default", "balanced", "diverging", "viridis_pair",
 #> diverging: max |dL| = 0.8
 #> viridis_pair: max |dL| = 7.1
 #> brewer_pair: max |dL| = 4.2
-#> print_safe: max |dL| = 0.6
+#> greyscale_safe: max |dL| = 0.6
 ```

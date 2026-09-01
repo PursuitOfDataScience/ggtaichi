@@ -54,7 +54,7 @@ available on their own so they can be inspected, checked with
 
 <dl><dt id="arg-name">name<a class="anchor" aria-label="anchor" href="#arg-name"></a></dt>
 <dd><p>Name of the preset: one of <code>"default"</code>, <code>"balanced"</code>,
-<code>"diverging"</code>, <code>"viridis_pair"</code>, <code>"brewer_pair"</code>, <code>"print_safe"</code>.</p></dd>
+<code>"diverging"</code>, <code>"viridis_pair"</code>, <code>"brewer_pair"</code>, <code>"greyscale_safe"</code>.</p></dd>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
@@ -102,13 +102,16 @@ protan row before choosing it.</p></dd>
 Familiar and print-friendly; less exactly matched than
 <code>"balanced"</code>.</p></dd>
 
-<dt><code>"print_safe"</code></dt>
-<dd><p>A grey yin ramp and a hued yang ramp on the <em>same</em>
-luminance trajectory. In colour the two fish are told apart by hue; in
-greyscale they collapse to the same ink, so equal values still read as
-equal — the two sources are then distinguished by their position in
-the glyph (yin is the top bulb, yang the bottom). The right choice for
-a journal figure that may be printed in black and white.</p></dd>
+<dt><code>"greyscale_safe"</code></dt>
+<dd><p>A grey yin ramp and a hued yang ramp on the
+<em>same</em> luminance trajectory. In colour the two fish are told apart by
+hue; in greyscale they collapse to the same ink, so equal values still
+read as equal — the two sources are then distinguished by their
+position in the glyph (yin is the top bulb, yang the bottom). The right
+choice for a journal figure that may be printed in black and white.
+Note the promise precisely: it is about <strong>greyscale</strong>, not about the
+CMYK gamut. A hued ramp can still shift when converted for offset
+printing; if that matters, soft-proof the figure.</p></dd>
 
 
 </dl></div>
@@ -126,7 +129,7 @@ a journal figure that may be printed in black and white.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $yang</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "#EEDFDE" "#D2B1AD" "#B6857E" "#985A4F" "#7A2F19"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="fu">taichi_palette</span><span class="op">(</span><span class="st">"print_safe"</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">taichi_palette</span><span class="op">(</span><span class="st">"greyscale_safe"</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $yin</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "#F1F1F1" "#919191" "#3B3B3B"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -136,7 +139,7 @@ a journal figure that may be printed in black and white.</p></dd>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># every preset, measured</span></span></span>
 <span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">p</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"default"</span>, <span class="st">"balanced"</span>, <span class="st">"diverging"</span>, <span class="st">"viridis_pair"</span>,</span></span>
-<span class="r-in"><span>            <span class="st">"brewer_pair"</span>, <span class="st">"print_safe"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>            <span class="st">"brewer_pair"</span>, <span class="st">"greyscale_safe"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">p</span>, <span class="st">": max |dL| = "</span>,</span></span>
 <span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="taichi_check_palette.html">taichi_check_palette</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="va">p</span><span class="op">)</span><span class="op">$</span><span class="va">max_luminance_diff</span>, <span class="fl">1</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>      <span class="st">"\n"</span>, sep <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span></span>
@@ -146,7 +149,7 @@ a journal figure that may be printed in black and white.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> diverging: max |dL| = 0.8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> viridis_pair: max |dL| = 7.1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> brewer_pair: max |dL| = 4.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> print_safe: max |dL| = 0.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> greyscale_safe: max |dL| = 0.6</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

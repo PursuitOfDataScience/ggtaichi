@@ -590,6 +590,7 @@ taichi_check_palette()
 #> 
 #>   largest luminance mismatch : 40.6 L* (tolerance 5.0)
 #>   largest chroma mismatch    : 78.1
+#>   measured in                : CIE Lab (L*, C*ab), CIE2000 distances
 #>   how far apart the ramps stay (median distance, step for step)
 #>       normal       27.2  
 #>       deutan       20.9  
@@ -627,6 +628,7 @@ taichi_check_palette(palette = "balanced")
 #> 
 #>   largest luminance mismatch : 0.8 L* (tolerance 5.0)
 #>   largest chroma mismatch    : 1.5
+#>   measured in                : CIE Lab (L*, C*ab), CIE2000 distances
 #>   how far apart the ramps stay (median distance, step for step)
 #>       normal       26.4  
 #>       deutan       27.7  
@@ -652,11 +654,11 @@ ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
 
 The other presets are `"diverging"` (both ramps reaching a shared
 near-white midpoint, so the two fish read as the two arms of one
-diverging scale), `"viridis_pair"`, `"brewer_pair"`, and `"print_safe"`
-— a grey ramp and a hued ramp on the *same* luminance trajectory, so in
-colour the two fish are told apart by hue and in greyscale they collapse
-to the same ink, which keeps equal values equal in a black-and-white
-printout.
+diverging scale), `"viridis_pair"`, `"brewer_pair"`, and
+`"greyscale_safe"` — a grey ramp and a hued ramp on the *same* luminance
+trajectory, so in colour the two fish are told apart by hue and in
+greyscale they collapse to the same ink, which keeps equal values equal
+in a black-and-white printout.
 [`taichi_palette()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_palette.md)
 returns any of them, and
 [`taichi_palette_pair()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_palette_pair.md)
@@ -766,7 +768,7 @@ A few honest caveats:
   [`taichi_check_palette()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_check_palette.md)
   also simulates deuteranopia, protanopia and tritanopia; the default
   pair loses about half its separation under protanopia.
-  `palette = "balanced"` holds up, `palette = "print_safe"` survives
+  `palette = "balanced"` holds up, `palette = "greyscale_safe"` survives
   greyscale printing, and
   [`scale_taichi_yin_viridis_c()`](https://pursuitofdatascience.github.io/ggtaichi/reference/scale_taichi.md)
   /

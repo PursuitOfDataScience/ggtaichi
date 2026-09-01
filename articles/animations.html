@@ -62,6 +62,13 @@ Chicago</span></p>
 
     
     
+<blockquote>
+<p><strong>Every animation on this page is really rendered when the
+vignette is built.</strong> Up to 0.3.0 the <code><a href="https://gganimate.com/reference/animate.html" class="external-link">animate()</a></code> calls
+here were commented out for CI, which meant a bug that collapsed every
+transition to a single frame went unnoticed for three releases. See
+<code>NEWS.md</code>.</p>
+</blockquote>
 <div class="section level2">
 <h2 id="why-animate">Why animate?<a class="anchor" aria-label="anchor" href="#why-animate"></a>
 </h2>
@@ -106,15 +113,18 @@ its 31 weeks onto the x-axis, keep a <code>category</code> x
 frames. Because the fills are continuous, <code>tweenr</code>
 interpolates the values smoothly between consecutive weeks.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">states_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">category</span>, y <span class="op">=</span> <span class="va">state</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<code class="sourceCode R"><span><span class="va">states_small</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">states_tg</span>, <span class="va">week</span> <span class="op">&lt;=</span> <span class="fl">8</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">states_small</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">category</span>, y <span class="op">=</span> <span class="va">state</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">Twitter</span>, yang <span class="op">=</span> <span class="va">Google</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Week {closest_state}"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://gganimate.com/reference/transition_states.html" class="external-link">transition_states</a></span><span class="op">(</span><span class="va">week</span>, transition_length <span class="op">=</span> <span class="fl">1</span>, state_length <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Render to a GIF (requires the gifski package)</span></span>
-<span><span class="co"># animate(p, renderer = gifski_renderer())</span></span>
-<span><span class="co"># anim_save("taichi.gif", p)</span></span></code></pre></div>
+<span><span class="fu">show_animation</span><span class="op">(</span><span class="va">p</span>, nframes <span class="op">=</span> <span class="fl">24</span><span class="op">)</span></span></code></pre></div>
+<p><img src="animations_files/figure-html/unnamed-chunk-1-1.gif" class="r-plt" alt="" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># and to save it:  anim_save("taichi.gif", p)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="keeping-glyphs-round">Keeping glyphs round<a class="anchor" aria-label="anchor" href="#keeping-glyphs-round"></a>
@@ -123,14 +133,15 @@ interpolates the values smoothly between consecutive weeks.</p>
 units, like <code><a href="https://rdrr.io/r/grid/grid.circle.html" class="external-link">grid::circleGrob()</a></code>), but
 <code><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed()</a></code> keeps the <em>cells</em> square too, so the
 glyphs fill them evenly. Match the animation dimensions to the grid:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p_fixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">states_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">category</span>, y <span class="op">=</span> <span class="va">state</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p_fixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">states_small</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">category</span>, y <span class="op">=</span> <span class="va">state</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">Twitter</span>, yang <span class="op">=</span> <span class="va">Google</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://gganimate.com/reference/transition_states.html" class="external-link">transition_states</a></span><span class="op">(</span><span class="va">week</span>, transition_length <span class="op">=</span> <span class="fl">1</span>, state_length <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># animate(p_fixed, width = 800, height = 600, fps = 10)</span></span></code></pre></div>
+<span><span class="fu">show_animation</span><span class="op">(</span><span class="va">p_fixed</span>, nframes <span class="op">=</span> <span class="fl">24</span>, width <span class="op">=</span> <span class="fl">560</span>, height <span class="op">=</span> <span class="fl">420</span><span class="op">)</span></span></code></pre></div>
+<p><img src="animations_files/figure-html/unnamed-chunk-2-1.gif" class="r-plt" alt="" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
 <h2 id="spin-animation">Spin animation<a class="anchor" aria-label="anchor" href="#spin-animation"></a>
@@ -140,7 +151,7 @@ you can rotate each glyph. Mapping <code>angle</code> to an expression
 of the frame variable and animating produces the iconic “turning taichi”
 — with <code>eyes = TRUE</code> each eye rides around in its own fish’s
 head:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spin</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="fl">1</span>, y <span class="op">=</span> <span class="fl">1</span>, yin <span class="op">=</span> <span class="fl">5</span>, yang <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  frame <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">36</span></span>
@@ -153,7 +164,8 @@ head:</p>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://gganimate.com/reference/transition_states.html" class="external-link">transition_states</a></span><span class="op">(</span><span class="va">frame</span>, transition_length <span class="op">=</span> <span class="fl">0</span>, state_length <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># animate(p_spin, width = 300, height = 300, fps = 12)</span></span></code></pre></div>
+<span><span class="fu">show_animation</span><span class="op">(</span><span class="va">p_spin</span>, nframes <span class="op">=</span> <span class="fl">36</span>, fps <span class="op">=</span> <span class="fl">12</span>, width <span class="op">=</span> <span class="fl">300</span>, height <span class="op">=</span> <span class="fl">300</span><span class="op">)</span></span></code></pre></div>
+<p><img src="animations_files/figure-html/unnamed-chunk-3-1.gif" class="r-plt" alt="" style="display: block; margin: auto;"></p>
 <p>Note the <code>state_length = 1</code> with
 <code>transition_length = 0</code>: each frame <em>is</em> a state, so
 the rotation advances in crisp steps (at least one of the two lengths

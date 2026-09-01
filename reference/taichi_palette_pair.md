@@ -102,6 +102,7 @@ taichi_check_palette(pair$yin, pair$yang)
 #> 
 #>   largest luminance mismatch : 0.8 L* (tolerance 5.0)
 #>   largest chroma mismatch    : 1.5
+#>   measured in                : CIE Lab (L*, C*ab), CIE2000 distances
 #>   how far apart the ramps stay (median distance, step for step)
 #>       normal       26.4  
 #>       deutan       27.7  

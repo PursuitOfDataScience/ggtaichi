@@ -74,6 +74,16 @@ cell identifiers, `yin`, `yang`, `difference`, `ratio`, `log_ratio`,
   The cell's rank by size of `abs(difference)`, 1 being the widest gap.
   Cells with a missing difference get `NA`.
 
+## A caveat on `rank`
+
+A grid of 96 cells is 96 implicit comparisons, and the most extreme cell
+in a grid that size is frequently the most extreme *noise* rather than
+the largest real effect. Treat `rank` as a list of places to look, not
+as a list of findings: taking the top-ranked cell and reporting it is
+the multiple-comparisons problem in miniature. With one observation per
+cell there is no per-cell test to correct with, so the honest check is
+on the field as a whole.
+
 ## See also
 
 [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)'s
@@ -96,7 +106,7 @@ head(summ)
 #> 5 5 Old Town 38.3 56.2      -17.9 0.6814947 -0.5532257 -1.6120500 espresso   48
 #> 6 6 Old Town 41.1 60.0      -18.9 0.6850000 -0.5458241 -1.7148359 espresso   45
 
-# the five cells where the two sources disagree most
+# the five widest gaps -- places to look, not findings; see the caveat above
 head(summ[order(summ$rank), ], 5)
 #>     x               y  yin yang difference    ratio log_ratio        z dominant
 #> 35 11      University 74.1 24.0       50.1 3.087500  1.626439 4.260819   matcha

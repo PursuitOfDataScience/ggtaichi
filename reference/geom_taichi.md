@@ -31,6 +31,7 @@ geom_taichi(
   explicit = c("none", "difference", "ratio", "log_ratio", "z"),
   explicit_channel = c("eye_size", "angle", "border", "radius"),
   explicit_range = NULL,
+  radius_exponent = 0.57,
   interactive = FALSE,
   tooltip = NULL,
   data_id = NULL,
@@ -94,8 +95,8 @@ geom_taichi(
   `yang_colors`: the name of a
   [`taichi_palette()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_palette.md)
   preset (`"balanced"`, `"diverging"`, `"viridis_pair"`,
-  `"brewer_pair"`, `"print_safe"`, `"default"`) or a list with `yin` and
-  `yang` colour vectors, such as the result of
+  `"brewer_pair"`, `"greyscale_safe"`, `"default"`) or a list with `yin`
+  and `yang` colour vectors, such as the result of
   [`taichi_palette_pair()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_palette_pair.md).
   Default `NULL`, which keeps the package's historical grey / seal-red
   pair. See the Palettes section.
@@ -159,6 +160,15 @@ geom_taichi(
 
   Two numbers giving the output range of `explicit_channel`, or `NULL`
   (the default) for that channel's own sensible range.
+
+- radius_exponent:
+
+  Only used by `explicit_channel = "radius"`: the exponent relating the
+  statistic to the glyph radius. `0.5` is strict area scaling; the
+  default `0.57` is the cartographic apparent-magnitude (Flannery)
+  compensation, which makes larger symbols slightly larger than the
+  geometry alone would give because readers systematically underestimate
+  the area ratio between big and small circles.
 
 - interactive:
 
@@ -293,6 +303,13 @@ that no category is invisible on a white panel; an explicitly supplied
 color vector is used as-is. Supply `yin_scale` / `yang_scale` to
 override the automatic choice entirely.
 
+The automatic discrete palette samples a *sequential* ramp, which
+implies that the levels are ordered. That suits an ordered factor and
+overstates an unordered one: if your categories have no natural order,
+supply a qualitative palette through `yin_colors` / `yang_colors` or a
+scale through `yin_scale` / `yang_scale`, so the fill does not assert a
+ranking the data does not have.
+
 Because the choice is made when the layer is added, replacing the plot's
 data afterwards keeps the scales picked for the original data. Swapping
 in data of the same types is fine; if the new `yin` / `yang` columns are
@@ -339,6 +356,16 @@ and `width` / `height` via
 A fish whose fill value is `NA` is painted in the scale's `na.value`
 colour (pass e.g. `na.value = "transparent"` through `...` to change
 it), while `na.rm = TRUE` silently drops rows with missing positions.
+
+## Time on an axis
+
+Putting time on `x` makes each row of the grid a time series drawn as a
+row of discrete glyphs, and the series is then encoded in *fill* rather
+than in position — so slope is not encoded at all, and a reader infers a
+trend by comparing the shade of neighbouring cells. That is a poor
+substitute for a line. Use a taichi grid for the question *which series
+differ from each other, and where*; put a line chart or a horizon plot
+beside it for *what is the trend*.
 
 ## Explicit encoding
 

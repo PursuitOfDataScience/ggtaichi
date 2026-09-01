@@ -79,6 +79,7 @@ can carry up to six dimensions.</p>
 <span>  explicit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"difference"</span>, <span class="st">"ratio"</span>, <span class="st">"log_ratio"</span>, <span class="st">"z"</span><span class="op">)</span>,</span>
 <span>  explicit_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"eye_size"</span>, <span class="st">"angle"</span>, <span class="st">"border"</span>, <span class="st">"radius"</span><span class="op">)</span>,</span>
 <span>  explicit_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  radius_exponent <span class="op">=</span> <span class="fl">0.57</span>,</span>
 <span>  interactive <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  tooltip <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  data_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -143,7 +144,7 @@ for factor/character data. Ignored if <code>yang_scale</code> is provided.</p></
 <code>yin_colors</code> / <code>yang_colors</code>: the name of a
 <code><a href="taichi_palette.html">taichi_palette()</a></code> preset (<code>"balanced"</code>,
 <code>"diverging"</code>, <code>"viridis_pair"</code>, <code>"brewer_pair"</code>,
-<code>"print_safe"</code>, <code>"default"</code>) or a list with <code>yin</code> and
+<code>"greyscale_safe"</code>, <code>"default"</code>) or a list with <code>yin</code> and
 <code>yang</code> colour vectors, such as the result of
 <code><a href="taichi_palette_pair.html">taichi_palette_pair()</a></code>. Default <code>NULL</code>, which keeps the
 package's historical grey / seal-red pair. See the Palettes section.</p></dd>
@@ -211,6 +212,16 @@ silent override.</p></dd>
 <dd><p>Two numbers giving the output range of
 <code>explicit_channel</code>, or <code>NULL</code> (the default) for that channel's
 own sensible range.</p></dd>
+
+
+<dt id="arg-radius-exponent">radius_exponent<a class="anchor" aria-label="anchor" href="#arg-radius-exponent"></a></dt>
+<dd><p>Only used by <code>explicit_channel = "radius"</code>: the
+exponent relating the statistic to the glyph radius. <code>0.5</code> is strict
+area scaling; the default <code>0.57</code> is the cartographic
+apparent-magnitude (Flannery) compensation, which makes larger symbols
+slightly larger than the geometry alone would give because readers
+systematically underestimate the area ratio between big and small
+circles.</p></dd>
 
 
 <dt id="arg-interactive">interactive<a class="anchor" aria-label="anchor" href="#arg-interactive"></a></dt>
@@ -347,6 +358,12 @@ the palest end of the ramp so that no category is invisible on a white
 panel; an explicitly supplied color vector is used as-is. Supply
 <code>yin_scale</code> / <code>yang_scale</code> to override the automatic choice
 entirely.</p>
+<p>The automatic discrete palette samples a <em>sequential</em> ramp, which
+implies that the levels are ordered. That suits an ordered factor and
+overstates an unordered one: if your categories have no natural order,
+supply a qualitative palette through <code>yin_colors</code> / <code>yang_colors</code>
+or a scale through <code>yin_scale</code> / <code>yang_scale</code>, so the fill does
+not assert a ranking the data does not have.</p>
 <p>Because the choice is made when the layer is added, replacing the plot's
 data afterwards keeps the scales picked for the original data. Swapping in
 data of the same types is fine; if the new <code>yin</code> / <code>yang</code> columns
@@ -397,6 +414,18 @@ via <code><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="exte
 <code>na.value</code> colour (pass e.g. <code>na.value = "transparent"</code> through
 <code>...</code> to change it), while <code>na.rm = TRUE</code> silently drops rows
 with missing positions.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="time-on-an-axis">Time on an axis<a class="anchor" aria-label="anchor" href="#time-on-an-axis"></a></h2>
+
+
+<p>Putting time on <code>x</code> makes each row of the grid a time series drawn as
+a row of discrete glyphs, and the series is then encoded in <em>fill</em>
+rather than in position — so slope is not encoded at all, and a reader
+infers a trend by comparing the shade of neighbouring cells. That is a poor
+substitute for a line. Use a taichi grid for the question <em>which
+series differ from each other, and where</em>; put a line chart or a horizon
+plot beside it for <em>what is the trend</em>.</p>
     </div>
     <div class="section level2">
     <h2 id="explicit-encoding">Explicit encoding<a class="anchor" aria-label="anchor" href="#explicit-encoding"></a></h2>

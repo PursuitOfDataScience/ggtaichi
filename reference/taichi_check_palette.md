@@ -52,7 +52,9 @@ frame of per-step colours, luminance and chroma), `max_luminance_diff`,
 `max_chroma_diff`, `monotone` (a logical pair), `verdict` (`"pass"`,
 `"warning"` or `"fail"`), `cvd` (a data frame of median step-wise colour
 distances for normal vision and each simulation, or `NULL` when
-colorspace is not installed) and `tolerance`.
+colorspace is not installed), `tolerance`, and `space`, naming the
+colour space every number was measured in — they are not comparable with
+figures computed in another space.
 
 ## Details
 
@@ -114,6 +116,7 @@ taichi_check_palette()
 #> 
 #>   largest luminance mismatch : 40.6 L* (tolerance 5.0)
 #>   largest chroma mismatch    : 78.1
+#>   measured in                : CIE Lab (L*, C*ab), CIE2000 distances
 #>   how far apart the ramps stay (median distance, step for step)
 #>       normal       27.2  
 #>       deutan       20.9  
@@ -142,6 +145,7 @@ taichi_check_palette(palette = "balanced")
 #> 
 #>   largest luminance mismatch : 0.8 L* (tolerance 5.0)
 #>   largest chroma mismatch    : 1.5
+#>   measured in                : CIE Lab (L*, C*ab), CIE2000 distances
 #>   how far apart the ramps stay (median distance, step for step)
 #>       normal       26.4  
 #>       deutan       27.7  

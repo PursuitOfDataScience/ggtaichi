@@ -98,7 +98,9 @@ that lays the measurements out as a table. It is a list with elements
 <code>max_luminance_diff</code>, <code>max_chroma_diff</code>, <code>monotone</code> (a logical pair),
 <code>verdict</code> (<code>"pass"</code>, <code>"warning"</code> or <code>"fail"</code>), <code>cvd</code> (a data frame of
 median step-wise colour distances for normal vision and each simulation,
-or <code>NULL</code> when <span class="pkg">colorspace</span> is not installed) and <code>tolerance</code>.</p>
+or <code>NULL</code> when <span class="pkg">colorspace</span> is not installed), <code>tolerance</code>, and
+<code>space</code>, naming the colour space every number was measured in — they
+are not comparable with figures computed in another space.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -159,6 +161,7 @@ well-matched pair.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   largest luminance mismatch : 40.6 L* (tolerance 5.0)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   largest chroma mismatch    : 78.1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   measured in                : CIE Lab (L*, C*ab), CIE2000 distances</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   how far apart the ramps stay (median distance, step for step)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       normal       27.2  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       deutan       20.9  </span>
@@ -187,6 +190,7 @@ well-matched pair.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   largest luminance mismatch : 0.8 L* (tolerance 5.0)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   largest chroma mismatch    : 1.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   measured in                : CIE Lab (L*, C*ab), CIE2000 distances</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   how far apart the ramps stay (median distance, step for step)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       normal       26.4  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       deutan       27.7  </span>

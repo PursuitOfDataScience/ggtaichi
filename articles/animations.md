@@ -1,5 +1,12 @@
 # Animating taichi diagrams
 
+> **Every animation on this page is really rendered when the vignette is
+> built.** Up to 0.3.0 the
+> [`animate()`](https://gganimate.com/reference/animate.html) calls here
+> were commented out for CI, which meant a bug that collapsed every
+> transition to a single frame went unnoticed for three releases. See
+> `NEWS.md`.
+
 ## Why animate?
 
 A taichi (yin-yang) symbol is *cyclical*, so motion is unusually
@@ -51,15 +58,22 @@ consecutive weeks.
 
 ``` r
 
-p <- ggplot(states_tg, aes(x = category, y = state)) +
+states_small <- subset(states_tg, week <= 8)
+
+p <- ggplot(states_small, aes(x = category, y = state)) +
   geom_taichi(yin = Twitter, yang = Google) +
   theme_taichi() +
   labs(title = "Week {closest_state}") +
   transition_states(week, transition_length = 1, state_length = 1)
 
-# Render to a GIF (requires the gifski package)
-# animate(p, renderer = gifski_renderer())
-# anim_save("taichi.gif", p)
+show_animation(p, nframes = 24)
+```
+
+![](animations_files/figure-html/unnamed-chunk-1-1.gif)
+
+``` r
+
+# and to save it:  anim_save("taichi.gif", p)
 ```
 
 ## Keeping glyphs round
@@ -73,14 +87,16 @@ animation dimensions to the grid:
 
 ``` r
 
-p_fixed <- ggplot(states_tg, aes(x = category, y = state)) +
+p_fixed <- ggplot(states_small, aes(x = category, y = state)) +
   geom_taichi(yin = Twitter, yang = Google) +
   coord_fixed() +
   theme_taichi() +
   transition_states(week, transition_length = 1, state_length = 1)
 
-# animate(p_fixed, width = 800, height = 600, fps = 10)
+show_animation(p_fixed, nframes = 24, width = 560, height = 420)
 ```
+
+![](animations_files/figure-html/unnamed-chunk-2-1.gif)
 
 ## Spin animation
 
@@ -104,8 +120,10 @@ p_spin <- ggplot(spin, aes(x, y)) +
   theme_taichi() +
   transition_states(frame, transition_length = 0, state_length = 1)
 
-# animate(p_spin, width = 300, height = 300, fps = 12)
+show_animation(p_spin, nframes = 36, fps = 12, width = 300, height = 300)
 ```
+
+![](animations_files/figure-html/unnamed-chunk-3-1.gif)
 
 Note the `state_length = 1` with `transition_length = 0`: each frame
 *is* a state, so the rotation advances in crisp steps (at least one of

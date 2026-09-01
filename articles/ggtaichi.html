@@ -563,6 +563,7 @@ measures the package’s own defaults:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   largest luminance mismatch : 40.6 L* (tolerance 5.0)</span></span>
 <span><span class="co">#&gt;   largest chroma mismatch    : 78.1</span></span>
+<span><span class="co">#&gt;   measured in                : CIE Lab (L*, C*ab), CIE2000 distances</span></span>
 <span><span class="co">#&gt;   how far apart the ramps stay (median distance, step for step)</span></span>
 <span><span class="co">#&gt;       normal       27.2  </span></span>
 <span><span class="co">#&gt;       deutan       20.9  </span></span>
@@ -596,6 +597,7 @@ built to be matched, differing only in hue:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   largest luminance mismatch : 0.8 L* (tolerance 5.0)</span></span>
 <span><span class="co">#&gt;   largest chroma mismatch    : 1.5</span></span>
+<span><span class="co">#&gt;   measured in                : CIE Lab (L*, C*ab), CIE2000 distances</span></span>
 <span><span class="co">#&gt;   how far apart the ramps stay (median distance, step for step)</span></span>
 <span><span class="co">#&gt;       normal       26.4  </span></span>
 <span><span class="co">#&gt;       deutan       27.7  </span></span>
@@ -616,11 +618,11 @@ built to be matched, differing only in hue:</p>
 <p>The other presets are <code>"diverging"</code> (both ramps reaching a
 shared near-white midpoint, so the two fish read as the two arms of one
 diverging scale), <code>"viridis_pair"</code>,
-<code>"brewer_pair"</code>, and <code>"print_safe"</code> — a grey ramp
-and a hued ramp on the <em>same</em> luminance trajectory, so in colour
-the two fish are told apart by hue and in greyscale they collapse to the
-same ink, which keeps equal values equal in a black-and-white printout.
-<code><a href="../reference/taichi_palette.html">taichi_palette()</a></code> returns any of them, and
+<code>"brewer_pair"</code>, and <code>"greyscale_safe"</code> — a grey
+ramp and a hued ramp on the <em>same</em> luminance trajectory, so in
+colour the two fish are told apart by hue and in greyscale they collapse
+to the same ink, which keeps equal values equal in a black-and-white
+printout. <code><a href="../reference/taichi_palette.html">taichi_palette()</a></code> returns any of them, and
 <code><a href="../reference/taichi_palette_pair.html">taichi_palette_pair()</a></code> builds your own from hue, luminance
 and chroma.</p>
 <p><code>shared_legend = TRUE</code> deserves a mention here too. It
@@ -727,7 +729,7 @@ and see the palette section above.</li>
 <code><a href="../reference/taichi_check_palette.html">taichi_check_palette()</a></code> also simulates deuteranopia,
 protanopia and tritanopia; the default pair loses about half its
 separation under protanopia. <code>palette = "balanced"</code> holds up,
-<code>palette = "print_safe"</code> survives greyscale printing, and
+<code>palette = "greyscale_safe"</code> survives greyscale printing, and
 <code><a href="../reference/scale_taichi.html">scale_taichi_yin_viridis_c()</a></code> /
 <code><a href="../reference/scale_taichi.html">scale_taichi_yang_viridis_c()</a></code> are there if you prefer the
 viridis family.</li>
