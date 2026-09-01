@@ -483,7 +483,7 @@ ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
 
 The other presets are `"diverging"` (both ramps reaching a shared near-white
 midpoint, so the two fish read as the two arms of one diverging scale),
-`"viridis_pair"`, `"brewer_pair"`, and `"print_safe"` --- a grey ramp and a
+`"viridis_pair"`, `"brewer_pair"`, and `"greyscale_safe"` --- a grey ramp and a
 hued ramp on the *same* luminance trajectory, so in colour the two fish are
 told apart by hue and in greyscale they collapse to the same ink, which keeps
 equal values equal in a black-and-white printout. `taichi_palette()` returns
@@ -583,7 +583,7 @@ caveats:
 - **Colour-vision deficiency.** `taichi_check_palette()` also simulates
   deuteranopia, protanopia and tritanopia; the default pair loses about half
   its separation under protanopia. `palette = "balanced"` holds up,
-  `palette = "print_safe"` survives greyscale printing, and
+  `palette = "greyscale_safe"` survives greyscale printing, and
   `scale_taichi_yin_viridis_c()` / `scale_taichi_yang_viridis_c()` are there
   if you prefer the viridis family.
 - **One source missing?** An `NA` fish keeps its place (painted in

@@ -27,6 +27,15 @@
 #'     widest gap. Cells with a missing difference get `NA`.}
 #' }
 #'
+#' @section A caveat on `rank`:
+#' A grid of 96 cells is 96 implicit comparisons, and the most extreme cell in
+#' a grid that size is frequently the most extreme *noise* rather than the
+#' largest real effect. Treat `rank` as a list of places to look, not as a
+#' list of findings: taking the top-ranked cell and reporting it is the
+#' multiple-comparisons problem in miniature. With one observation per cell
+#' there is no per-cell test to correct with, so the honest check is on the
+#' field as a whole.
+#'
 #' @param data A data frame, the same one passed to [ggplot2::ggplot()].
 #' @param yin,yang Unquoted column names (or strings naming columns) for the
 #'   two sources, exactly as in [geom_taichi()].
@@ -46,7 +55,7 @@
 #'                        x = week, y = neighbourhood)
 #' head(summ)
 #'
-#' # the five cells where the two sources disagree most
+#' # the five widest gaps -- places to look, not findings; see the caveat above
 #' head(summ[order(summ$rank), ], 5)
 taichi_summary <- function(data, yin, yang, x = NULL, y = NULL) {
   if (!is.data.frame(data)) {
@@ -369,8 +378,9 @@ explicit_default_range <- function(channel) {
 # `radius` is the one channel where the eye reads area rather than extent, so
 # it is scaled by the square root -- the standard fix for the area-versus-
 # diameter error of bubble charts.
-rescale_explicit <- function(x, channel, range = NULL) {
+rescale_explicit <- function(x, channel, range = NULL, exponent = NULL) {
   range <- range %||% explicit_default_range(channel)
+  exponent <- exponent %||% 0.57
   if (!is.numeric(range) || length(range) != 2 || anyNA(range)) {
     rlang::abort("`explicit_range` must be two numbers, or NULL.")
   }
@@ -400,7 +410,12 @@ rescale_explicit <- function(x, channel, range = NULL) {
     out[!is.finite(x)] <- mean(range)
   } else {
     frac <- abs(x) / m
-    if (channel == "radius") frac <- sqrt(frac)
+    # Area, not diameter -- but not the naive square root either. Readers
+    # systematically underestimate the area ratio between large and small
+    # circles, and cartography compensates with an exponent near 0.57
+    # (Flannery) rather than 0.5. `radius_exponent` exposes the choice;
+    # 0.5 gives strict area scaling.
+    if (channel == "radius") frac <- frac^exponent
     out <- range[1] + frac * (range[2] - range[1])
     # A missing statistic is not a zero one: leave the eye off and the rest
     # of the glyph at its neutral value.

@@ -755,3 +755,53 @@ test_that("printing the geom_taichi() object is human-readable", {
   expect_true(any(grepl("eyes : on", out, fixed = TRUE)))
   expect_true(any(grepl("shared", out)))
 })
+
+# ------------------------------------------------------------------
+# Legend order is pinned, not left to chance
+# ------------------------------------------------------------------
+
+test_that("the yin guide always comes before the yang guide", {
+  # With both guides left at ggplot2's default `order`, the tie was broken by
+  # something that is not stable between sessions: the same plot, package and
+  # ggplot2 could put yin first in one render and yang first in the next. One
+  # of the committed vdiffr references had in fact captured the wrong order.
+  d <- data.frame(x = rep(1:3, 3), y = rep(1:3, each = 3),
+                  yin = 1:9, yang = 9:1)
+  guide_order <- function(p) {
+    fills <- Filter(function(s) any(grepl("^fill", s$aesthetics)),
+                    ggplot_build(p)$plot$scales$scales)
+    vapply(fills, function(s) {
+      g <- s$guide
+      if (is.character(g)) NA_real_ else (g$params$order %||% g$order %||% NA_real_)
+    }, numeric(1))
+  }
+  ord <- guide_order(ggplot(d, aes(x, y)) + geom_taichi(yin = yin, yang = yang))
+  expect_equal(ord, c(1, 2))
+
+  # and for discrete fills, which use a different guide
+  dd <- data.frame(x = 1:3, y = 1, g = factor(c("a", "b", "c")))
+  ordd <- guide_order(ggplot(dd, aes(x, y)) + geom_taichi(yin = g, yang = g))
+  expect_equal(ordd, c(1, 2))
+})
+
+test_that("an explicit guide passed through ... still wins", {
+  d <- data.frame(x = 1:3, y = 1, yin = 1:3, yang = 3:1)
+  b <- ggplot_build(ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, guide = "none"))
+  fills <- Filter(function(s) any(grepl("^fill", s$aesthetics)),
+                  b$plot$scales$scales)
+  expect_true(all(vapply(fills, function(s) identical(s$guide, "none"),
+                         logical(1))))
+})
+
+test_that("shared_legend still drops the yang guide", {
+  d <- data.frame(x = 1:3, y = 1, yin = 1:3, yang = 3:1)
+  b <- ggplot_build(ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, shared_legend = TRUE))
+  fills <- Filter(function(s) any(grepl("^fill", s$aesthetics)),
+                  b$plot$scales$scales)
+  guides <- vapply(fills, function(s) {
+    if (is.character(s$guide)) s$guide else class(s$guide)[1]
+  }, character(1))
+  expect_true("none" %in% guides)
+})

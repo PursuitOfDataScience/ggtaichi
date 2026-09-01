@@ -23,6 +23,7 @@ geom_taichi(
   explicit = c("none", "difference", "ratio", "log_ratio", "z"),
   explicit_channel = c("eye_size", "angle", "border", "radius"),
   explicit_range = NULL,
+  radius_exponent = 0.57,
   interactive = FALSE,
   tooltip = NULL,
   data_id = NULL,
@@ -70,7 +71,7 @@ for factor/character data. Ignored if \code{yang_scale} is provided.}
 \code{yin_colors} / \code{yang_colors}: the name of a
 \code{\link{taichi_palette}()} preset (\code{"balanced"},
 \code{"diverging"}, \code{"viridis_pair"}, \code{"brewer_pair"},
-\code{"print_safe"}, \code{"default"}) or a list with \code{yin} and
+\code{"greyscale_safe"}, \code{"default"}) or a list with \code{yin} and
 \code{yang} colour vectors, such as the result of
 \code{\link{taichi_palette_pair}()}. Default \code{NULL}, which keeps the
 package's historical grey / seal-red pair. See the Palettes section.}
@@ -120,6 +121,14 @@ silent override.}
 \item{explicit_range}{Two numbers giving the output range of
 \code{explicit_channel}, or \code{NULL} (the default) for that channel's
 own sensible range.}
+
+\item{radius_exponent}{Only used by \code{explicit_channel = "radius"}: the
+exponent relating the statistic to the glyph radius. \code{0.5} is strict
+area scaling; the default \code{0.57} is the cartographic
+apparent-magnitude (Flannery) compensation, which makes larger symbols
+slightly larger than the geometry alone would give because readers
+systematically underestimate the area ratio between big and small
+circles.}
 
 \item{interactive}{If \code{TRUE}, draw the fish (and their eyes) as
 \pkg{ggiraph} grobs carrying \code{tooltip}, \code{data_id} and
@@ -234,6 +243,13 @@ panel; an explicitly supplied color vector is used as-is. Supply
 \code{yin_scale} / \code{yang_scale} to override the automatic choice
 entirely.
 
+The automatic discrete palette samples a \emph{sequential} ramp, which
+implies that the levels are ordered. That suits an ordered factor and
+overstates an unordered one: if your categories have no natural order,
+supply a qualitative palette through \code{yin_colors} / \code{yang_colors}
+or a scale through \code{yin_scale} / \code{yang_scale}, so the fill does
+not assert a ranking the data does not have.
+
 Because the choice is made when the layer is added, replacing the plot's
 data afterwards keeps the scales picked for the original data. Swapping in
 data of the same types is fine; if the new \code{yin} / \code{yang} columns
@@ -282,6 +298,17 @@ A fish whose fill value is \code{NA} is painted in the scale's
 \code{na.value} colour (pass e.g. \code{na.value = "transparent"} through
 \code{...} to change it), while \code{na.rm = TRUE} silently drops rows
 with missing positions.
+}
+
+\section{Time on an axis}{
+
+Putting time on \code{x} makes each row of the grid a time series drawn as
+a row of discrete glyphs, and the series is then encoded in \emph{fill}
+rather than in position --- so slope is not encoded at all, and a reader
+infers a trend by comparing the shade of neighbouring cells. That is a poor
+substitute for a line. Use a taichi grid for the question \emph{which
+series differ from each other, and where}; put a line chart or a horizon
+plot beside it for \emph{what is the trend}.
 }
 
 \section{Explicit encoding}{

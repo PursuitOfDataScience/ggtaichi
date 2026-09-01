@@ -47,7 +47,7 @@ test_that("taichi_palette_pair validates its arguments", {
 
 test_that("every preset returns two ramps of the requested length", {
   for (nm in c("default", "balanced", "diverging", "viridis_pair",
-               "brewer_pair", "print_safe")) {
+               "brewer_pair", "greyscale_safe")) {
     p <- taichi_palette(nm, n = 4)
     expect_named(p, c("yin", "yang"), info = nm)
     expect_length(p$yin, 4)
@@ -63,8 +63,8 @@ test_that("the 'default' preset is the package's own pair", {
                c("#FED7D8", "#FE8C91", "#F5636B", "#E72D3F", "#C20824"))
 })
 
-test_that("print_safe collapses to the same greys, balanced does not", {
-  p <- taichi_palette("print_safe")
+test_that("greyscale_safe collapses to the same greys, balanced does not", {
+  p <- taichi_palette("greyscale_safe")
   # identical luminance means identical ink once the colour is taken away
   expect_lt(max(abs(lum(p$yin) - lum(p$yang))), 2)
   # the yin ramp is genuinely grey
@@ -139,9 +139,9 @@ test_that("a matched pair is not falsely flagged for colour-vision", {
 
 test_that("a pair that colour-vision deficiency really does hurt is flagged", {
   skip_if_not_installed("colorspace")
-  chk <- taichi_check_palette(palette = "print_safe")
+  chk <- taichi_check_palette(palette = "greyscale_safe")
   normal <- chk$cvd$distance[chk$cvd$simulation == "normal"]
-  # print_safe pays for greyscale survival with red-green separability
+  # greyscale_safe pays for greyscale survival with red-green separability
   expect_lt(chk$cvd$distance[chk$cvd$simulation == "protan"], 0.5 * normal)
 })
 

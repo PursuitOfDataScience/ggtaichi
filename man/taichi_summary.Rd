@@ -51,12 +51,23 @@ widest gap. Cells with a missing difference get \code{NA}.}
 }
 }
 
+\section{A caveat on \code{rank}}{
+
+A grid of 96 cells is 96 implicit comparisons, and the most extreme cell in
+a grid that size is frequently the most extreme \emph{noise} rather than the
+largest real effect. Treat \code{rank} as a list of places to look, not as a
+list of findings: taking the top-ranked cell and reporting it is the
+multiple-comparisons problem in miniature. With one observation per cell
+there is no per-cell test to correct with, so the honest check is on the
+field as a whole.
+}
+
 \examples{
 summ <- taichi_summary(cafes_tg, yin = matcha, yang = espresso,
                        x = week, y = neighbourhood)
 head(summ)
 
-# the five cells where the two sources disagree most
+# the five widest gaps -- places to look, not findings; see the caveat above
 head(summ[order(summ$rank), ], 5)
 }
 \seealso{

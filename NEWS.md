@@ -76,7 +76,7 @@ Nothing about the default appearance changes.
   the same visual weight.
 - **`palette =`** on `geom_taichi()` selects a ready-made pair:
   `"balanced"` (the recommended one), `"diverging"`, `"viridis_pair"`,
-  `"brewer_pair"`, `"print_safe"` (a grey ramp and a hued ramp on the same
+  `"brewer_pair"`, `"greyscale_safe"` (a grey ramp and a hued ramp on the same
   luminance trajectory, so the figure survives greyscale printing), or
   `"default"`. **`taichi_palette()`** returns any of them for inspection.
 - **The defaults do not change.** Every existing figure is unaffected. The
@@ -160,6 +160,51 @@ arguments.
   `#00000000`. A fully transparent `paper` now falls back to white (and a
   transparent `ink` to black), which also stops the fallback fill being mixed
   towards transparency instead of towards the page.
+
+## Fixes and corrections in this cycle
+
+Found by auditing 0.3.0 against its own documentation before release. None of
+these has appeared in a CRAN release, so all are corrections rather than
+breaking changes.
+
+- **The yin and yang legends could swap places between sessions.** Both
+  auto-built fill guides were left at ggplot2's default `order`, and the tie
+  was broken by something that is not stable across R sessions: the same plot,
+  the same package and the same ggplot2 could put yin first in one render and
+  yang first in the next. One of the committed vdiffr references had in fact
+  recorded the wrong order, which is how it was found. Yin is now pinned
+  before yang, matching the argument order and every example in the
+  documentation. An explicit `guide` passed through `...` still wins, and
+  `shared_legend` still drops the yang guide.
+- **`vignette("animations")` now really renders its animations.** Every
+  `animate()` call in it was commented out, because gifski is not installed on
+  every check machine — and since building a `gganim` object succeeds whether
+  or not the transition works, nothing ever noticed that the geom was
+  collapsing every animation to a single frame. The calls now execute through
+  `gganimate::file_renderer()`, which needs no gifski and no system libraries,
+  and emit a GIF on top of that wherever gifski exists. A demonstration that is
+  never run is not a demonstration.
+- **`palette = "print_safe"` is renamed `"greyscale_safe"`.** The preset
+  guarantees that the two ramps collapse to the same ink in *greyscale*; it
+  says nothing about the CMYK gamut, which is what most readers understand by
+  "print safe". The name over-promised. Renamed now because the preset is new
+  in this cycle and has never been released.
+- **`explicit_channel = "radius"` gains `radius_exponent`, defaulting to
+  0.57.** The radius was scaled by `sqrt()` — strict area scaling — which was a
+  silent choice. Cartography's answer for proportional symbols is the
+  apparent-magnitude (Flannery) exponent of about 0.57, because readers
+  systematically underestimate the area ratio between large and small circles.
+  `radius_exponent = 0.5` restores the previous behaviour.
+- **`taichi_check_palette()` now names the colour space it measured in.**
+  Every number it prints is space-dependent and none of them said so, which
+  made them impossible to check against another tool.
+- **`taichi_summary()` documents a caveat on `rank`.** The widest gap in a
+  96-cell grid is frequently the largest noise; `rank` lists places to look,
+  not findings.
+- **`geom_taichi()` documents two things the mark cannot do.** A sequential
+  discrete palette asserts an ordering, which suits an ordered factor and
+  overstates an unordered one; and putting time on `x` encodes the series in
+  fill rather than position, so slope is not encoded at all.
 
 ## Deprecations and notes
 

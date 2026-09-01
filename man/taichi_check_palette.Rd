@@ -35,7 +35,9 @@ that lays the measurements out as a table. It is a list with elements
 \code{max_luminance_diff}, \code{max_chroma_diff}, \code{monotone} (a logical pair),
 \code{verdict} (\code{"pass"}, \code{"warning"} or \code{"fail"}), \code{cvd} (a data frame of
 median step-wise colour distances for normal vision and each simulation,
-or \code{NULL} when \pkg{colorspace} is not installed) and \code{tolerance}.
+or \code{NULL} when \pkg{colorspace} is not installed), \code{tolerance}, and
+\code{space}, naming the colour space every number was measured in --- they
+are not comparable with figures computed in another space.
 }
 \description{
 The taichi's whole purpose is to compare two sources inside one mark, and

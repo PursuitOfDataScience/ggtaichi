@@ -112,16 +112,19 @@ taichi_palette_pair <- function(n = 5, hues = c(250, 20),
 #'   \item{`"brewer_pair"`}{ColorBrewer's sequential Blues and Oranges.
 #'     Familiar and print-friendly; less exactly matched than
 #'     `"balanced"`.}
-#'   \item{`"print_safe"`}{A grey yin ramp and a hued yang ramp on the *same*
-#'     luminance trajectory. In colour the two fish are told apart by hue; in
-#'     greyscale they collapse to the same ink, so equal values still read as
-#'     equal --- the two sources are then distinguished by their position in
-#'     the glyph (yin is the top bulb, yang the bottom). The right choice for
-#'     a journal figure that may be printed in black and white.}
+#'   \item{`"greyscale_safe"`}{A grey yin ramp and a hued yang ramp on the
+#'     *same* luminance trajectory. In colour the two fish are told apart by
+#'     hue; in greyscale they collapse to the same ink, so equal values still
+#'     read as equal --- the two sources are then distinguished by their
+#'     position in the glyph (yin is the top bulb, yang the bottom). The right
+#'     choice for a journal figure that may be printed in black and white.
+#'     Note the promise precisely: it is about **greyscale**, not about the
+#'     CMYK gamut. A hued ramp can still shift when converted for offset
+#'     printing; if that matters, soft-proof the figure.}
 #' }
 #'
 #' @param name Name of the preset: one of `"default"`, `"balanced"`,
-#'   `"diverging"`, `"viridis_pair"`, `"brewer_pair"`, `"print_safe"`.
+#'   `"diverging"`, `"viridis_pair"`, `"brewer_pair"`, `"greyscale_safe"`.
 #' @param n Number of colours per ramp; ramps of a fixed length are
 #'   interpolated (in Lab space) when `n` differs from their natural length.
 #'
@@ -130,11 +133,11 @@ taichi_palette_pair <- function(n = 5, hues = c(250, 20),
 #' @export
 #' @examples
 #' taichi_palette("balanced")
-#' taichi_palette("print_safe", n = 3)
+#' taichi_palette("greyscale_safe", n = 3)
 #'
 #' # every preset, measured
 #' for (p in c("default", "balanced", "diverging", "viridis_pair",
-#'             "brewer_pair", "print_safe")) {
+#'             "brewer_pair", "greyscale_safe")) {
 #'   cat(p, ": max |dL| = ",
 #'       round(taichi_check_palette(palette = p)$max_luminance_diff, 1),
 #'       "\n", sep = "")
@@ -159,7 +162,7 @@ taichi_palette <- function(name = "balanced", n = 5) {
       yin  = c("#EFF3FF", "#BDD7E7", "#6BAED6", "#3182BD", "#08519C"),
       yang = c("#FEEDDE", "#FDBE85", "#FD8D3C", "#E6550D", "#A63603")
     ),
-    print_safe = {
+    greyscale_safe = {
       l <- seq(95, 25, length.out = n)
       cvec <- 65 * (0.15 + 0.85 * (1 - (l - 25) / 70))
       list(yin  = grDevices::hcl(h = 0, c = 0, l = l),
@@ -173,7 +176,7 @@ taichi_palette <- function(name = "balanced", n = 5) {
 }
 
 taichi_palette_names <- c("default", "balanced", "diverging", "viridis_pair",
-                          "brewer_pair", "print_safe")
+                          "brewer_pair", "greyscale_safe")
 
 taichi_default_yin_colors <-
   c("gray100", "gray85", "gray50", "gray35", "gray0")
@@ -246,7 +249,9 @@ interpolate_ramp <- function(cols, n) {
 #'   `max_luminance_diff`, `max_chroma_diff`, `monotone` (a logical pair),
 #'   `verdict` (`"pass"`, `"warning"` or `"fail"`), `cvd` (a data frame of
 #'   median step-wise colour distances for normal vision and each simulation,
-#'   or `NULL` when \pkg{colorspace} is not installed) and `tolerance`.
+#'   or `NULL` when \pkg{colorspace} is not installed), `tolerance`, and
+#'   `space`, naming the colour space every number was measured in --- they
+#'   are not comparable with figures computed in another space.
 #' @seealso [taichi_palette_pair()] to build a matched pair,
 #'   [taichi_palette()] for the presets.
 #' @export
@@ -306,6 +311,7 @@ taichi_check_palette <- function(yin_colors = NULL, yang_colors = NULL,
   }
 
   out <- list(
+    space = "CIE Lab (L*, C*ab), CIE2000 distances",
     steps = steps,
     max_luminance_diff = max_l,
     max_chroma_diff = max_c,
@@ -336,6 +342,9 @@ print.taichi_palette_check <- function(x, ...) {
   cat(sprintf("  largest luminance mismatch : %.1f L* (tolerance %.1f)\n",
               x$max_luminance_diff, x$tolerance))
   cat(sprintf("  largest chroma mismatch    : %.1f\n", x$max_chroma_diff))
+  # Every number above is colour-space dependent and none of them is
+  # comparable with a figure computed in another space, so say which one.
+  cat(sprintf("  measured in                : %s\n", x$space))
   if (!all(x$monotone)) {
     bad <- names(x$monotone)[!x$monotone]
     cat(sprintf("  NOT monotone in luminance  : %s\n",

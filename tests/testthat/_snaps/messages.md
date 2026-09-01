@@ -75,6 +75,7 @@
       
         largest luminance mismatch : 40.6 L* (tolerance 5.0)
         largest chroma mismatch    : 78.1
+        measured in                : CIE Lab (L*, C*ab), CIE2000 distances
         how far apart the ramps stay (median distance, step for step)
             normal       27.2  
             deutan       20.9  
@@ -106,6 +107,7 @@
       
         largest luminance mismatch : 0.8 L* (tolerance 5.0)
         largest chroma mismatch    : 1.5
+        measured in                : CIE Lab (L*, C*ab), CIE2000 distances
         how far apart the ramps stay (median distance, step for step)
             normal       26.4  
             deutan       27.7  
@@ -162,7 +164,7 @@
       geom_taichi(yin = a, yang = b, palette = 42)
     Condition
       Error in `as_palette_pair()`:
-      ! `palette` must be one of "default", "balanced", "diverging", "viridis_pair", "brewer_pair", "print_safe", or a list with `yin` and `yang` colour vectors (see `taichi_palette_pair()`).
+      ! `palette` must be one of "default", "balanced", "diverging", "viridis_pair", "brewer_pair", "greyscale_safe", or a list with `yin` and `yang` colour vectors (see `taichi_palette_pair()`).
 
 ---
 

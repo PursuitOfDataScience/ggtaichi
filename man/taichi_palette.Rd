@@ -8,7 +8,7 @@ taichi_palette(name = "balanced", n = 5)
 }
 \arguments{
 \item{name}{Name of the preset: one of \code{"default"}, \code{"balanced"},
-\code{"diverging"}, \code{"viridis_pair"}, \code{"brewer_pair"}, \code{"print_safe"}.}
+\code{"diverging"}, \code{"viridis_pair"}, \code{"brewer_pair"}, \code{"greyscale_safe"}.}
 
 \item{n}{Number of colours per ramp; ramps of a fixed length are
 interpolated (in Lab space) when \code{n} differs from their natural length.}
@@ -46,22 +46,25 @@ protan row before choosing it.}
 \item{\code{"brewer_pair"}}{ColorBrewer's sequential Blues and Oranges.
 Familiar and print-friendly; less exactly matched than
 \code{"balanced"}.}
-\item{\code{"print_safe"}}{A grey yin ramp and a hued yang ramp on the \emph{same}
-luminance trajectory. In colour the two fish are told apart by hue; in
-greyscale they collapse to the same ink, so equal values still read as
-equal --- the two sources are then distinguished by their position in
-the glyph (yin is the top bulb, yang the bottom). The right choice for
-a journal figure that may be printed in black and white.}
+\item{\code{"greyscale_safe"}}{A grey yin ramp and a hued yang ramp on the
+\emph{same} luminance trajectory. In colour the two fish are told apart by
+hue; in greyscale they collapse to the same ink, so equal values still
+read as equal --- the two sources are then distinguished by their
+position in the glyph (yin is the top bulb, yang the bottom). The right
+choice for a journal figure that may be printed in black and white.
+Note the promise precisely: it is about \strong{greyscale}, not about the
+CMYK gamut. A hued ramp can still shift when converted for offset
+printing; if that matters, soft-proof the figure.}
 }
 }
 
 \examples{
 taichi_palette("balanced")
-taichi_palette("print_safe", n = 3)
+taichi_palette("greyscale_safe", n = 3)
 
 # every preset, measured
 for (p in c("default", "balanced", "diverging", "viridis_pair",
-            "brewer_pair", "print_safe")) {
+            "brewer_pair", "greyscale_safe")) {
   cat(p, ": max |dL| = ",
       round(taichi_check_palette(palette = p)$max_luminance_diff, 1),
       "\n", sep = "")

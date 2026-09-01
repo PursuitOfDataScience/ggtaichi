@@ -27,6 +27,13 @@
 #' \code{yin_scale} / \code{yang_scale} to override the automatic choice
 #' entirely.
 #'
+#' The automatic discrete palette samples a \emph{sequential} ramp, which
+#' implies that the levels are ordered. That suits an ordered factor and
+#' overstates an unordered one: if your categories have no natural order,
+#' supply a qualitative palette through \code{yin_colors} / \code{yang_colors}
+#' or a scale through \code{yin_scale} / \code{yang_scale}, so the fill does
+#' not assert a ranking the data does not have.
+#'
 #' Because the choice is made when the layer is added, replacing the plot's
 #' data afterwards keeps the scales picked for the original data. Swapping in
 #' data of the same types is fine; if the new \code{yin} / \code{yang} columns
@@ -69,6 +76,15 @@
 #' \code{na.value} colour (pass e.g. \code{na.value = "transparent"} through
 #' \code{...} to change it), while \code{na.rm = TRUE} silently drops rows
 #' with missing positions.
+#'
+#' @section Time on an axis:
+#' Putting time on \code{x} makes each row of the grid a time series drawn as
+#' a row of discrete glyphs, and the series is then encoded in \emph{fill}
+#' rather than in position --- so slope is not encoded at all, and a reader
+#' infers a trend by comparing the shade of neighbouring cells. That is a poor
+#' substitute for a line. Use a taichi grid for the question \emph{which
+#' series differ from each other, and where}; put a line chart or a horizon
+#' plot beside it for \emph{what is the trend}.
 #'
 #' @section Explicit encoding:
 #' Two fish sharing one position is a \emph{superposition} comparison. It is
@@ -175,7 +191,7 @@
 #'   \code{yin_colors} / \code{yang_colors}: the name of a
 #'   \code{\link{taichi_palette}()} preset (\code{"balanced"},
 #'   \code{"diverging"}, \code{"viridis_pair"}, \code{"brewer_pair"},
-#'   \code{"print_safe"}, \code{"default"}) or a list with \code{yin} and
+#'   \code{"greyscale_safe"}, \code{"default"}) or a list with \code{yin} and
 #'   \code{yang} colour vectors, such as the result of
 #'   \code{\link{taichi_palette_pair}()}. Default \code{NULL}, which keeps the
 #'   package's historical grey / seal-red pair. See the Palettes section.
@@ -216,6 +232,13 @@
 #' @param explicit_range Two numbers giving the output range of
 #'   \code{explicit_channel}, or \code{NULL} (the default) for that channel's
 #'   own sensible range.
+#' @param radius_exponent Only used by \code{explicit_channel = "radius"}: the
+#'   exponent relating the statistic to the glyph radius. \code{0.5} is strict
+#'   area scaling; the default \code{0.57} is the cartographic
+#'   apparent-magnitude (Flannery) compensation, which makes larger symbols
+#'   slightly larger than the geometry alone would give because readers
+#'   systematically underestimate the area ratio between big and small
+#'   circles.
 #' @param interactive If \code{TRUE}, draw the fish (and their eyes) as
 #'   \pkg{ggiraph} grobs carrying \code{tooltip}, \code{data_id} and
 #'   \code{onclick}, so that \code{ggiraph::girafe()} turns the plot into a
@@ -367,6 +390,7 @@ geom_taichi <- function(
   explicit = c("none", "difference", "ratio", "log_ratio", "z"),
   explicit_channel = c("eye_size", "angle", "border", "radius"),
   explicit_range = NULL,
+  radius_exponent = 0.57,
   interactive = FALSE,
   tooltip = NULL,
   data_id = NULL,
@@ -427,6 +451,10 @@ geom_taichi <- function(
         anyNA(explicit_range)) {
       rlang::abort("`explicit_range` must be two numbers, or NULL.")
     }
+  }
+  if (!is.numeric(radius_exponent) || length(radius_exponent) != 1 ||
+      is.na(radius_exponent) || radius_exponent <= 0) {
+    rlang::abort("`radius_exponent` must be a single positive number.")
   }
   if (explicit == "none") {
     explicit_channel <- NULL
@@ -582,6 +610,7 @@ geom_taichi <- function(
     shared_params$explicit <- explicit
     shared_params$explicit_channel <- explicit_channel
     shared_params$explicit_range <- explicit_range
+    shared_params$radius_exponent <- radius_exponent
   }
   if (!is.null(key_glyph)) shared_params$key_glyph <- key_glyph
 
@@ -815,7 +844,7 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
   }
 
   build_scale <- function(vals, colors, name, custom_scale, user_palette,
-                          extra = list(), arg) {
+                          extra = list(), arg, order = NULL) {
     if (!is.null(custom_scale)) {
       # The options ggtaichi computes for this fish -- the shared limits and
       # the dropped duplicate guide -- have to reach a supplied scale too, or
@@ -871,8 +900,10 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
       } else {
         scale_col <- grDevices::colorRampPalette(colors)(n_vals)
       }
+      dots$guide <- dots$guide %||% ggplot2::guide_legend(order = order)
       do.call(ggplot2::scale_fill_manual, c(list(name = name, values = scale_col), dots))
     } else {
+      dots$guide <- dots$guide %||% ggplot2::guide_colourbar(order = order)
       do.call(ggplot2::scale_fill_gradientn, c(list(name = name, colors = colors), dots))
     }
   }
@@ -899,12 +930,17 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
     yang_extra$guide <- "none"
   }
 
+  # `order` pins the two guides. With both left at ggplot2's default the tie
+  # is broken by something that is not stable between sessions, so the yin and
+  # yang legends could swap places from one render to the next -- on the same
+  # data, the same package and the same ggplot2. Yin first, matching the
+  # argument order and every example in the docs.
   yin_scale_obj <- build_scale(yin_vals, object$yin_colors, object$yin_name,
                                object$yin_scale, isTRUE(object$yin_colors_user),
-                               yin_extra, "yin_scale")
+                               yin_extra, "yin_scale", order = 1)
   yang_scale_obj <- build_scale(yang_vals, object$yang_colors, object$yang_name,
                                 object$yang_scale, isTRUE(object$yang_colors_user),
-                                yang_extra, "yang_scale")
+                                yang_extra, "yang_scale", order = 2)
 
   yin_layer <- object$yin_layer
   yang_layer <- object$yang_layer
@@ -1198,7 +1234,8 @@ taichi_setup_data <- function(data, params) {
   )
   if (!is.null(channel_col) && !is.null(data[[channel_col]])) {
     data[[channel_col]] <- rescale_explicit(data[[channel_col]], channel,
-                                            params$explicit_range)
+                                            params$explicit_range,
+                                            params$radius_exponent)
   }
 
   if (!identical(channel, "eye_size") &&
@@ -1249,7 +1286,8 @@ taichi_setup_data <- function(data, params) {
 #' @export
 GeomYinFish <- ggplot2::ggproto("GeomYinFish", ggplot2::Geom,
   extra_params = c("na.rm", "eyes", "interactive",
-                   "explicit", "explicit_channel", "explicit_range"),
+                   "explicit", "explicit_channel", "explicit_range",
+                   "radius_exponent"),
 
   rename_size = TRUE,
 
