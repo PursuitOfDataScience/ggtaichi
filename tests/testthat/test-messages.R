@@ -12,6 +12,10 @@ library(ggtaichi)
 d <- data.frame(x = 1:3, y = 1, yin = c(1, 5, 9), yang = c(9, 5, 1))
 
 test_that("geom_taichi() prints a readable summary of what it will draw", {
+  # The third snapshot below builds an interactive layer, which needs ggiraph.
+  # It is in Suggests, and on macOS runners it installs but will not load, so
+  # requireNamespace() is FALSE there and geom_taichi() aborts by design.
+  skip_if_not_installed("ggiraph")
   expect_snapshot(print(geom_taichi(yin = Twitter, yang = Google)))
   expect_snapshot(
     print(geom_taichi(yin = Twitter, yang = Google, eyes = TRUE,

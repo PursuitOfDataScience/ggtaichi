@@ -364,10 +364,10 @@
 #'
 #' # tooltips carry the exact values; needs ggiraph to view
 #'
-#' p <- ggplot(data, aes(x, y)) +
-#'   geom_taichi(yin = yin_values, yang = yang_values,
-#'               interactive = TRUE, data_id_by = "source")
 #' if (requireNamespace("ggiraph", quietly = TRUE)) {
+#'   p <- ggplot(data, aes(x, y)) +
+#'     geom_taichi(yin = yin_values, yang = yang_values,
+#'                 interactive = TRUE, data_id_by = "source")
 #'   # ggiraph::girafe(ggobj = p)
 #' }
 #'
