@@ -6,7 +6,7 @@
 [![R-CMD-check](https://github.com/PursuitOfDataScience/ggtaichi/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/PursuitOfDataScience/ggtaichi/actions/workflows/R-CMD-check.yaml)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/ggtaichi)](https://CRAN.R-project.org/package=ggtaichi)
-[![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/ggtaichi)](https://CRAN.R-project.org/package=ggtaichi)
+[![CRAN downloads](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fcranlogs.r-pkg.org%2Fdownloads%2Ftotal%2F1990-01-01%3A2030-01-01%2Fggtaichi&query=%24%5B0%5D.downloads&label=downloads&color=blue)](https://CRAN.R-project.org/package=ggtaichi)
 [![Lifecycle:
 stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 <!-- badges: end -->

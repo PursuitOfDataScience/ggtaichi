@@ -14,7 +14,7 @@ on:
     - cron: '17 5 * * 1'
   workflow_dispatch:
 
-name: hygiene.yaml
+name: hygiene
 
 permissions: read-all
 
