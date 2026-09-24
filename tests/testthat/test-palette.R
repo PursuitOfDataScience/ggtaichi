@@ -221,3 +221,20 @@ test_that("mix_ink reproduces the fallback fill the package has always used", {
   expect_equal(substr(ggtaichi:::mix_ink("black", "white", 0.2), 1, 7),
                "#333333")
 })
+
+test_that("a misspelled preset is reported against the caller's argument", {
+  # taichi_palette() checks its own `name`, which a geom_taichi() or scale
+  # caller never passed
+  expect_error(geom_taichi(yin = yin, yang = yang, palette = "sepia"),
+               "`palette` must be one of")
+  expect_error(scale_taichi_yin_c(palette = "sepia"), "`palette` must be one of")
+  expect_error(taichi_check_palette(palette = "sepia"), "`palette` must be one of")
+})
+
+test_that("tolerance must be a single non-negative number", {
+  for (bad in list(NA, "a", -1, c(1, 2))) {
+    expect_error(taichi_check_palette(tolerance = bad),
+                 "`tolerance` must be a single non-negative number")
+  }
+  expect_equal(taichi_check_palette(tolerance = 0)$tolerance, 0)
+})

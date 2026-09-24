@@ -1,9 +1,9 @@
 # Geometry tests for taichi_fish()
 #
-# The fish geometry is provably exact -- every point of the circle falls in
-# exactly one fish, no overlap and no gap -- and a 20k-point Monte-Carlo test is
-# what establishes it.  These formal unit tests reify that check and add
-# boundary-closure verification.
+# Every point of the circle falls in exactly one fish, with no overlap and no
+# gap. That is exact by construction; a 20k-point Monte-Carlo test checks it
+# on the discretised polygons the renderer actually uses, and the other tests
+# check that each boundary closes and that rotation goes the documented way.
 
 test_that("taichi_fish returns the correct number of points", {
   yin <- ggtaichi:::taichi_fish(0, 0, 1, "yin", n = 50)
@@ -25,7 +25,8 @@ test_that("fish polygons are closed (first == last vertex)", {
 })
 
 test_that("each fish covers approximately half the unit circle area", {
-  # Use the "pipa" package or a simple winding-number check
+  # An even-odd (ray casting) point-in-polygon test, written out so the check
+  # needs no extra package
   point_in_poly <- function(px, py, poly_x, poly_y) {
     n <- length(poly_x)
     inside <- logical(length(px))

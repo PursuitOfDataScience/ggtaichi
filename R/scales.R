@@ -13,9 +13,12 @@
 #'     gradients, the same construction [geom_taichi()] builds automatically
 #'     for numeric sources.}
 #'   \item{`scale_taichi_yin_d()`, `scale_taichi_yang_d()`}{Discrete scales
-#'     that sample the ramp for however many levels the data has, skipping its
-#'     palest end so no category is invisible on a white panel --- matching
-#'     what [geom_taichi()] does for factor, character and logical sources.}
+#'     that sample the palette's ramp for however many levels the data has,
+#'     skipping its palest end so no category is invisible on a white panel:
+#'     the rule [geom_taichi()] applies to its default colours for factor,
+#'     character and logical sources. An explicit `colors` vector is used as
+#'     given instead, again as in [geom_taichi()], so a qualitative palette
+#'     keeps its own colours.}
 #'   \item{`scale_taichi_yin_binned()`, `scale_taichi_yang_binned()`}{Binned
 #'     scales: the fill is matched to one of a handful of discrete steps
 #'     instead of to a position on a continuous luminance ramp.}
@@ -29,8 +32,8 @@
 #' perceptual task there is, and it gets worse as a grid grows. Matching a
 #' patch to one of five labelled bins is much closer to a categorical lookup,
 #' and the legend then tells the reader exactly which values share a colour.
-#' On any grid too dense to compare cell by cell --- roughly, once the glyphs
-#' are smaller than a few millimetres --- binning both fish is the single
+#' On any grid too dense to compare cell by cell (roughly, once the glyphs
+#' are smaller than a few millimetres), binning both fish is the single
 #' cheapest thing you can do for readability:
 #'
 #' \preformatted{  geom_taichi(yin = matcha, yang = espresso,
@@ -48,8 +51,11 @@
 #'   [taichi_palette()] preset, or a list with `yin` and `yang` colour
 #'   vectors, for example the output of [taichi_palette_pair()].
 #' @param colors,colours An explicit colour vector, used instead of `palette`.
-#' @param n For the discrete scales, how many colours to draw from the ramp
-#'   before interpolating; defaults to the ramp's own length.
+#'   The discrete scales use it as given, one colour per level in order, and
+#'   interpolate only when there are more levels than colours.
+#' @param n For the discrete scales, how many colours to take from a preset
+#'   `palette` before interpolating; defaults to 5, the length of the
+#'   built-in ramps. Not used with a list `palette` or with `colors`.
 #' @param ... Passed on to the underlying ggplot2 scale
 #'   ([ggplot2::scale_fill_gradientn()], [ggplot2::discrete_scale()],
 #'   [ggplot2::scale_fill_stepsn()] or [ggplot2::scale_fill_viridis_c()]), so
@@ -84,7 +90,7 @@ NULL
 scale_colours <- function(fish, palette, colors, colours, n = 5) {
   cols <- colors %||% colours
   if (!is.null(cols)) {
-    check_colours(cols, "colors")
+    check_colours(cols, if (is.null(colors)) "colours" else "colors")
     return(cols)
   }
   as_palette_pair(palette, "palette", n = n)[[fish]]
@@ -125,22 +131,29 @@ scale_taichi_yang_d <- function(name = ggplot2::waiver(), palette = "default",
 }
 
 # A discrete scale rather than scale_fill_manual(), because the number of
-# levels is not known until the plot is built. The ramp is sampled for k + 1
-# steps and the palest dropped, which is the rule geom_taichi() applies to its
-# own automatic discrete palette: the light end of a sequential ramp is
-# invisible on a white panel.
+# levels is not known until the plot is built. A palette's ramp is sampled
+# for k + 1 steps and the palest dropped, which is the rule geom_taichi()
+# applies to its default colours: the light end of a sequential ramp is
+# invisible on a white panel. An explicit colour vector is the caller's own
+# choice of colours (often a qualitative one, for unordered levels), so, as in
+# geom_taichi(), it is used as given rather than treated as a ramp.
 taichi_discrete_scale <- function(fish, name, palette, colors, colours, n,
                                   ...) {
+  explicit <- !is.null(colors %||% colours)
   cols <- scale_colours(fish, palette, colors, colours, n = n %||% 5)
-  ggplot2::discrete_scale(
-    aesthetics = "fill",
-    name = name,
-    palette = function(k) {
-      if (k <= 0) return(character(0))
-      grDevices::colorRampPalette(cols, space = "Lab")(k + 1)[-1]
-    },
-    ...
-  )
+  pal <- function(k) {
+    if (k <= 0) return(character(0))
+    if (explicit && k <= length(cols)) return(cols[seq_len(k)])
+    if (explicit) return(grDevices::colorRampPalette(cols, space = "Lab")(k))
+    grDevices::colorRampPalette(cols, space = "Lab")(k + 1)[-1]
+  }
+  # ggplot2 3.4 still requires `scale_name`; 3.5 deprecated it.
+  if (utils::packageVersion("ggplot2") < "3.5.0") {
+    return(ggplot2::discrete_scale(aesthetics = "fill",
+                                   scale_name = "taichi_discrete",
+                                   palette = pal, name = name, ...))
+  }
+  ggplot2::discrete_scale(aesthetics = "fill", palette = pal, name = name, ...)
 }
 
 #' @rdname scale_taichi

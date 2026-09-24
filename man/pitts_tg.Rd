@@ -9,7 +9,7 @@ A data frame with 270 rows and 6 columns:
 \describe{
 \item{msa}{Metropolitan statistical area (Pittsburgh only).}
 \item{week}{week 1 to week 30.}
-\item{week_start}{The Monday date of the week started.}
+\item{week_start}{The date of the Monday the week starts on.}
 \item{category}{One of 9 COVID-related categories: Covid, General Virus,
 Masks, Sanitizing, Social Distancing, Symptoms, Tests, Treatment,
 Working.}

@@ -26,7 +26,7 @@ a list with \code{yin} and \code{yang} elements, checked instead of
 \code{yin_colors} / \code{yang_colors}.}
 
 \item{tolerance}{Largest luminance difference, in L\* units, still counted
-as a pass.}
+as a pass: a single non-negative number.}
 }
 \value{
 An object of class \code{taichi_palette_check}, with a \code{print()} method
@@ -36,8 +36,8 @@ that lays the measurements out as a table. It is a list with elements
 \code{verdict} (\code{"pass"}, \code{"warning"} or \code{"fail"}), \code{cvd} (a data frame of
 median step-wise colour distances for normal vision and each simulation,
 or \code{NULL} when \pkg{colorspace} is not installed), \code{tolerance}, and
-\code{space}, naming the colour space every number was measured in --- they
-are not comparable with figures computed in another space.
+\code{space}, naming the colour space every number was measured in (they
+are not comparable with figures computed in another space).
 }
 \description{
 The taichi's whole purpose is to compare two sources inside one mark, and
@@ -58,8 +58,8 @@ comparison.
 }
 \section{How the verdict is decided}{
 
-Both ramps are resampled to \code{n} steps in Lab space --- the space ggplot2's
-gradient scales interpolate in --- and each step's CIE L\* (luminance) and
+Both ramps are resampled to \code{n} steps in Lab space (the space ggplot2's
+gradient scales interpolate in), and each step's CIE L\* (luminance) and
 chroma are recorded. The reported mismatch is the largest absolute
 luminance difference between corresponding steps. The verdict is
 \code{"pass"} below \code{tolerance} L\* units (default 5, around the point where a
@@ -74,7 +74,7 @@ between corresponding steps is reported for each, alongside the same figure
 for normal vision. Read it as a comparison: a simulation much below the
 normal-vision row means the deficiency is costing those readers the
 distinction, and anything below about 10 means the two fish are not
-tellable apart at all. The median rather than the minimum is deliberate ---
+tellable apart at all. The median rather than the minimum is deliberate:
 two luminance-matched ramps necessarily converge at their pale end, where
 both are near white, and a minimum would report that as a fault of every
 well-matched pair.

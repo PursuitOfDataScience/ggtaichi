@@ -49,7 +49,8 @@ geom_yang_fish(
 \code{ggiraph::girafe()} can turn the plot into a widget. Needs the
 \pkg{ggiraph} package.}
 
-\item{na.rm}{If \code{TRUE}, silently removes rows with missing values.}
+\item{na.rm}{If \code{TRUE}, silently removes rows with missing positions; a
+missing \code{fill} is drawn in the scale's \code{na.value} instead.}
 
 \item{show.legend}{Logical. Should this layer be included in the legends?}
 
@@ -67,8 +68,8 @@ A ggplot2 layer drawing one fish per cell.
 interlocking fish of a taichi symbol per \verb{(x, y)} cell. They are the
 building blocks that \code{\link[=geom_taichi]{geom_taichi()}} assembles (together with two fill
 scales and a \code{\link[ggnewscale:new_scale]{ggnewscale::new_scale_fill()}} break); use them directly when
-you want full control --- e.g. to bring your own fill scale for a single
-fish, to stack scales differently, or to draw only one source.
+you want full control: to bring your own fill scale for a single fish, to
+stack scales differently, or to draw only one source.
 }
 \details{
 Both geoms understand the aesthetics \code{x}, \code{y}, \code{fill}, \code{colour},

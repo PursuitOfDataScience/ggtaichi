@@ -21,7 +21,7 @@
         scale: shared limits, single legend
       Add it to a plot: ggplot(data, aes(x, y)) + geom_taichi(...)
 
----
+# the summary names the explicit channel and the hover mode
 
     Code
       print(geom_taichi(yin = Twitter, yang = Google, explicit = "log_ratio",
@@ -234,15 +234,12 @@
 # a ratio of a non-positive value warns before it becomes NA
 
     Code
-      ggplot_build(ggplot(dd, aes(x, y)) + geom_taichi(yin = a, yang = b, explicit = "ratio"))$
-        data[[1]]$eye_size
+      ggtaichi:::taichi_explicit_stat(c(1, 0, 3), c(2, 2, 2), "ratio")
     Condition
       Warning:
       A ratio needs two positive values: 1 cell has a zero or negative `yin` / `yang` and became NA. Consider `"difference"` or `"z"` instead.
-      Warning:
-      A ratio needs two positive values: 1 cell has a zero or negative `yin` / `yang` and became NA. Consider `"difference"` or `"z"` instead.
     Output
-      [1] 0.1  NA 0.3
+      [1] 0.5  NA 1.5
 
 # the deprecated size argument still says what replaced it
 

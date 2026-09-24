@@ -4,13 +4,26 @@ library(ggtaichi)
 # gganimate transitions must actually advance.
 #
 # gganimate tracks which rows belong to which frame by encoding the frame into
-# the `group` column, as a "<id>" suffix. Up to 0.3.0 the geom's setup_data()
-# reset `group` to seq_len(nrow(data)), which threw that away and collapsed
-# every transition to a single frame -- silently, because the animations
-# vignette only ever built the gganim object and left every animate() call
-# commented out for CI. These tests render frames with file_renderer(), which
-# needs no gifski, no ffmpeg and no system libraries, so the regression is
-# caught wherever gganimate is installed.
+# the `group` column, as a "<id>" suffix. Before 0.3.0 the geom's setup_data()
+# reset `group` to seq_len(nrow(data)) whenever it held duplicates, which threw
+# that away and collapsed every transition to a single frame. It did so
+# silently, because the animations vignette only ever built the gganim object
+# and left every animate() call commented out for CI. These tests render
+# frames with file_renderer(), which needs no gifski, no ffmpeg and no system
+# libraries, so the regression is caught wherever gganimate is installed.
+
+test_that("setup_data leaves gganimate's frame encoding in `group` intact", {
+  # the mechanism, tested directly (and without gganimate), so a future change
+  # to setup_data fails here with an explanatory name rather than only as a
+  # frame count. Duplicated on purpose: the code before 0.3.0 only rewrote
+  # `group` when it had duplicates, which is exactly the case gganimate
+  # produces when several cells share a frame
+  d <- data.frame(x = 1:3, y = 1, fill = 1:3,
+                  group = c("-1<1>", "-1<1>", "-1<1>"),
+                  PANEL = factor(1))
+  out <- ggtaichi:::taichi_setup_data(d, list())
+  expect_equal(out$group, c("-1<1>", "-1<1>", "-1<1>"))
+})
 
 skip_if_not_installed("gganimate")
 
@@ -62,17 +75,4 @@ test_that("the individual fish geoms animate too", {
     geom_yin_fish(aes(fill = yin, angle = turn)) +
     gganimate::transition_manual(f)
   expect_equal(n_frames(p), 6L)
-})
-
-test_that("setup_data leaves gganimate's frame encoding in `group` intact", {
-  # the mechanism, tested directly, so a future change to setup_data fails
-  # here with an explanatory name rather than only as a frame count
-  # duplicated on purpose: the 0.3.0 code only rewrote `group` when it had
-  # duplicates, which is exactly the case gganimate produces when several
-  # cells share a frame
-  d <- data.frame(x = 1:3, y = 1, fill = 1:3,
-                  group = c("-1<1>", "-1<1>", "-1<1>"),
-                  PANEL = factor(1))
-  out <- ggtaichi:::taichi_setup_data(d, list())
-  expect_equal(out$group, c("-1<1>", "-1<1>", "-1<1>"))
 })

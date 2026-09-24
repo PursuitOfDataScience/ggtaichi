@@ -6,7 +6,7 @@
 # zzz.R resolve inside this namespace, and so that the package keeps working
 # on ggplot2 3.4 where no such helper exists.
 #
-# mix_ink("black", "white", 0.2) is "#333333", i.e. grey20 -- which is exactly
+# mix_ink("black", "white", 0.2) is "#333333", i.e. grey20, which is exactly
 # the fallback fill ggtaichi has always used. That is the point: following the
 # theme costs nothing on a light theme and makes the geoms visible on a dark
 # one.
@@ -26,6 +26,16 @@ mix_ink <- function(a, b, amount = 0.5) {
 has_themed_aes <- function() {
   isTRUE(utils::packageVersion("ggplot2") >= "4.0.0") &&
     "from_theme" %in% getNamespaceExports("ggplot2")
+}
+
+# TRUE or FALSE and nothing else. isTRUE() reads anything else as FALSE, which
+# is how a mistyped flag (`eyes = "yes"`) switches a feature off without a
+# word.
+check_flag <- function(value, arg, call = rlang::caller_env()) {
+  if (!rlang::is_bool(value)) {
+    rlang::abort(paste0("`", arg, "` must be TRUE or FALSE."), call = call)
+  }
+  invisible(value)
 }
 
 # A theme need not have a background. theme_void() and any theme built with

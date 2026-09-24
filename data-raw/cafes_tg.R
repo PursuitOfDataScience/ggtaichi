@@ -1,4 +1,4 @@
-# cafes_tg — synthetic espresso-vs-matcha café orders.
+# cafes_tg: synthetic espresso-vs-matcha café orders.
 #
 # A deliberately synthetic, evergreen two-source dataset for ggtaichi demos:
 # weekly orders (per 100 customers) of espresso and matcha drinks across

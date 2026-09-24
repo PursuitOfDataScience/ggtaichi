@@ -28,7 +28,7 @@ devtools::install_github("PursuitOfDataScience/ggtaichi")
 
 ## One glyph, two numbers
 
-Yin takes one source, yang the other. No decoration – every drop of ink
+Yin takes one source, yang the other. No decoration: every drop of ink
 is data.
 
 ``` r
@@ -57,8 +57,8 @@ ggplot(pitts_small, aes(week, category)) +
 
 <img src="man/figures/README-pitts-1.png" alt="A six-week grid of taichi diagrams for nine Pittsburgh COVID categories, the yang fish shaded red by Google and the yin fish grey by Twitter." style="display: block; margin: auto;" />
 
-`Covid` and `Masks` lean dark – lots of Twitter – while staying pink, so
-only moderate Google.
+`Covid` runs dark in both halves, heavy on Twitter and Google alike.
+`Masks` darkens on Twitter but stays pale pink: little Google.
 
 ## The eyes are data too
 
@@ -81,7 +81,7 @@ ggplot(quad, aes(x, y)) +
 
 ## Spin it
 
-`angle` takes a constant or a column – a seventh channel.
+`angle` takes a constant or a column: a seventh channel.
 
 ``` r
 rot <- data.frame(x = 1:4, y = 1, yin = 1:4, yang = 4:1,
@@ -163,7 +163,7 @@ ggplot(cafes_tg, aes(week, neighbourhood)) +
 
 <img src="man/figures/README-shared-1.png" alt="A 12-week by 8-neighbourhood grid of taichi diagrams comparing espresso and matcha orders on one shared grey scale with a single legend." style="display: block; margin: auto;" />
 
-## Bigger, sure – but by how much?
+## Bigger, sure. But by how much?
 
 Two fish in one spot tell you *which*. `explicit` computes the gap and
 shows you *how much*. Cells where the two agree get no eye at all.
@@ -220,8 +220,8 @@ taichi_check_palette()
 #>   Verdict: FAIL
 ```
 
-Yes – the defaults fail their own check, and are kept only so old
-figures don’t move. `palette = "balanced"` passes.
+Yes: the defaults fail their own check, and are kept only so old figures
+don’t move. `palette = "balanced"` passes.
 
 ``` r
 ggplot(cafes_tg, aes(week, neighbourhood)) +

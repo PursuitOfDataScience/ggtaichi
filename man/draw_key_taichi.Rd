@@ -11,15 +11,18 @@ draw_key_taichi(data, params, size, fish = "both")
 ggplot2.}
 
 \item{params}{The layer's parameters, supplied by ggplot2. \code{eyes = TRUE} is
-honoured, so a plot drawn with eyes gets keys with eyes.}
+honoured, so a plot drawn with eyes gets keys with eyes. For a
+single-fish key the eye takes the layer's own eye colour and (constant)
+eye size, so it matches the eyes on the plot.}
 
 \item{size}{The key size in mm, supplied by ggplot2. Unused: the glyph is
 drawn in a square viewport that fills the key, so it stays round whatever
 the key's aspect ratio.}
 
 \item{fish}{Which fish carries \code{data$fill}: \code{"yin"}, \code{"yang"}, or
-\code{"both"} --- the last fills the yin fish with the key colour and the yang
-fish with a pale version of it, for a decorative complete symbol.}
+\code{"both"}. The last fills the yin fish with the key colour and the yang
+fish with a pale version of it, for a decorative complete symbol with the
+classic white and black eyes.}
 }
 \value{
 A grob.

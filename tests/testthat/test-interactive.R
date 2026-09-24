@@ -69,6 +69,18 @@ test_that("markup in a column name cannot break the tooltip", {
   expect_match(tt, "c&amp;d")
 })
 
+test_that("markup in a category or a cell label cannot break it either", {
+  tt <- ggtaichi:::taichi_tooltip(factor(c("<5 yrs", "A&B")), c(1, 2),
+                                  "age", "n", c("x<1", "x&2"), c("y", "y"),
+                                  "xx", "yy")
+  expect_match(tt[1], "&lt;5 yrs", fixed = TRUE)
+  expect_match(tt[2], "A&amp;B", fixed = TRUE)
+  expect_match(tt[1], "xx x&lt;1", fixed = TRUE)
+  expect_match(tt[2], "xx x&amp;2", fixed = TRUE)
+  # the package's own markup is left alone
+  expect_match(tt[1], "<b>age</b>", fixed = TRUE)
+})
+
 test_that("data_id scopes address cells, fish and sources", {
   x <- c("w1", "w1", "w2")
   y <- c("A", "B", "A")
@@ -185,4 +197,31 @@ test_that("the fish geoms take interactive aesthetics on their own", {
   g <- collect_grobs(sc, "polygon")[[1]]
   expect_s3_class(g, "interactive_polygon_grob")
   expect_equal(ipar(g)$tooltip, c("a", "b", "c"))
+})
+
+test_that("under shared_legend the tooltip names each source by its column", {
+  # the yin name is the joint legend title there, and the tooltip used to
+  # label the yin value with it ("yin / yang: 1")
+  tooltip <- function(...) {
+    sc <- forced_scene(ggplot(d, aes(x, y)) +
+      geom_taichi(yin = yin, yang = yang, interactive = TRUE,
+                  shared_legend = TRUE, ...))
+    ipar(collect_grobs(sc, "polygon")[[1]])$tooltip[1]
+  }
+  expect_match(tooltip(), "<b>yin</b>: 1", fixed = TRUE)
+  expect_false(grepl("yin / yang", tooltip(), fixed = TRUE))
+  expect_match(tooltip(yin_name = "orders"), "<b>yin</b>: 1", fixed = TRUE)
+})
+
+test_that("one interactive object can be added to several plots", {
+  # the layers are shared by reference, and filling in the tooltip used to
+  # write into them, pointing the first plot at the second plot's columns
+  obj <- geom_taichi(yin = yin, yang = yang, interactive = TRUE)
+  d2 <- data.frame(week = 1:3, hood = "A", yin = 4:6, yang = 6:4)
+  p1 <- ggplot(d, aes(x, y)) + obj
+  p2 <- ggplot(d2, aes(week, hood)) + obj
+  expect_no_error(ggplot_build(p1))
+  expect_no_error(ggplot_build(p2))
+  g1 <- collect_grobs(forced_scene(p1), "polygon")
+  expect_match(ipar(g1[[2]])$tooltip[1], "x 1 / y 1", fixed = TRUE)
 })

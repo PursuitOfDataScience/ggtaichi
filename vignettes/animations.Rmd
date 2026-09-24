@@ -36,8 +36,8 @@ set.seed(2026)
 
 # Every animate() call in this vignette is really executed.
 #
-# Until 0.3.0 they were all commented out -- gifski is not installed on every
-# check machine -- and because building a `gganim` object succeeds whether or
+# Until 0.3.0 they were all commented out (gifski is not installed on every
+# check machine), and because building a `gganim` object succeeds whether or
 # not the transition works, nothing here ever noticed that the geom was
 # collapsing every animation to a single frame.  A demonstration that is never
 # run is not a demonstration.
@@ -65,9 +65,9 @@ show_animation <- function(p, nframes = 24, fps = 10,
 ```
 
 > **Every animation on this page is really rendered when the vignette is
-> built.** Up to 0.3.0 the `animate()` calls here were commented out for CI,
-> which meant a bug that collapsed every transition to a single frame went
-> unnoticed for three releases. See `NEWS.md`.
+> built.** Before 0.3.0 the `animate()` calls here were commented out for CI,
+> which is how a bug that collapsed every transition to a single frame went
+> unnoticed through two releases. See `NEWS.md`.
 
 ## Why animate?
 
@@ -90,7 +90,7 @@ library(gganimate)
 
 `geom_taichi()` returns a pair of layers separated by
 `ggnewscale::new_scale_fill()`, so each fish keeps its own fill scale and
-legend.  gganimate works at the *layer* level --- it splits every layer's data
+legend.  gganimate works at the *layer* level: it splits every layer's data
 by the transition variable and builds one frame per state.  Because the two
 fish layers are ordinary `ggplot2` layers, gganimate treats them independently
 and the two fill scales continue to apply frame-by-frame.  In short: **the
@@ -142,7 +142,7 @@ show_animation(p_fixed, nframes = 24, width = 560, height = 420)
 
 With the `angle` argument (see `?geom_taichi`) you can rotate each glyph.
 Mapping `angle` to an expression of the frame variable and animating produces
-the iconic "turning taichi" --- with `eyes = TRUE` each eye rides around in
+the iconic "turning taichi", and with `eyes = TRUE` each eye rides around in
 its own fish's head:
 
 ```{r}

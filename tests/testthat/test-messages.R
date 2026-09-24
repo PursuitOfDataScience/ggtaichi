@@ -12,15 +12,19 @@ library(ggtaichi)
 d <- data.frame(x = 1:3, y = 1, yin = c(1, 5, 9), yang = c(9, 5, 1))
 
 test_that("geom_taichi() prints a readable summary of what it will draw", {
-  # The third snapshot below builds an interactive layer, which needs ggiraph.
-  # It is in Suggests, and on macOS runners it installs but will not load, so
-  # requireNamespace() is FALSE there and geom_taichi() aborts by design.
-  skip_if_not_installed("ggiraph")
   expect_snapshot(print(geom_taichi(yin = Twitter, yang = Google)))
   expect_snapshot(
     print(geom_taichi(yin = Twitter, yang = Google, eyes = TRUE,
                       shared_legend = TRUE))
   )
+})
+
+test_that("the summary names the explicit channel and the hover mode", {
+  # This one builds an interactive layer, which needs ggiraph even just to be
+  # printed. It is in Suggests, and on macOS runners it installs but will not
+  # load, so requireNamespace() is FALSE there and geom_taichi() aborts by
+  # design.
+  skip_if_not_installed("ggiraph")
   expect_snapshot(
     print(geom_taichi(yin = Twitter, yang = Google,
                       explicit = "log_ratio", explicit_channel = "angle",
@@ -36,6 +40,8 @@ test_that("geom_taichi_diff() prints a summary too", {
 })
 
 test_that("the palette check prints its measurements", {
+  # the report has a colour-vision block only when colorspace is installed
+  skip_if_not_installed("colorspace")
   expect_snapshot(print(taichi_check_palette()))
   expect_snapshot(print(taichi_check_palette(palette = "balanced")))
 })
@@ -85,10 +91,10 @@ test_that("mismatched source types warn rather than pretending to share", {
 })
 
 test_that("a ratio of a non-positive value warns before it becomes NA", {
-  dd <- data.frame(x = 1:3, y = 1, a = c(1, 0, 3), b = c(2, 2, 2))
+  # pinned where the warning is raised: how many times a whole plot build
+  # evaluates it depends on the ggplot2 version (see test-explicit.R)
   expect_snapshot(
-    ggplot_build(ggplot(dd, aes(x, y)) +
-      geom_taichi(yin = a, yang = b, explicit = "ratio"))$data[[1]]$eye_size
+    ggtaichi:::taichi_explicit_stat(c(1, 0, 3), c(2, 2, 2), "ratio")
   )
 })
 

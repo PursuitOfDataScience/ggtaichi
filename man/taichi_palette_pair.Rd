@@ -22,14 +22,14 @@ the built-in \code{yin_colors} / \code{yang_colors} vectors.}
 \item{luminance}{The two ends of the shared luminance trajectory as
 \code{c(dark, light)}, on the CIE L\* scale from 0 (black) to 100 (white).
 Both ramps run from the light end to the dark end, so the first colour
-belongs to the lowest value --- the same convention as \code{yin_colors} /
+belongs to the lowest value, the same convention as \code{yin_colors} /
 \code{yang_colors}.}
 
 \item{chroma}{Chroma (colourfulness) at the dark end of each ramp. Chroma
 tapers towards the light end, because a very light colour cannot also be
 saturated; both ramps taper identically. Values above about 80 will be
 clipped to the sRGB gamut, and clipping is hue-dependent, which is
-exactly what breaks the match --- keep it moderate and verify with
+exactly what breaks the match. Keep it moderate and verify with
 \code{\link[=taichi_check_palette]{taichi_check_palette()}}.}
 }
 \value{
@@ -43,7 +43,7 @@ The two fish of a taichi symbol are compared \emph{against each other}, so the
 two fill ramps have to be matched: if one ramp spans a wider luminance
 range than the other, equal values do not produce equal visual weight and
 one fish systematically appears to dominate. That makes palette pairing a
-correctness problem rather than a matter of taste --- see
+correctness problem rather than a matter of taste: see
 \code{\link[=taichi_check_palette]{taichi_check_palette()}} for the measurement and \code{vignette("ggtaichi")}
 for the discussion.
 }

@@ -80,7 +80,9 @@ in ggplot2.}
 \code{\link[=taichi_palette]{taichi_palette()}} preset, or a list with \code{yin} and \code{yang} colour
 vectors, for example the output of \code{\link[=taichi_palette_pair]{taichi_palette_pair()}}.}
 
-\item{colors, colours}{An explicit colour vector, used instead of \code{palette}.}
+\item{colors, colours}{An explicit colour vector, used instead of \code{palette}.
+The discrete scales use it as given, one colour per level in order, and
+interpolate only when there are more levels than colours.}
 
 \item{...}{Passed on to the underlying ggplot2 scale
 (\code{\link[ggplot2:scale_gradient]{ggplot2::scale_fill_gradientn()}}, \code{\link[ggplot2:discrete_scale]{ggplot2::discrete_scale()}},
@@ -88,8 +90,9 @@ vectors, for example the output of \code{\link[=taichi_palette_pair]{taichi_pale
 \code{limits}, \code{breaks}, \code{labels}, \code{guide}, \code{na.value}, \code{n.breaks} and the
 rest all work as usual.}
 
-\item{n}{For the discrete scales, how many colours to draw from the ramp
-before interpolating; defaults to the ramp's own length.}
+\item{n}{For the discrete scales, how many colours to take from a preset
+\code{palette} before interpolating; defaults to 5, the length of the
+built-in ramps. Not used with a list \code{palette} or with \code{colors}.}
 }
 \value{
 A ggplot2 fill scale.
@@ -109,9 +112,12 @@ half of the palette pair they take.
 gradients, the same construction \code{\link[=geom_taichi]{geom_taichi()}} builds automatically
 for numeric sources.}
 \item{\code{scale_taichi_yin_d()}, \code{scale_taichi_yang_d()}}{Discrete scales
-that sample the ramp for however many levels the data has, skipping its
-palest end so no category is invisible on a white panel --- matching
-what \code{\link[=geom_taichi]{geom_taichi()}} does for factor, character and logical sources.}
+that sample the palette's ramp for however many levels the data has,
+skipping its palest end so no category is invisible on a white panel:
+the rule \code{\link[=geom_taichi]{geom_taichi()}} applies to its default colours for factor,
+character and logical sources. An explicit \code{colors} vector is used as
+given instead, again as in \code{\link[=geom_taichi]{geom_taichi()}}, so a qualitative palette
+keeps its own colours.}
 \item{\code{scale_taichi_yin_binned()}, \code{scale_taichi_yang_binned()}}{Binned
 scales: the fill is matched to one of a handful of discrete steps
 instead of to a position on a continuous luminance ramp.}
@@ -126,8 +132,8 @@ Reading a value off a continuous luminance ramp is the least accurate
 perceptual task there is, and it gets worse as a grid grows. Matching a
 patch to one of five labelled bins is much closer to a categorical lookup,
 and the legend then tells the reader exactly which values share a colour.
-On any grid too dense to compare cell by cell --- roughly, once the glyphs
-are smaller than a few millimetres --- binning both fish is the single
+On any grid too dense to compare cell by cell (roughly, once the glyphs
+are smaller than a few millimetres), binning both fish is the single
 cheapest thing you can do for readability:
 
 \preformatted{  geom_taichi(yin = matcha, yang = espresso,

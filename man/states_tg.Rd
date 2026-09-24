@@ -9,7 +9,7 @@ A data frame with 1116 rows and 6 columns:
 \describe{
 \item{state}{One of the four states: Florida, Missouri, New York, Texas.}
 \item{week}{week 1 to week 31.}
-\item{week_start}{The Monday date of the week started.}
+\item{week_start}{The date of the Monday the week starts on.}
 \item{category}{One of 9 COVID-related categories: Covid, General Virus,
 Masks, Sanitizing, Social Distancing, Symptoms, Tests, Treatment,
 Working.}

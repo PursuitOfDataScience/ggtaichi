@@ -260,3 +260,80 @@ test_that("an all-agreeing grid does not ask for a zero-width scale", {
     geom_taichi_diff(yin = a, yang = b))
   expect_null(b$plot$scales$get_scales("fill")$limits)
 })
+
+# ------------------------------------------------------------------
+# Corrections
+# ------------------------------------------------------------------
+
+test_that("the z label has no stray spaces inside its parentheses", {
+  p <- ggplot(d3, aes(x, y)) + geom_taichi_diff(yin = yin, yang = yang,
+                                               method = "z")
+  expect_equal(ggplot_build(p)$plot$scales$get_scales("fill")$name,
+               "z(yin) - z(yang)")
+})
+
+test_that("taichi_summary survives labels that would repeat a level", {
+  # factor() errors on duplicated levels, which a column compared with itself
+  # (or one called "tie") used to hand it
+  s <- taichi_summary(data.frame(a = 1:3), yin = a, yang = a)
+  expect_equal(as.character(s$dominant), rep("tie", 3))
+  s2 <- taichi_summary(data.frame(tie = c(1, 5), b = c(2, 2)),
+                       yin = tie, yang = b)
+  expect_equal(as.character(s2$dominant), c("b", "tie"))
+})
+
+test_that("a missing value keeps a missing z, even in a constant column", {
+  expect_equal(ggtaichi:::zscore(c(2, NA, 2)), c(0, NA, 0))
+  expect_equal(ggtaichi:::zscore(c(1, NA, 3)), c(-1, NA, 1) / sqrt(2))
+  s <- taichi_summary(data.frame(a = c(2, NA, 2), b = c(1, 2, 3)),
+                      yin = a, yang = b)
+  expect_true(is.na(s$z[2]))
+})
+
+test_that("geom_taichi_diff takes its limits from the tiles' own data", {
+  other <- data.frame(x = 1:2, y = 1, a = c(0, 100), b = c(0, 0))
+  lims <- function(p) ggplot_build(p)$plot$scales$get_scales("fill")$limits
+  # the plot data has no a / b at all: the limits used to be skipped silently
+  expect_equal(lims(ggplot(d3, aes(x, y)) +
+    geom_taichi_diff(yin = a, yang = b, data = other)), c(-100, 100))
+  # a function of the plot data is a layer's data too
+  # (doubling yin turns the gaps -8, 0, 8 into -7, 5, 17)
+  expect_equal(lims(ggplot(d3, aes(x, y)) +
+    geom_taichi_diff(yin = yin, yang = yang,
+                     data = function(dd) transform(dd, yin = yin * 2))),
+    c(-17, 17))
+})
+
+test_that("geom_taichi_diff's palette error names all three accepted forms", {
+  expect_error(geom_taichi_diff(yin = a, yang = b, palette = c("red", "blue")),
+               "exactly three colours")
+  expect_error(geom_taichi_diff(yin = a, yang = b, palette = 42),
+               "exactly three colours")
+})
+
+test_that("a ratio problem is reported once per plot, not once per fish", {
+  dd <- data.frame(x = 1:3, y = 1, a = c(1, 0, 3), b = c(2, 2, 2))
+  msgs <- character()
+  eye <- withCallingHandlers(
+    ggplot_build(ggplot(dd, aes(x, y)) +
+      geom_taichi(yin = a, yang = b, explicit = "ratio"))$data[[1]]$eye_size,
+    warning = function(cnd) {
+      msgs <<- c(msgs, conditionMessage(cnd))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_equal(eye, c(0.1, NA, 0.3))
+  expect_length(unique(msgs), 1)
+  expect_match(msgs[1], "A ratio needs two positive values")
+  # ggplot2 3.4 evaluates each mapping twice while it builds a plot, so the
+  # count is only pinned where that no longer happens
+  if (utils::packageVersion("ggplot2") >= "3.5.0") expect_length(msgs, 1)
+})
+
+test_that("an all-agreeing grid puts the angle where agreement is mapped", {
+  # the signed mapping sends a zero gap to the middle of the range, so the
+  # degenerate grid must too, whatever the range
+  expect_equal(ggtaichi:::rescale_explicit(c(0, 0), "angle", c(0, 90)),
+               c(45, 45))
+  expect_equal(ggtaichi:::rescale_explicit(c(0, 1), "angle", c(0, 90))[1], 45)
+})

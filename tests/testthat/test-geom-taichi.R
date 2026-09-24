@@ -357,7 +357,7 @@ test_that("each eye sits in its own fish's head (yin top, yang bottom)", {
 
 test_that("a positive angle rotates counter-clockwise in the drawn scene", {
   # makeContent() rotates the unit fish itself, so this is the only path that
-  # exercises the rotation the plots actually use -- taichi_fish(angle =) is a
+  # exercises the rotation the plots actually use; taichi_fish(angle =) is a
   # separate implementation used outside drawing.
   d <- data.frame(x = 1, y = 1, yin = 1, yang = 2)
   eye_pos <- function(angle) {
@@ -804,4 +804,199 @@ test_that("shared_legend still drops the yang guide", {
     if (is.character(s$guide)) s$guide else class(s$guide)[1]
   }, character(1))
   expect_true("none" %in% guides)
+})
+
+# ------------------------------------------------------------------
+# Supplied scales are the caller's objects
+# ------------------------------------------------------------------
+
+test_that("a supplied scale object is never modified in place", {
+  # A scale is a ggproto object and so shared by reference. The shared limits
+  # and the dropped yang guide used to be written straight into it, and then
+  # followed it into every other plot it was used in.
+  d <- data.frame(x = 1:3, y = 1, yin = 1:3, yang = 7:9)
+  s_yin <- scale_taichi_yin_binned(n.breaks = 4)
+  s_yang <- scale_taichi_yang_binned()
+  p <- ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, yin_scale = s_yin, yang_scale = s_yang,
+                shared_legend = TRUE)
+  expect_null(s_yin$limits)
+  expect_null(s_yang$limits)
+  expect_false(identical(s_yang$guide, "none"))
+  expect_true(inherits(s_yin$name, "waiver"))
+  # the plot itself still gets them
+  fill_scales <- function(p) {
+    Filter(function(s) any(grepl("^fill", s$aesthetics)), p$scales$scales)
+  }
+  expect_equal(fill_scales(p)[[1]]$limits, c(1, 9))
+  expect_identical(fill_scales(p)[[2]]$guide, "none")
+  # and a second plot with the same objects starts clean (checked before it
+  # is built: a binned scale sets limits of its own while it trains)
+  p2 <- ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, yin_scale = s_yin, yang_scale = s_yang)
+  expect_null(fill_scales(p2)[[1]]$limits)
+  expect_false(identical(fill_scales(p2)[[2]]$guide, "none"))
+  # building either plot leaves the caller's objects alone too
+  ggplot_build(p)
+  ggplot_build(p2)
+  expect_null(s_yin$limits)
+  expect_null(s_yang$limits)
+})
+
+test_that("yin_name / yang_name title a supplied scale object", {
+  d <- data.frame(x = 1:3, y = 1, yin = 1:3, yang = 3:1)
+  names_of <- function(...) {
+    b <- ggplot_build(ggplot(d, aes(x, y)) + geom_taichi(yin = yin, yang = yang, ...))
+    fills <- Filter(function(s) any(grepl("^fill", s$aesthetics)),
+                    b$plot$scales$scales)
+    vapply(fills, function(s) {
+      if (inherits(s$name, "waiver")) "<waiver>" else s$name
+    }, character(1))
+  }
+  expect_equal(
+    names_of(yin_name = "A", yang_name = "B",
+             yin_scale = scale_fill_viridis_c(),
+             yang_scale = scale_fill_viridis_c()),
+    c("A", "B")
+  )
+  # the column names by default, and the joint title under shared_legend
+  expect_equal(names_of(yin_scale = scale_fill_viridis_c()), c("yin", "yang"))
+  expect_equal(names_of(shared_legend = TRUE, yin_scale = scale_fill_viridis_c()),
+               c("yin / yang", "yang"))
+  # a name the scale sets itself still wins
+  expect_equal(names_of(yin_name = "A", yin_scale = scale_fill_viridis_c("own")),
+               c("own", "yang"))
+})
+
+# ------------------------------------------------------------------
+# Reversed coords
+# ------------------------------------------------------------------
+
+test_that("a reversed coord neither turns the glyph over nor resizes it", {
+  # The cells arrive with max below min under a reversed coord, and the
+  # negative size used to rotate every glyph by 180 degrees (yin eye at the
+  # bottom) and take the radius from the longer cell side.
+  d <- data.frame(x = 1:2, y = 1, yin = 1:2, yang = 2:1)
+  eyes <- function(extra = NULL) {
+    circles <- collect_grobs(forced_scene(ggplot(d, aes(x, y)) +
+      geom_taichi(yin = yin, yang = yang, eyes = TRUE) + extra), "circle")
+    fills <- vapply(circles, function(ci) as.character(ci$gp$fill)[1], "")
+    list(
+      white_y = as.numeric(circles[[which(fills == "white")]]$y)[1],
+      black_y = as.numeric(circles[[which(fills == "black")]]$y)[1],
+      r = as.numeric(circles[[1]]$r)[1]
+    )
+  }
+  plain <- eyes()
+  reverse_y <- if (exists("coord_transform", asNamespace("ggplot2"))) {
+    ggplot2::coord_transform(y = "reverse")
+  } else {
+    ggplot2::coord_trans(y = "reverse")
+  }
+  flipped <- eyes(reverse_y)
+  expect_gt(flipped$white_y, flipped$black_y)
+  expect_equal(flipped$r, plain$r, tolerance = 1e-6)
+
+  reverse_x <- if (exists("coord_transform", asNamespace("ggplot2"))) {
+    ggplot2::coord_transform(x = "reverse")
+  } else {
+    ggplot2::coord_trans(x = "reverse")
+  }
+  mirrored <- eyes(reverse_x)
+  expect_gt(mirrored$white_y, mirrored$black_y)
+  expect_gt(mirrored$r, 0)
+})
+
+# ------------------------------------------------------------------
+# Outline width
+# ------------------------------------------------------------------
+
+test_that("a cell without a border keeps the layer's own linewidth", {
+  d <- data.frame(x = 1:3, y = 1, v = 1:3, bw = c(1, NA, 2))
+  pg <- collect_grobs(forced_scene(ggplot(d, aes(x, y)) +
+    geom_yin_fish(aes(fill = v, border = bw), linewidth = 0.5,
+                  colour = "black")), "polygon")[[1]]
+  expect_equal(pg$gp$lwd, c(1, 0.5, 2) * .pt)
+})
+
+test_that("a mapped border must be numeric", {
+  d <- data.frame(x = 1:2, y = 1, v = 1:2, bw = c("thin", "thick"))
+  expect_error(
+    ggplot_build(ggplot(d, aes(x, y)) + geom_yin_fish(aes(fill = v, border = bw))),
+    "must be numeric"
+  )
+})
+
+test_that("the deprecated size counts as linewidth for the border channel", {
+  expect_error(
+    suppressWarnings(geom_taichi(yin = a, yang = b, explicit = "difference",
+                                 explicit_channel = "border", size = 2)),
+    "drives the same channel"
+  )
+})
+
+# ------------------------------------------------------------------
+# The fish geoms' flags
+# ------------------------------------------------------------------
+
+test_that("the fish geoms reject a flag that is not TRUE or FALSE", {
+  # isTRUE("yes") is FALSE, so a mistyped flag used to switch the eyes off
+  # without a word
+  expect_error(geom_yin_fish(eyes = "yes"), "`eyes` must be TRUE or FALSE")
+  expect_error(geom_yang_fish(eyes = NA), "`eyes` must be TRUE or FALSE")
+  expect_error(geom_yin_fish(interactive = "no"),
+               "`interactive` must be TRUE or FALSE")
+})
+
+test_that("shared_limits only warns about a mismatch that is real", {
+  # two numeric sources with no finite value have no limits to share, but
+  # they are not of different types, which is what the warning used to say
+  d <- data.frame(x = 1:2, y = 1, a = c(NA_real_, NA), b = c(NA_real_, NA))
+  expect_no_warning(ggplot(d, aes(x, y)) +
+    geom_taichi(yin = a, yang = b, shared_limits = TRUE))
+  mixed <- data.frame(x = 1:2, y = 1, a = c(1, 2), b = c("p", "q"))
+  expect_warning(ggplot(mixed, aes(x, y)) +
+    geom_taichi(yin = a, yang = b, shared_limits = TRUE), "same type")
+})
+
+test_that("the yin guide comes first with supplied scales too", {
+  # Guides left at order 0 are sorted by a hash of their contents, so with a
+  # supplied scale the yang legend came first for some titles (these two
+  # pairs among them) and not for others.
+  d <- data.frame(x = rep(1:3, 3), y = rep(1:3, each = 3), yin = 1:9, yang = 9:1)
+  guide_order <- function(p) {
+    fills <- Filter(function(s) any(grepl("^fill", s$aesthetics)),
+                    ggplot_build(p)$plot$scales$scales)
+    vapply(fills, function(s) {
+      g <- s$guide
+      if (is.character(g)) NA_real_ else (g$params$order %||% g$order %||% NA_real_)
+    }, numeric(1))
+  }
+  objects <- ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang,
+                yin_scale = scale_fill_viridis_c(),
+                yang_scale = scale_fill_viridis_c(option = "magma"))
+  constructors <- ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, yin_name = "matcha",
+                yang_name = "espresso",
+                yin_scale = scale_taichi_yin_binned,
+                yang_scale = scale_taichi_yang_binned)
+  expect_equal(guide_order(objects), c(1, 2))
+  expect_equal(guide_order(constructors), c(1, 2))
+  # and the legends really are drawn in that order where ggplot2 builds them
+  # at build time (3.5 and later)
+  titles <- function(p) {
+    params <- ggplot_build(p)$plot$guides$params
+    if (is.null(params)) return(NULL)
+    unname(vapply(params, function(g) as.character(g$title), ""))
+  }
+  if (!is.null(titles(objects))) {
+    expect_equal(titles(objects), c("yin", "yang"))
+    expect_equal(titles(constructors), c("matcha", "espresso"))
+  }
+  # an order the supplied scale asks for itself still wins
+  own <- ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang,
+                yin_scale = scale_fill_viridis_c(guide = guide_colourbar(order = 5)))
+  expect_equal(guide_order(own)[1], 5)
 })

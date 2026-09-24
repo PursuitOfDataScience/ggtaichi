@@ -79,3 +79,35 @@ test_that("a continuous fill still gets a colourbar, not keys", {
   p <- ggplot(d, aes(x, y)) + geom_taichi(yin = yin, yang = yang)
   expect_length(collect_grobs(forced_scene(p), "taichi_key"), 0)
 })
+
+test_that("a single-fish key's eye is the layer's eye", {
+  key <- function(fish, ...) {
+    draw_key_taichi(data.frame(fill = "#336699", colour = NA, alpha = NA,
+                               linewidth = 0.1, linetype = 1, ...),
+                    list(eyes = TRUE), c(1.2, 1.2), fish = fish)
+  }
+  eye <- collect_grobs(key("yin", eye_colour = "red", eye_size = 0.3),
+                       "circle")[[1]]
+  expect_equal(as.character(eye$gp$fill), "red")
+  expect_equal(as.numeric(eye$r), 0.45 * 0.3)
+  # without the aesthetics the classic look stays
+  expect_equal(as.character(collect_grobs(key("yang"), "circle")[[1]]$gp$fill),
+               "black")
+  # an eye the plot does not draw is not drawn in the key either
+  expect_length(collect_grobs(key("yin", eye_size = 0), "circle"), 0)
+  # and the decorative full symbol keeps the classic pair
+  both <- collect_grobs(key("both", eye_colour = "red"), "circle")
+  expect_setequal(vapply(both, function(ci) as.character(ci$gp$fill), ""),
+                  c("white", "black"))
+})
+
+test_that("the plot's legend keys carry the plot's eye colours", {
+  p <- ggplot(dd, aes(x, y)) +
+    geom_taichi(yin = g, yang = g, eyes = TRUE,
+                yin_eye_colour = "red", yang_eye_colour = "blue")
+  keys <- collect_grobs(forced_scene(p), "taichi_key")
+  eye_fills <- unlist(lapply(keys, function(k) {
+    vapply(collect_grobs(k, "circle"), function(ci) as.character(ci$gp$fill), "")
+  }))
+  expect_setequal(unique(eye_fills), c("red", "blue"))
+})

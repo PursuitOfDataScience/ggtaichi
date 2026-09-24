@@ -63,7 +63,7 @@ test_that("... reaches both position scales", {
   # arguments both scale types accept are fine
   expect_silent(ggplot_build(p(x = "c", y = "d", name = "shared")))
   # a continuous-only argument is rejected by the discrete scale, because the
-  # same `...` is handed to both -- documented, so pin it
+  # same `...` is handed to both; that is documented, so pin it
   expect_error(p(x = "c", y = "d", n.breaks = 3), "unused argument")
   # with axes of the same type it goes through
   same <- data.frame(x = 1:3, y = 1:3, yin = 1:3, yang = 4:6)
@@ -76,11 +76,12 @@ test_that("auto-detection reads the plot mapping, and the override rescues it", 
   library(ggplot2)
   mix <- data.frame(x = 1:3, y = c("a", "b", "c"), v = 1:3)
   # x/y mapped in the layer, not in ggplot(): nothing for detect_axis to read,
-  # so it falls back to continuous and the discrete y fails at build time
+  # so it falls back to continuous and the discrete y fails at build time.
+  # (ggplot2 3.5 words it "Discrete values supplied to continuous scale".)
   expect_error(
     ggplot_build(ggplot() + geom_yin_fish(data = mix, aes(x = x, y = y, fill = v)) +
                    remove_padding()),
-    "Discrete value supplied to a continuous scale"
+    "Discrete values? supplied to (a )?continuous scale"
   )
   # naming the types explicitly is the documented way out
   expect_silent(

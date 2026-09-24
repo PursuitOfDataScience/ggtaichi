@@ -9,9 +9,9 @@
 # ggtaichi: text metrics (the svglite / systemfonts versions and the platform's
 # font stack shift every label by a fraction of a point, which moves the panel),
 # and the continuous legend colourbar, which `guide_colourbar()` emits as an
-# embedded base64 PNG that different R graphics engines encode differently --
-# under R 4.3.2 six of these seven snapshots differ from the R >= 4.4 references
-# by nothing but those raster bytes.  The references here were generated with
+# embedded base64 PNG that different R graphics engines encode differently:
+# under R 4.3.2, six of the original seven snapshots differed from the R >= 4.4
+# references by nothing but those raster bytes.  The references here were generated with
 # R 4.4.1, ggplot2 4.0.3 and vdiffr 1.0.9; regenerate them on that stack (or
 # whatever the current reference is) rather than on an older R.
 #

@@ -44,11 +44,12 @@ symmetric about \code{midpoint}, so the mid colour really does sit at the
 centre of the legend and the two directions are coloured comparably.
 Set it to \code{FALSE} to use the plain data range.}
 
-\item{na.value}{Colour for cells whose statistic is missing --- which
+\item{na.value}{Colour for cells whose statistic is missing, which
 includes every non-positive cell under \code{"ratio"} and \code{"log_ratio"}.}
 
 \item{...}{Further arguments passed to \code{\link[ggplot2:geom_tile]{ggplot2::geom_tile()}}, for example
-\code{width}, \code{height}, \code{colour} or \code{linewidth}.}
+\code{width}, \code{height}, \code{colour} or \code{linewidth}. A \code{data} given here is also
+what the symmetric limits are computed from.}
 }
 \value{
 An object that, added to a \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} with \code{+}, draws the
@@ -67,7 +68,7 @@ agree".
 It is the explicit-encoding companion to \code{\link[=geom_taichi]{geom_taichi()}}: same data, same
 grid, same statistics, but the relationship itself is on the page instead
 of being left to the reader's eye. Use it beside a taichi grid, not instead
-of one --- the glyph shows the levels, this shows the gap.
+of one: the glyph shows the levels, this shows the gap.
 }
 \examples{
 library(ggplot2)

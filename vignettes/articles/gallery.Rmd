@@ -73,7 +73,7 @@ ggplot(d, aes(x, y)) +
 
 ## A turning grid
 
-Rotation can be pure annotation or a data channel — here each glyph's angle
+Rotation can be pure annotation or a data channel. Here each glyph's angle
 encodes its column:
 
 ```{r rotation, fig.height = 6, fig.alt="A four-by-four grid of taichi diagrams whose rotation angle increases along the x direction."}
@@ -105,7 +105,8 @@ ggplot(d9, aes(x, y)) +
 ## Texture at scale
 
 Dense grids stop being symbols you read one by one and become a texture of
-two interleaved fields — still useful for spotting bands and regime changes:
+two interleaved fields, which is still useful for spotting bands and regime
+changes:
 
 ```{r texture, fig.height = 7, fig.alt="A dense 31-week by 9-category grid of small taichi diagrams for two states, read as an overall texture rather than glyph by glyph."}
 ggplot(subset(states_tg, state %in% c("New York", "Texas")),
@@ -135,7 +136,7 @@ ggplot(d, aes(x, y)) +
 ## The gap, drawn three ways
 
 `explicit` computes the relationship between the two sources and shows it as a
-third channel. The eyes are the default --- subordinate to the fills, so the
+third channel. The eyes are the default: subordinate to the fills, so the
 two sources stay the story, and absent altogether where the sources agree:
 
 ```{r explicit-eye, fig.height = 6, fig.alt="The espresso versus matcha grid with eyes whose size grows with the gap between the two sources; cells where they agree have no eyes."}
@@ -174,7 +175,7 @@ ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
 ## A fair pair of palettes
 
 First the package defaults, then `palette = "balanced"`. The data is
-symmetric --- both fish carry the same value in every cell --- so a fair pair
+symmetric (both fish carry the same value in every cell), so a fair pair
 should make the two halves of every glyph look equally heavy. Only one of them
 does:
 
@@ -226,7 +227,7 @@ yin fish highlights the yin fish in *every* cell, which turns the
 superposition display into a single-source display for as long as you hold the
 pointer there.
 
-```{r girafe, eval = requireNamespace("ggiraph", quietly = TRUE), fig.height = 6}
+```{r girafe, eval = requireNamespace("ggiraph", quietly = TRUE), fig.height = 6, fig.alt="An interactive espresso versus matcha taichi grid: hovering a fish shows both values and their difference, and highlights that source in every cell."}
 p <- ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
   geom_taichi(yin = matcha, yang = espresso,
               shared_legend = TRUE, yin_name = "orders / 100 customers",

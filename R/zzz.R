@@ -2,21 +2,21 @@
 #
 # ggplot2 4.0 lets a theme set geom defaults through
 # `theme(geom = element_geom(ink, paper, accent))`, and lets a geom read them
-# with `from_theme()`. Without that, ggtaichi's hard-coded fallbacks -- a
-# grey20 fish, a white yin eye, a black yang eye -- do not follow a dark
+# with `from_theme()`. Without that, ggtaichi's hard-coded fallbacks (a
+# grey20 fish, a white yin eye, a black yang eye) do not follow a dark
 # theme: on a dark `paper` the fallback fish is nearly invisible and the two
 # eyes are the wrong way round.
 #
 # The expressions below reproduce the current appearance exactly on the
-# default light theme -- ink black, paper white and borderwidth 0.5 give a
-# #333333 (grey20) fill, a linewidth of 0.1, a white yin eye and a black yang
-# eye -- and flip with the theme otherwise. They are installed here rather
+# default light theme, where ink black, paper white and borderwidth 0.5 give
+# a #333333 fill (grey20), a linewidth of 0.1, a white yin eye and a black
+# yang eye, and flip with the theme otherwise. They are installed here rather
 # than written into the ggproto definitions so that the package still works,
 # with the literal fallbacks, on the ggplot2 3.4-3.5 it still supports, and so
 # that upgrading ggplot2 after installing ggtaichi is enough to switch them on
 # without a reinstall.
 # The names below are supplied by ggplot2 as a data mask when it evaluates a
-# from_theme() expression -- they are theme element properties, not objects in
+# from_theme() expression. They are theme element properties, not objects in
 # this namespace, so R's static check cannot see where they come from.
 utils::globalVariables(c(
   "ink", "paper", "fill", "colour", "borderwidth", "bordertype"

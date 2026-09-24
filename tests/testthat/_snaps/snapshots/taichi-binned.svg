@@ -72,18 +72,18 @@
 <text x='351.90' y='568.24' text-anchor='middle' style='font-size: 11.00px; font-family: sans;' textLength='5.50px' lengthAdjust='spacingAndGlyphs'>x</text>
 <text transform='translate(75.89,283.95) rotate(-90)' text-anchor='middle' style='font-size: 11.00px; font-family: sans;' textLength='5.50px' lengthAdjust='spacingAndGlyphs'>y</text>
 <rect x='624.03' y='176.74' width='27.65' height='101.73' style='stroke-width: 1.07; stroke: none; fill: #FFFFFF;' />
-<text x='624.03' y='185.45' style='font-size: 11.00px; font-family: sans;' textLength='23.86px' lengthAdjust='spacingAndGlyphs'>yang</text>
-<rect x='624.03' y='249.67' width='17.28' height='28.80' style='stroke-width: 0.75; stroke: none; fill: #FFB2B4;' />
-<rect x='624.03' y='220.87' width='17.28' height='28.80' style='stroke-width: 0.75; stroke: none; fill: #F86E74;' />
-<rect x='624.03' y='192.07' width='17.28' height='28.80' style='stroke-width: 0.75; stroke: none; fill: #DE2638;' />
+<text x='624.03' y='185.45' style='font-size: 11.00px; font-family: sans;' textLength='14.06px' lengthAdjust='spacingAndGlyphs'>yin</text>
+<rect x='624.03' y='249.67' width='17.28' height='28.80' style='stroke-width: 0.75; stroke: none; fill: #ECECEC;' />
+<rect x='624.03' y='220.87' width='17.28' height='28.80' style='stroke-width: 0.75; stroke: none; fill: #959595;' />
+<rect x='624.03' y='192.07' width='17.28' height='28.80' style='stroke-width: 0.75; stroke: none; fill: #434343;' />
 <text x='646.79' y='252.70' style='font-size: 8.80px; font-family: sans;' textLength='4.89px' lengthAdjust='spacingAndGlyphs'>3</text>
 <text x='646.79' y='223.90' style='font-size: 8.80px; font-family: sans;' textLength='4.89px' lengthAdjust='spacingAndGlyphs'>6</text>
 <text x='646.79' y='195.10' style='font-size: 8.80px; font-family: sans;' textLength='4.89px' lengthAdjust='spacingAndGlyphs'>9</text>
 <rect x='624.03' y='289.43' width='27.65' height='101.73' style='stroke-width: 1.07; stroke: none; fill: #FFFFFF;' />
-<text x='624.03' y='298.14' style='font-size: 11.00px; font-family: sans;' textLength='14.06px' lengthAdjust='spacingAndGlyphs'>yin</text>
-<rect x='624.03' y='362.36' width='17.28' height='28.80' style='stroke-width: 0.75; stroke: none; fill: #ECECEC;' />
-<rect x='624.03' y='333.56' width='17.28' height='28.80' style='stroke-width: 0.75; stroke: none; fill: #959595;' />
-<rect x='624.03' y='304.76' width='17.28' height='28.80' style='stroke-width: 0.75; stroke: none; fill: #434343;' />
+<text x='624.03' y='298.14' style='font-size: 11.00px; font-family: sans;' textLength='23.86px' lengthAdjust='spacingAndGlyphs'>yang</text>
+<rect x='624.03' y='362.36' width='17.28' height='28.80' style='stroke-width: 0.75; stroke: none; fill: #FFB2B4;' />
+<rect x='624.03' y='333.56' width='17.28' height='28.80' style='stroke-width: 0.75; stroke: none; fill: #F86E74;' />
+<rect x='624.03' y='304.76' width='17.28' height='28.80' style='stroke-width: 0.75; stroke: none; fill: #DE2638;' />
 <text x='646.79' y='365.39' style='font-size: 8.80px; font-family: sans;' textLength='4.89px' lengthAdjust='spacingAndGlyphs'>3</text>
 <text x='646.79' y='336.59' style='font-size: 8.80px; font-family: sans;' textLength='4.89px' lengthAdjust='spacingAndGlyphs'>6</text>
 <text x='646.79' y='307.79' style='font-size: 8.80px; font-family: sans;' textLength='4.89px' lengthAdjust='spacingAndGlyphs'>9</text>

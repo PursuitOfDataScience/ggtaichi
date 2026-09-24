@@ -114,3 +114,21 @@ test_that("a bad palette or colour vector is rejected by the constructors", {
   expect_error(scale_taichi_yin_c(palette = "nope"), "must be one of")
   expect_error(scale_taichi_yin_c(colors = 1:3), "character vector")
 })
+
+test_that("the discrete scales use an explicit colour vector as given", {
+  # a qualitative palette is the usual reason to pass colours for unordered
+  # levels; treating it as a ramp used to turn red and blue into purple and
+  # blue
+  s <- scale_taichi_yin_d(colors = c("red", "blue"))
+  expect_equal(s$palette(2), c("red", "blue"))
+  expect_equal(s$palette(1), "red")
+  # more levels than colours still interpolate
+  expect_length(s$palette(3), 3)
+  b <- ggplot_build(ggplot(dd, aes(x, y)) +
+    geom_taichi(yin = g, yang = g,
+                yin_scale = scale_taichi_yin_d(colours = c("#1b9e77", "#d95f02",
+                                                           "#7570b3"))))
+  expect_setequal(b$data[[1]]$fill, c("#1b9e77", "#d95f02", "#7570b3"))
+  # a palette is still sampled as a ramp, palest end skipped
+  expect_false(scale_taichi_yin_d()$palette(2)[1] == "#FFFFFF")
+})

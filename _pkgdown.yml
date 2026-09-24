@@ -46,7 +46,7 @@ reference:
   desc: >
     A taichi grid shows two sources in one position, which answers "which is
     bigger here?" and not "by how much?". These compute the second question's
-    answer -- inside the glyph, as a table, or as a heatmap of its own.
+    answer: inside the glyph, as a table, or as a heatmap of its own.
   contents:
   - taichi_summary
   - geom_taichi_diff

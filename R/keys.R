@@ -14,13 +14,16 @@
 #' @param data A one-row data frame of the key's aesthetics, supplied by
 #'   ggplot2.
 #' @param params The layer's parameters, supplied by ggplot2. `eyes = TRUE` is
-#'   honoured, so a plot drawn with eyes gets keys with eyes.
+#'   honoured, so a plot drawn with eyes gets keys with eyes. For a
+#'   single-fish key the eye takes the layer's own eye colour and (constant)
+#'   eye size, so it matches the eyes on the plot.
 #' @param size The key size in mm, supplied by ggplot2. Unused: the glyph is
 #'   drawn in a square viewport that fills the key, so it stays round whatever
 #'   the key's aspect ratio.
 #' @param fish Which fish carries `data$fill`: `"yin"`, `"yang"`, or
-#'   `"both"` --- the last fills the yin fish with the key colour and the yang
-#'   fish with a pale version of it, for a decorative complete symbol.
+#'   `"both"`. The last fills the yin fish with the key colour and the yang
+#'   fish with a pale version of it, for a decorative complete symbol with the
+#'   classic white and black eyes.
 #'
 #' @return A grob.
 #' @export
@@ -69,21 +72,32 @@ draw_key_taichi <- function(data, params, size, fish = "both") {
 
   children <- grid::gList(poly("yin", yin_fill), poly("yang", yang_fill))
 
-  if (isTRUE(params$eyes)) {
-    eyes <- list()
-    if (fish %in% c("yin", "both")) {
-      eyes[[length(eyes) + 1]] <- grid::circleGrob(
-        x = grid::unit(0.5, "npc"), y = grid::unit(0.5 + 0.225, "npc"),
-        r = grid::unit(0.45 * 0.15, "npc"),
-        gp = grid::gpar(fill = "white", col = "white")
+  # A single-fish key describes one layer, so its eye is that layer's eye: the
+  # colour the plot's eyes are drawn in (a constant, or the theme's) and a
+  # constant size, under the plot's own rule that a size which is not a
+  # positive number means no eye. A mapped size has no one value to show, so
+  # the key gets the default. The decorative full symbol keeps the classic
+  # pair.
+  size <- if (fish == "both") 0.15 else data$eye_size[1] %||% 0.15
+  has_eye <- is.numeric(size) && is.finite(size) && size > 0
+  if (isTRUE(params$eyes) && has_eye) {
+    own_colour <- function(classic) {
+      col <- if (fish == "both") NULL else data$eye_colour[1]
+      if (is.null(col)) classic else as.character(col)
+    }
+    eye <- function(y, col) {
+      grid::circleGrob(
+        x = grid::unit(0.5, "npc"), y = grid::unit(y, "npc"),
+        r = grid::unit(0.45 * size, "npc"),
+        gp = grid::gpar(fill = col, col = col)
       )
     }
+    eyes <- list()
+    if (fish %in% c("yin", "both")) {
+      eyes[[length(eyes) + 1]] <- eye(0.5 + 0.225, own_colour("white"))
+    }
     if (fish %in% c("yang", "both")) {
-      eyes[[length(eyes) + 1]] <- grid::circleGrob(
-        x = grid::unit(0.5, "npc"), y = grid::unit(0.5 - 0.225, "npc"),
-        r = grid::unit(0.45 * 0.15, "npc"),
-        gp = grid::gpar(fill = "black", col = "black")
-      )
+      eyes[[length(eyes) + 1]] <- eye(0.5 - 0.225, own_colour("black"))
     }
     children <- do.call(grid::gList, c(as.list(children), eyes))
   }

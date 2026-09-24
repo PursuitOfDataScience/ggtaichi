@@ -8,14 +8,15 @@
 #' Two of the theme's settings surprise people often enough to be worth
 #' spelling out. The y axis \emph{title} is blanked, on the assumption that the
 #' y axis of a taichi grid is a list of category names that already reads as a
-#' label --- so \code{labs(y = "...")} has no visible effect under this theme.
+#' label, so \code{labs(y = "...")} has no visible effect under this theme.
 #' Legend text is rotated 90 degrees, which keeps a wide continuous legend from
 #' running off the bottom of the plot. Both are ordinary theme elements, so add
 #' a \code{\link[ggplot2]{theme}()} call afterwards to put them back:
 #' \preformatted{  + theme_taichi() + theme(axis.title.y = element_text(),
 #'                           legend.text = element_text(angle = 0))}
 #'
-#' @param base_size base font size
+#' @param base_size base font size; every text size in the theme scales with
+#'   it
 #' @param base_family base font family
 #' @param base_line_size base size for line elements
 #' @param base_rect_size base size for rect elements
@@ -35,6 +36,12 @@ theme_taichi <- function(base_size = 11, base_family = "",
                          base_line_size = base_size / 22,
                          base_rect_size = base_size / 22) {
 
+  # The text sizes below are the ones the theme was designed at, the default
+  # base_size of 11, and scale with base_size so that theme_taichi(20) grows
+  # its titles and tick labels too (multiplied first, so that at 11 they come
+  # out exactly as written).
+  size_at <- function(size) base_size * size / 11
+
   ggplot2::theme_bw(base_size = base_size, base_family = base_family,
            base_line_size = base_line_size, base_rect_size = base_rect_size) %+replace%
 
@@ -44,8 +51,8 @@ theme_taichi <- function(base_size = 11, base_family = "",
     # here or it falls back to the generic `text` / `rect` parent.
     ggplot2::theme(legend.position = "bottom",
           axis.ticks = element_blank(),
-          axis.title = element_text(size = 13, color = "#222222", face = "bold"),
-          axis.text = element_text(size = 11, color = "#222222"),
+          axis.title = element_text(size = size_at(13), color = "#222222", face = "bold"),
+          axis.text = element_text(size = size_at(11), color = "#222222"),
           # hjust and the right margin keep the y tick labels flush-right with a
           # gap from the panel, as in theme_bw().
           axis.text.y = element_text(face = "bold", hjust = 1,
@@ -63,7 +70,7 @@ theme_taichi <- function(base_size = 11, base_family = "",
           # Align the title with the whole plot (not the panel) and keep it a
           # size that long titles survive without running off the right edge.
           plot.title.position = "plot",
-          plot.title = element_text(size = 15, vjust = 1, hjust = 0, color = "#222222", face = "bold",
+          plot.title = element_text(size = size_at(15), vjust = 1, hjust = 0, color = "#222222", face = "bold",
                                     margin = margin(10, 0, 10, 0)))
 
 }

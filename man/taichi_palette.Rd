@@ -24,7 +24,7 @@ available on their own so they can be inspected, checked with
 \section{The presets}{
 
 \describe{
-\item{\code{"default"}}{The package's own grey yin / seal-red yang ramps ---
+\item{\code{"default"}}{The package's own grey yin / seal-red yang ramps,
 the look of every ggtaichi release so far. It is \emph{not} luminance
 matched (the grey ramp spans the full range, the red one does not);
 run \code{taichi_check_palette()} to see by how much. Kept as the default
@@ -40,7 +40,7 @@ diverging scale. Use it with \code{shared_limits = TRUE}.}
 to dark. They come from the same generator and are close to luminance
 matched, and each ramp on its own stays ordered under colour-vision
 deficiency. The two are harder to tell apart from \emph{each other} under
-red-green deficiency than \code{"balanced"} is, though --- run
+red-green deficiency than \code{"balanced"} is, though, so run
 \code{taichi_check_palette(palette = "viridis_pair")} and look at the
 protan row before choosing it.}
 \item{\code{"brewer_pair"}}{ColorBrewer's sequential Blues and Oranges.
@@ -49,7 +49,7 @@ Familiar and print-friendly; less exactly matched than
 \item{\code{"greyscale_safe"}}{A grey yin ramp and a hued yang ramp on the
 \emph{same} luminance trajectory. In colour the two fish are told apart by
 hue; in greyscale they collapse to the same ink, so equal values still
-read as equal --- the two sources are then distinguished by their
+read as equal, and the two sources are then distinguished by their
 position in the glyph (yin is the top bulb, yang the bottom). The right
 choice for a journal figure that may be printed in black and white.
 Note the promise precisely: it is about \strong{greyscale}, not about the

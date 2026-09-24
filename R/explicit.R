@@ -3,7 +3,7 @@
 #' A taichi grid is a *superposition* comparison: the two sources share one
 #' position, which makes "are these similar?" and "which is bigger here?" easy
 #' to see and "by how much?" impossible. `taichi_summary()` is the tidy answer
-#' to the last question --- the numbers behind the glyph, one row per input
+#' to the last question: the numbers behind the glyph, one row per input
 #' row, for the reader who needs a table rather than a picture.
 #'
 #' @section The statistics:
@@ -11,8 +11,8 @@
 #'   \item{`difference`}{`yin - yang`. Positive means the yin fish (the top
 #'     bulb) carries the larger value.}
 #'   \item{`ratio`}{`yin / yang`, and `NA` wherever either value is not
-#'     strictly positive --- a ratio of a negative or zero quantity is not a
-#'     ratio, and `Inf` is never returned.}
+#'     strictly positive (a ratio of a negative or zero quantity is not a
+#'     ratio), so `Inf` is never returned.}
 #'   \item{`log_ratio`}{`log2(yin / yang)`, so a value of 1 means yin is twice
 #'     yang and -1 means half. Symmetric around zero, which `ratio` is not,
 #'     and the right choice when the two sources span orders of magnitude.}
@@ -55,7 +55,7 @@
 #'                        x = week, y = neighbourhood)
 #' head(summ)
 #'
-#' # the five widest gaps -- places to look, not findings; see the caveat above
+#' # the five widest gaps: places to look, not findings (see the caveat above)
 #' head(summ[order(summ$rank), ], 5)
 taichi_summary <- function(data, yin, yang, x = NULL, y = NULL) {
   if (!is.data.frame(data)) {
@@ -94,6 +94,8 @@ taichi_summary <- function(data, yin, yang, x = NULL, y = NULL) {
   }
 
   diff <- yin_vals - yang_vals
+  yin_lab <- rlang::as_label(yin_quo)
+  yang_lab <- rlang::as_label(yang_quo)
   out <- data.frame(
     yin = yin_vals,
     yang = yang_vals,
@@ -103,9 +105,11 @@ taichi_summary <- function(data, yin, yang, x = NULL, y = NULL) {
     z = zscore(yin_vals) - zscore(yang_vals),
     dominant = factor(
       ifelse(is.na(diff), NA_character_,
-             ifelse(diff > 0, rlang::as_label(yin_quo),
-                    ifelse(diff < 0, rlang::as_label(yang_quo), "tie"))),
-      levels = c(rlang::as_label(yin_quo), rlang::as_label(yang_quo), "tie")
+             ifelse(diff > 0, yin_lab,
+                    ifelse(diff < 0, yang_lab, "tie"))),
+      # unique(): a column compared with itself (or one named "tie") would
+      # otherwise hand factor() duplicated levels, which is an error.
+      levels = unique(c(yin_lab, yang_lab, "tie"))
     ),
     rank = rank_by_gap(diff),
     stringsAsFactors = FALSE
@@ -133,7 +137,7 @@ taichi_summary <- function(data, yin, yang, x = NULL, y = NULL) {
 #' It is the explicit-encoding companion to [geom_taichi()]: same data, same
 #' grid, same statistics, but the relationship itself is on the page instead
 #' of being left to the reader's eye. Use it beside a taichi grid, not instead
-#' of one --- the glyph shows the levels, this shows the gap.
+#' of one: the glyph shows the levels, this shows the gap.
 #'
 #' @param yin,yang Unquoted column names (or strings naming columns) for the
 #'   two sources, as in [geom_taichi()].
@@ -156,10 +160,11 @@ taichi_summary <- function(data, yin, yang, x = NULL, y = NULL) {
 #'   symmetric about `midpoint`, so the mid colour really does sit at the
 #'   centre of the legend and the two directions are coloured comparably.
 #'   Set it to `FALSE` to use the plain data range.
-#' @param na.value Colour for cells whose statistic is missing --- which
+#' @param na.value Colour for cells whose statistic is missing, which
 #'   includes every non-positive cell under `"ratio"` and `"log_ratio"`.
 #' @param ... Further arguments passed to [ggplot2::geom_tile()], for example
-#'   `width`, `height`, `colour` or `linewidth`.
+#'   `width`, `height`, `colour` or `linewidth`. A `data` given here is also
+#'   what the symmetric limits are computed from.
 #'
 #' @return An object that, added to a [ggplot2::ggplot()] with `+`, draws the
 #'   difference tiles and their diverging fill scale. It is not a plot on its
@@ -250,6 +255,14 @@ print.ggtaichi_diff <- function(x, ...) {
 ggplot_add.ggtaichi_diff <- function(object, plot, ...) {
   data <- plot$data
   if (!is.data.frame(data)) data <- NULL
+  # The limits describe the tiles, so they come from the data the tiles are
+  # drawn from: a `data` passed through `...` (a data frame, or a function of
+  # the plot data) rather than the plot's own.
+  layer_data <- object$layer$data
+  if (is.function(layer_data)) {
+    layer_data <- tryCatch(layer_data(data), error = function(e) NULL)
+  }
+  if (is.data.frame(layer_data)) data <- layer_data
 
   limits <- NULL
   if (isTRUE(object$symmetric)) {
@@ -290,9 +303,11 @@ explicit_methods <- c("none", "difference", "ratio", "log_ratio", "z")
 explicit_channels <- c("eye_size", "angle", "border", "radius")
 
 # The raw explicit statistic for one pair of source columns. Called from
-# inside an aes() quosure, so it runs on whatever data the layer is given --
-# including replaced data and each facet's rows.
-taichi_explicit_stat <- function(yin, yang, method = "difference") {
+# inside an aes() quosure, so it runs on whatever data the layer is given,
+# including replaced data. `warn = FALSE` is for the second of two layers
+# computing the same statistic, so that a problem is reported once.
+taichi_explicit_stat <- function(yin, yang, method = "difference",
+                                 warn = TRUE) {
   if (!is.numeric(yin) || !is.numeric(yang)) {
     rlang::abort(paste0(
       "`explicit` needs numeric `yin` and `yang` columns; a computed ",
@@ -301,14 +316,14 @@ taichi_explicit_stat <- function(yin, yang, method = "difference") {
   }
   switch(method,
     difference = yin - yang,
-    ratio = safe_ratio(yin, yang),
-    log_ratio = log2(safe_ratio(yin, yang)),
+    ratio = safe_ratio(yin, yang, warn = warn),
+    log_ratio = log2(safe_ratio(yin, yang, warn = warn)),
     z = zscore(yin) - zscore(yang),
     rlang::abort(paste0("Unknown `explicit` method \"", method, "\"."))
   )
 }
 
-# yin / yang, with NA -- never Inf -- wherever the quotient is not a ratio of
+# yin / yang, with NA (never Inf) wherever the quotient is not a ratio of
 # two positive quantities. A silent Inf would sail through the rescaling and
 # paint one cell at the extreme of whatever channel it feeds.
 safe_ratio <- function(yin, yang, warn = TRUE) {
@@ -329,12 +344,20 @@ safe_ratio <- function(yin, yang, warn = TRUE) {
   out
 }
 
-# Centre and scale across the whole grid. A constant column has no spread to
-# standardise by, so it contributes nothing rather than NaN.
+# Centre and scale across the whole grid, over the finite values. A constant
+# column has no spread to standardise by, so it contributes nothing rather
+# than NaN; a missing (or infinite) value stays missing either way, rather
+# than turning into a z of 0 that says the cell is average.
 zscore <- function(v) {
-  s <- stats::sd(v, na.rm = TRUE)
-  if (!is.finite(s) || s == 0) return(rep(0, length(v)))
-  (v - mean(v, na.rm = TRUE)) / s
+  ok <- is.finite(v)
+  out <- rep(NA_real_, length(v))
+  s <- if (sum(ok) > 1) stats::sd(v[ok]) else NA_real_
+  if (!is.finite(s) || s == 0) {
+    out[ok] <- 0
+    return(out)
+  }
+  out[ok] <- (v[ok] - mean(v[ok])) / s
+  out
 }
 
 # Rank cells by how far apart the two sources are, widest gap first.
@@ -352,7 +375,7 @@ explicit_label <- function(method, yin_lab, yang_lab) {
     difference = paste(yin_lab, "-", yang_lab),
     ratio = paste(yin_lab, "/", yang_lab),
     log_ratio = paste0("log2(", yin_lab, " / ", yang_lab, ")"),
-    z = paste("z(", yin_lab, ") - z(", yang_lab, ")"),
+    z = paste0("z(", yin_lab, ") - z(", yang_lab, ")"),
     method
   )
 }
@@ -376,8 +399,8 @@ explicit_default_range <- function(channel) {
 # upright glyph means agreement; the magnitude channels use the absolute
 # statistic, because the sign is already legible from which fish is darker.
 # `radius` is the one channel where the eye reads area rather than extent, so
-# it is scaled by the square root -- the standard fix for the area-versus-
-# diameter error of bubble charts.
+# it is scaled as an area (the standard fix for the area-versus-diameter error
+# of bubble charts), with a perceptual correction on top; see below.
 rescale_explicit <- function(x, channel, range = NULL, exponent = NULL) {
   range <- range %||% explicit_default_range(channel)
   exponent <- exponent %||% 0.57
@@ -394,10 +417,12 @@ rescale_explicit <- function(x, channel, range = NULL, exponent = NULL) {
 
   if (m == 0) {
     # Nothing to show: every cell agrees (or nothing is finite). Return the
-    # channel's neutral value rather than dividing by zero -- no tilt, no eye,
-    # the thinnest border, the full radius.
+    # channel's neutral value rather than dividing by zero: no tilt (the
+    # middle of the range, where the signed mapping below puts agreement), no
+    # eye, the thinnest border, the full radius.
     neutral <- switch(channel,
-      eye_size = 0, angle = 0, border = min(range), radius = max(range)
+      eye_size = 0, angle = mean(range), border = min(range),
+      radius = max(range)
     )
     out <- rep(neutral, length(x))
     out[!is.finite(x)] <- if (channel == "eye_size") NA_real_ else neutral
@@ -410,7 +435,7 @@ rescale_explicit <- function(x, channel, range = NULL, exponent = NULL) {
     out[!is.finite(x)] <- mean(range)
   } else {
     frac <- abs(x) / m
-    # Area, not diameter -- but not the naive square root either. Readers
+    # Area, not diameter, but not the naive square root either. Readers
     # systematically underestimate the area ratio between large and small
     # circles, and cartography compensates with an exponent near 0.57
     # (Flannery) rather than 0.5. `radius_exponent` exposes the choice;
@@ -431,6 +456,18 @@ diverging_colours <- function(palette) {
   if (is.character(palette) && length(palette) == 3) {
     check_colours(palette, "palette")
     return(palette)
+  }
+  # Name all three accepted forms: the palette-pair message alone would leave
+  # out the one that is specific to this function.
+  is_pair <- (is.character(palette) && length(palette) == 1) ||
+    (is.list(palette) && all(c("yin", "yang") %in% names(palette)))
+  if (!is_pair) {
+    rlang::abort(paste0(
+      "`palette` must be one of ",
+      paste0("\"", taichi_palette_names, "\"", collapse = ", "),
+      ", a list with `yin` and `yang` colour vectors, or exactly three ",
+      "colours (low, mid, high)."
+    ))
   }
   pair <- as_palette_pair(palette, "palette")
   c(pair$yang[length(pair$yang)],

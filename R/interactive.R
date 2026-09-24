@@ -27,7 +27,7 @@ data_id_scopes <- c("cell", "fish", "source")
 
 # The default tooltip: both values, the gap between them, and the cell's own
 # coordinates when the plot's x / y mapping can supply them. The difference is
-# included on purpose -- it is the quantity the glyph cannot show, and the
+# included on purpose: it is the quantity the glyph cannot show, and the
 # reason interactivity earns its place.
 taichi_tooltip <- function(yin, yang, yin_name = "yin", yang_name = "yang",
                            x = NULL, y = NULL,
@@ -37,7 +37,7 @@ taichi_tooltip <- function(yin, yang, yin_name = "yin", yang_name = "yang",
     if (is.numeric(v)) {
       formatC(v, format = "g", digits = 4, width = 1)
     } else {
-      as.character(v)
+      html_escape(v)
     }
   }
   parts <- paste0(
@@ -59,13 +59,13 @@ taichi_cell_label <- function(x, y, x_name, y_name, n) {
   if (!is.null(x)) {
     bits[[length(bits) + 1]] <- paste0(
       if (is.null(x_name)) "" else paste0(html_escape(x_name), " "),
-      as.character(x)
+      html_escape(x)
     )
   }
   if (!is.null(y)) {
     bits[[length(bits) + 1]] <- paste0(
       if (is.null(y_name)) "" else paste0(html_escape(y_name), " "),
-      as.character(y)
+      html_escape(y)
     )
   }
   if (length(bits) == 0) return(NULL)
@@ -80,7 +80,7 @@ taichi_cell_label <- function(x, y, x_name, y_name, n) {
 # The default data_id, whose scope decides what a hover highlights:
 #
 #   "cell"   both fish of one cell share an id, so hovering lights up the
-#            whole glyph -- the useful default.
+#            whole glyph: the useful default.
 #   "fish"   every fish gets its own id, for per-fish selection.
 #   "source" all yin fish share one id and all yang fish another, so hovering
 #            one source highlights it in every cell. That turns a
@@ -105,7 +105,8 @@ taichi_data_id <- function(x = NULL, y = NULL, fallback, fish = "yin",
 }
 
 # Minimal escaping: the tooltip is inserted into the SVG as HTML, so a column
-# name or category containing < or & would otherwise break the markup.
+# name, a category or a cell label containing < or & would otherwise break the
+# markup.
 html_escape <- function(x) {
   x <- gsub("&", "&amp;", as.character(x), fixed = TRUE)
   x <- gsub("<", "&lt;", x, fixed = TRUE)

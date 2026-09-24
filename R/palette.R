@@ -4,7 +4,7 @@
 #' two fill ramps have to be matched: if one ramp spans a wider luminance
 #' range than the other, equal values do not produce equal visual weight and
 #' one fish systematically appears to dominate. That makes palette pairing a
-#' correctness problem rather than a matter of taste --- see
+#' correctness problem rather than a matter of taste: see
 #' [taichi_check_palette()] for the measurement and `vignette("ggtaichi")`
 #' for the discussion.
 #'
@@ -21,13 +21,13 @@
 #' @param luminance The two ends of the shared luminance trajectory as
 #'   `c(dark, light)`, on the CIE L\* scale from 0 (black) to 100 (white).
 #'   Both ramps run from the light end to the dark end, so the first colour
-#'   belongs to the lowest value --- the same convention as `yin_colors` /
+#'   belongs to the lowest value, the same convention as `yin_colors` /
 #'   `yang_colors`.
 #' @param chroma Chroma (colourfulness) at the dark end of each ramp. Chroma
 #'   tapers towards the light end, because a very light colour cannot also be
 #'   saturated; both ramps taper identically. Values above about 80 will be
 #'   clipped to the sRGB gamut, and clipping is hue-dependent, which is
-#'   exactly what breaks the match --- keep it moderate and verify with
+#'   exactly what breaks the match. Keep it moderate and verify with
 #'   [taichi_check_palette()].
 #'
 #' @return A list of two character vectors of hex colours, `yin` and `yang`,
@@ -90,7 +90,7 @@ taichi_palette_pair <- function(n = 5, hues = c(250, 20),
 #'
 #' @section The presets:
 #' \describe{
-#'   \item{`"default"`}{The package's own grey yin / seal-red yang ramps ---
+#'   \item{`"default"`}{The package's own grey yin / seal-red yang ramps,
 #'     the look of every ggtaichi release so far. It is *not* luminance
 #'     matched (the grey ramp spans the full range, the red one does not);
 #'     run `taichi_check_palette()` to see by how much. Kept as the default
@@ -106,7 +106,7 @@ taichi_palette_pair <- function(n = 5, hues = c(250, 20),
 #'     to dark. They come from the same generator and are close to luminance
 #'     matched, and each ramp on its own stays ordered under colour-vision
 #'     deficiency. The two are harder to tell apart from *each other* under
-#'     red-green deficiency than `"balanced"` is, though --- run
+#'     red-green deficiency than `"balanced"` is, though, so run
 #'     `taichi_check_palette(palette = "viridis_pair")` and look at the
 #'     protan row before choosing it.}
 #'   \item{`"brewer_pair"`}{ColorBrewer's sequential Blues and Oranges.
@@ -115,7 +115,7 @@ taichi_palette_pair <- function(n = 5, hues = c(250, 20),
 #'   \item{`"greyscale_safe"`}{A grey yin ramp and a hued yang ramp on the
 #'     *same* luminance trajectory. In colour the two fish are told apart by
 #'     hue; in greyscale they collapse to the same ink, so equal values still
-#'     read as equal --- the two sources are then distinguished by their
+#'     read as equal, and the two sources are then distinguished by their
 #'     position in the glyph (yin is the top bulb, yang the bottom). The right
 #'     choice for a journal figure that may be printed in black and white.
 #'     Note the promise precisely: it is about **greyscale**, not about the
@@ -210,8 +210,8 @@ interpolate_ramp <- function(cols, n) {
 #' comparison.
 #'
 #' @section How the verdict is decided:
-#' Both ramps are resampled to `n` steps in Lab space --- the space ggplot2's
-#' gradient scales interpolate in --- and each step's CIE L\* (luminance) and
+#' Both ramps are resampled to `n` steps in Lab space (the space ggplot2's
+#' gradient scales interpolate in), and each step's CIE L\* (luminance) and
 #' chroma are recorded. The reported mismatch is the largest absolute
 #' luminance difference between corresponding steps. The verdict is
 #' `"pass"` below `tolerance` L\* units (default 5, around the point where a
@@ -226,7 +226,7 @@ interpolate_ramp <- function(cols, n) {
 #' for normal vision. Read it as a comparison: a simulation much below the
 #' normal-vision row means the deficiency is costing those readers the
 #' distinction, and anything below about 10 means the two fish are not
-#' tellable apart at all. The median rather than the minimum is deliberate ---
+#' tellable apart at all. The median rather than the minimum is deliberate:
 #' two luminance-matched ramps necessarily converge at their pale end, where
 #' both are near white, and a minimum would report that as a fault of every
 #' well-matched pair.
@@ -241,7 +241,7 @@ interpolate_ramp <- function(cols, n) {
 #'   a list with `yin` and `yang` elements, checked instead of
 #'   `yin_colors` / `yang_colors`.
 #' @param tolerance Largest luminance difference, in L\* units, still counted
-#'   as a pass.
+#'   as a pass: a single non-negative number.
 #'
 #' @return An object of class `taichi_palette_check`, with a `print()` method
 #'   that lays the measurements out as a table. It is a list with elements
@@ -250,8 +250,8 @@ interpolate_ramp <- function(cols, n) {
 #'   `verdict` (`"pass"`, `"warning"` or `"fail"`), `cvd` (a data frame of
 #'   median step-wise colour distances for normal vision and each simulation,
 #'   or `NULL` when \pkg{colorspace} is not installed), `tolerance`, and
-#'   `space`, naming the colour space every number was measured in --- they
-#'   are not comparable with figures computed in another space.
+#'   `space`, naming the colour space every number was measured in (they
+#'   are not comparable with figures computed in another space).
 #' @seealso [taichi_palette_pair()] to build a matched pair,
 #'   [taichi_palette()] for the presets.
 #' @export
@@ -281,6 +281,10 @@ taichi_check_palette <- function(yin_colors = NULL, yang_colors = NULL,
     rlang::abort("`n` must be a single number of 2 or more.")
   }
   n <- as.integer(n)
+  if (!is.numeric(tolerance) || length(tolerance) != 1 || is.na(tolerance) ||
+      tolerance < 0) {
+    rlang::abort("`tolerance` must be a single non-negative number.")
+  }
 
   yin <- interpolate_ramp(yin_colors, n)
   yang <- interpolate_ramp(yang_colors, n)
@@ -403,7 +407,7 @@ is_monotone <- function(v) {
 }
 
 # How far apart the two ramps stay, step for step, for readers with
-# colour-vision deficiency -- reported against a normal-vision baseline,
+# colour-vision deficiency, reported against a normal-vision baseline,
 # because the interesting question is what the deficiency costs rather than
 # the raw number.
 #
@@ -446,6 +450,17 @@ cvd_distances <- function(yin, yang) {
 # expected. Anything else is a mistake worth naming.
 as_palette_pair <- function(palette, arg, n = 5) {
   if (is.character(palette) && length(palette) == 1) {
+    # Checked here so that the message names the caller's argument; left to
+    # taichi_palette() it would complain about a `name` the caller never
+    # passed.
+    if (!palette %in% taichi_palette_names) {
+      rlang::abort(paste0(
+        "`", arg, "` must be one of ",
+        paste0("\"", taichi_palette_names, "\"", collapse = ", "),
+        ", or a list with `yin` and `yang` colour vectors; not \"",
+        palette, "\"."
+      ))
+    }
     return(taichi_palette(palette, n = n))
   }
   if (is.list(palette) && all(c("yin", "yang") %in% names(palette))) {

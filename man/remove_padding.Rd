@@ -18,7 +18,7 @@ cannot answer for.}
 \code{\link[ggplot2:scale_continuous]{ggplot2::scale_x_continuous()}} / \code{\link[ggplot2:scale_discrete]{ggplot2::scale_x_discrete()}} (and y)
 calls. They go to \emph{both} scales, so when the two axes are of different
 types only arguments that continuous and discrete scales share (\code{name},
-\code{breaks}, \code{labels}, \code{guide}, ...) can be used here --- a continuous-only
+\code{breaks}, \code{labels}, \code{guide}, ...) can be used here: a continuous-only
 argument such as \code{n.breaks} would be rejected by the discrete scale with
 an "unused argument" error. For per-axis options, add your own
 \code{scale_x_*(expand = c(0, 0))} call instead.}

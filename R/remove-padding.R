@@ -18,7 +18,7 @@
 #'   [ggplot2::scale_x_continuous()] / [ggplot2::scale_x_discrete()] (and y)
 #'   calls. They go to *both* scales, so when the two axes are of different
 #'   types only arguments that continuous and discrete scales share (`name`,
-#'   `breaks`, `labels`, `guide`, ...) can be used here --- a continuous-only
+#'   `breaks`, `labels`, `guide`, ...) can be used here: a continuous-only
 #'   argument such as `n.breaks` would be rejected by the discrete scale with
 #'   an "unused argument" error. For per-axis options, add your own
 #'   `scale_x_*(expand = c(0, 0))` call instead.
@@ -45,7 +45,7 @@ remove_padding <- function(x = NULL, y = NULL, ...) {
 
   check_axis <- function(value, arg) {
     if (!is.null(value) && !(identical(value, "c") || identical(value, "d"))) {
-      rlang::abort(paste0("Arguments `", arg, "` only takes `c` or `d`"))
+      rlang::abort(paste0("Argument `", arg, "` only takes `c` or `d`."))
     }
   }
   check_axis(x, "x")

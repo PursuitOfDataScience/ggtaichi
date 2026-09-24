@@ -25,7 +25,7 @@ A data frame with one row per row of \code{data}: the optional \code{x} and
 A taichi grid is a \emph{superposition} comparison: the two sources share one
 position, which makes "are these similar?" and "which is bigger here?" easy
 to see and "by how much?" impossible. \code{taichi_summary()} is the tidy answer
-to the last question --- the numbers behind the glyph, one row per input
+to the last question: the numbers behind the glyph, one row per input
 row, for the reader who needs a table rather than a picture.
 }
 \section{The statistics}{
@@ -34,8 +34,8 @@ row, for the reader who needs a table rather than a picture.
 \item{\code{difference}}{\code{yin - yang}. Positive means the yin fish (the top
 bulb) carries the larger value.}
 \item{\code{ratio}}{\code{yin / yang}, and \code{NA} wherever either value is not
-strictly positive --- a ratio of a negative or zero quantity is not a
-ratio, and \code{Inf} is never returned.}
+strictly positive (a ratio of a negative or zero quantity is not a
+ratio), so \code{Inf} is never returned.}
 \item{\code{log_ratio}}{\code{log2(yin / yang)}, so a value of 1 means yin is twice
 yang and -1 means half. Symmetric around zero, which \code{ratio} is not,
 and the right choice when the two sources span orders of magnitude.}
@@ -67,7 +67,7 @@ summ <- taichi_summary(cafes_tg, yin = matcha, yang = espresso,
                        x = week, y = neighbourhood)
 head(summ)
 
-# the five widest gaps -- places to look, not findings; see the caveat above
+# the five widest gaps: places to look, not findings (see the caveat above)
 head(summ[order(summ$rank), ], 5)
 }
 \seealso{
