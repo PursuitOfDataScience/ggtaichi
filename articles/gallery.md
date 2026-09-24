@@ -70,7 +70,7 @@ size.](gallery_files/figure-html/eyes-1.png)
 
 ## A turning grid
 
-Rotation can be pure annotation or a data channel — here each glyph’s
+Rotation can be pure annotation or a data channel. Here each glyph’s
 angle encodes its column:
 
 ``` r
@@ -110,8 +110,8 @@ on both fish.](gallery_files/figure-html/categorical-1.png)
 ## Texture at scale
 
 Dense grids stop being symbols you read one by one and become a texture
-of two interleaved fields — still useful for spotting bands and regime
-changes:
+of two interleaved fields, which is still useful for spotting bands and
+regime changes:
 
 ``` r
 
@@ -153,7 +153,7 @@ scales.](gallery_files/figure-html/custom-1.png)
 ## The gap, drawn three ways
 
 `explicit` computes the relationship between the two sources and shows
-it as a third channel. The eyes are the default — subordinate to the
+it as a third channel. The eyes are the default: subordinate to the
 fills, so the two sources stay the story, and absent altogether where
 the sources agree:
 
@@ -209,9 +209,9 @@ does.](gallery_files/figure-html/diff-1.png)
 ## A fair pair of palettes
 
 First the package defaults, then `palette = "balanced"`. The data is
-symmetric — both fish carry the same value in every cell — so a fair
-pair should make the two halves of every glyph look equally heavy. Only
-one of them does:
+symmetric (both fish carry the same value in every cell), so a fair pair
+should make the two halves of every glyph look equally heavy. Only one
+of them does:
 
 ``` r
 

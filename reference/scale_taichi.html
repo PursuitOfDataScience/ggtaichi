@@ -123,7 +123,9 @@ vectors, for example the output of <code><a href="taichi_palette_pair.html">taic
 
 
 <dt id="arg-colors-colours">colors, colours<a class="anchor" aria-label="anchor" href="#arg-colors-colours"></a></dt>
-<dd><p>An explicit colour vector, used instead of <code>palette</code>.</p></dd>
+<dd><p>An explicit colour vector, used instead of <code>palette</code>.
+The discrete scales use it as given, one colour per level in order, and
+interpolate only when there are more levels than colours.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -135,8 +137,9 @@ rest all work as usual.</p></dd>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
-<dd><p>For the discrete scales, how many colours to draw from the ramp
-before interpolating; defaults to the ramp's own length.</p></dd>
+<dd><p>For the discrete scales, how many colours to take from a preset
+<code>palette</code> before interpolating; defaults to 5, the length of the
+built-in ramps. Not used with a list <code>palette</code> or with <code>colors</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -154,9 +157,12 @@ for numeric sources.</p></dd>
 
 <dt><code>scale_taichi_yin_d()</code>, <code>scale_taichi_yang_d()</code></dt>
 <dd><p>Discrete scales
-that sample the ramp for however many levels the data has, skipping its
-palest end so no category is invisible on a white panel — matching
-what <code><a href="geom_taichi.html">geom_taichi()</a></code> does for factor, character and logical sources.</p></dd>
+that sample the palette's ramp for however many levels the data has,
+skipping its palest end so no category is invisible on a white panel:
+the rule <code><a href="geom_taichi.html">geom_taichi()</a></code> applies to its default colours for factor,
+character and logical sources. An explicit <code>colors</code> vector is used as
+given instead, again as in <code><a href="geom_taichi.html">geom_taichi()</a></code>, so a qualitative palette
+keeps its own colours.</p></dd>
 
 <dt><code>scale_taichi_yin_binned()</code>, <code>scale_taichi_yang_binned()</code></dt>
 <dd><p>Binned
@@ -178,8 +184,8 @@ ordered under colour-vision deficiency.</p></dd>
 perceptual task there is, and it gets worse as a grid grows. Matching a
 patch to one of five labelled bins is much closer to a categorical lookup,
 and the legend then tells the reader exactly which values share a colour.
-On any grid too dense to compare cell by cell — roughly, once the glyphs
-are smaller than a few millimetres — binning both fish is the single
+On any grid too dense to compare cell by cell (roughly, once the glyphs
+are smaller than a few millimetres), binning both fish is the single
 cheapest thing you can do for readability:</p>
 <div class="sourceCode"><pre><code><span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>,</span>
 <span>              yin_scale <span class="op">=</span> <span class="fu"><a href="../reference/scale_taichi.html">scale_taichi_yin_binned</a></span><span class="op">(</span>n.breaks <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>

@@ -3,7 +3,7 @@
 A taichi grid is a *superposition* comparison: the two sources share one
 position, which makes "are these similar?" and "which is bigger here?"
 easy to see and "by how much?" impossible. `taichi_summary()` is the
-tidy answer to the last question — the numbers behind the glyph, one row
+tidy answer to the last question: the numbers behind the glyph, one row
 per input row, for the reader who needs a table rather than a picture.
 
 ## Usage
@@ -47,7 +47,7 @@ cell identifiers, `yin`, `yang`, `difference`, `ratio`, `log_ratio`,
 - `ratio`:
 
   `yin / yang`, and `NA` wherever either value is not strictly positive
-  — a ratio of a negative or zero quantity is not a ratio, and `Inf` is
+  (a ratio of a negative or zero quantity is not a ratio), so `Inf` is
   never returned.
 
 - `log_ratio`:
@@ -106,7 +106,7 @@ head(summ)
 #> 5 5 Old Town 38.3 56.2      -17.9 0.6814947 -0.5532257 -1.6120500 espresso   48
 #> 6 6 Old Town 41.1 60.0      -18.9 0.6850000 -0.5458241 -1.7148359 espresso   45
 
-# the five widest gaps -- places to look, not findings; see the caveat above
+# the five widest gaps: places to look, not findings (see the caveat above)
 head(summ[order(summ$rank), ], 5)
 #>     x               y  yin yang difference    ratio log_ratio        z dominant
 #> 35 11      University 74.1 24.0       50.1 3.087500  1.626439 4.260819   matcha

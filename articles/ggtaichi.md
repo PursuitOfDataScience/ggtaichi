@@ -22,8 +22,8 @@ Because both fish live in the same cell, a single
 layer encodes **four** dimensions at once: `x`, `y`, `yin`, and `yang`.
 The two sources keep their own color scales and legends, so they can be
 read independently while still being compared side by side. By default
-there are no decorative eyes or markers – every drop of ink on the plot
-is mapped to data – and when you do switch the classic eyes on
+there are no decorative eyes or markers, so every drop of ink on the
+plot is mapped to data; and when you do switch the classic eyes on
 (`eyes = TRUE`, new in v0.2.0), they can carry data too, taking a single
 glyph up to **six** dimensions.
 
@@ -45,7 +45,7 @@ gradient, so a lighter or darker shade is a smaller or larger value.
 one <- data.frame(x = 1, y = 1, google = 7, twitter = 3)
 
 ggplot(one, aes(x, y)) +
-  geom_taichi(yin = twitter, yang = google) +
+  geom_taichi(yin = twitter, yang = google, limits = c(0, 10)) +
   coord_fixed() +
   theme_taichi()
 ```
@@ -55,8 +55,10 @@ and its grey yin fish a low
 value.](ggtaichi_files/figure-html/unnamed-chunk-2-1.png)
 
 Here the yang (red) fish reads `7` and the yin (grey) fish reads `3`;
-the deeper the ink, the larger the number relative to the rest of the
-data.
+the deeper the ink, the larger the number. A single cell has no range of
+its own to shade against, so `limits = c(0, 10)` gives both scales one:
+without it, each fill scale would be trained on one value and draw it at
+the middle of its ramp.
 
 ## The example data
 
@@ -83,7 +85,8 @@ head(pitts_tg)
 across four states, and `pitts_emojis` holds the most popular weekly
 emoji per category. Since v0.2.0 the package also bundles `cafes_tg`, a
 small *synthetic* espresso-vs-matcha dataset whose two columns share the
-same units — handy for the shared-scale features shown later. See
+same units, which makes it handy for the shared-scale features shown
+later. See
 [`?pitts_tg`](https://pursuitofdatascience.github.io/ggtaichi/reference/pitts_tg.md),
 [`?states_tg`](https://pursuitofdatascience.github.io/ggtaichi/reference/states_tg.md),
 [`?pitts_emojis`](https://pursuitofdatascience.github.io/ggtaichi/reference/pitts_emojis.md),
@@ -94,7 +97,7 @@ for the full descriptions.
 ## A first taichi grid
 
 The two value columns are passed to the `yin` and `yang` arguments.
-Everything else – the `x`/`y` mapping, faceting, titles – is plain
+Everything else (the `x`/`y` mapping, faceting, titles) is plain
 `ggplot2`. The legend titles default to the column names you supplied
 (`Twitter` and `Google` here).
 
@@ -151,9 +154,9 @@ color vector (usually hex codes), and `yang_name` / `yin_name` relabel
 the legends. Any extra argument in `...` is forwarded to *both*
 auto-built fill scales, so you can, for example, set common `limits` so
 the two legends share a range, or pass an `na.value`. When the two fish
-need *different* scale options – or an entirely different scale type –
+need *different* scale options, or an entirely different scale type,
 hand a scale object or constructor to `yin_scale` / `yang_scale` and it
-is used verbatim.
+replaces the automatic one.
 
 ``` r
 
@@ -176,7 +179,7 @@ Google.](ggtaichi_files/figure-html/unnamed-chunk-6-1.png)
 `ggplot2` leaves a margin around discrete and continuous scales, which
 can make a taichi grid look like it is floating.
 [`remove_padding()`](https://pursuitofdatascience.github.io/ggtaichi/reference/remove_padding.md)
-trims it — as of v0.2.0 it detects each axis’s scale type by itself, and
+trims it. As of v0.2.0 it detects each axis’s scale type by itself, and
 you can still spell it out with `"c"` (continuous) / `"d"` (discrete)
 when you want to override the detection.
 
@@ -295,7 +298,7 @@ enabled.](ggtaichi_files/figure-html/unnamed-chunk-11-1.png)
 The eyes are not just decoration: `yin_eye_size`, `yang_eye_size`,
 `yin_eye_colour`, and `yang_eye_colour` all accept either a constant *or
 an unquoted column name*, so the two dots can encode up to two further
-variables – a **fifth and sixth dimension** on top of `x`, `y`, and the
+variables: a **fifth and sixth dimension** on top of `x`, `y`, and the
 two fills. A mapped size column is rescaled to eye radii between 5% and
 30% of the glyph radius (values already between 0 and 0.5 are used as
 exact proportions, and an `NA` suppresses the eye for that cell).
@@ -323,7 +326,7 @@ two extra variables.](ggtaichi_files/figure-html/unnamed-chunk-12-1.png)
 [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
 now automatically detects whether the `yin` / `yang` columns are numeric
 or discrete (factor / character / logical) and picks the appropriate
-scale – computed expressions such as `factor(week)` work too. With the
+scale; computed expressions such as `factor(week)` work too. With the
 default palettes the discrete colors are sampled from the ramp skipping
 its palest end, so every category stays visible.
 
@@ -346,9 +349,9 @@ ggplot(disc, aes(x, y)) +
 fish and win or loss on the yang
 fish.](ggtaichi_files/figure-html/unnamed-chunk-13-1.png)
 
-For full control, hand any fill scale – an object or a constructor
-function – to `yin_scale` / `yang_scale`; it overrides the
-auto-detection and the `*_colors` vectors entirely:
+For full control, hand any fill scale (an object or a constructor
+function) to `yin_scale` / `yang_scale`; it overrides the auto-detection
+and the `*_colors` vectors entirely:
 
 ``` r
 
@@ -408,8 +411,8 @@ legends are noise. `shared_limits = TRUE` aligns the limits of both fill
 scales (the union range of the two columns, or the union of levels for
 two discrete sources), so equal values carry equal ink.
 `shared_legend = TRUE` goes further: both fish use the yin palette and
-only one legend is shown. The synthetic `cafes_tg` data is the natural
-demo — espresso and matcha orders per 100 customers:
+only one legend is shown. The synthetic `cafes_tg` data, espresso and
+matcha orders per 100 customers, is the natural demo:
 
 ``` r
 
@@ -428,16 +431,16 @@ legend.](ggtaichi_files/figure-html/unnamed-chunk-16-1.png)
 
 For diverging data (values around 0), pass a diverging palette to both
 color arguments and symmetric limits through `...`, e.g.
-`limits = c(-5, 5)` — both fish then hinge on the same midpoint.
+`limits = c(-5, 5)`, and both fish then hinge on the same midpoint.
 
 ### The fish geoms are exported
 
 [`geom_yin_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
 and
-[`geom_yang_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
-— the layers
+[`geom_yang_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md),
+the layers
 [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
-is built from — are now exported and documented. Reach for them when you
+is built from, are now exported and documented. Reach for them when you
 want one fish only, or full manual control over scales and
 [`ggnewscale::new_scale_fill()`](https://eliocamp.github.io/ggnewscale/reference/new_scale.html)
 stacking. See
@@ -459,13 +462,13 @@ Two fish sharing one position is what the comparison literature calls a
 same place, so spatial patterns line up and “are these similar?” is
 answered at a glance. Its weakness is precise: it can say *which* is
 bigger, but not *by how much*. For that, the relationship has to be
-computed and drawn — what the same literature calls **explicit
+computed and drawn, which the same literature calls **explicit
 encoding**.
 
-`explicit` does that. It takes one of four statistics — `"difference"`
+`explicit` does that. It takes one of four statistics: `"difference"`
 (`yin - yang`), `"ratio"`, `"log_ratio"`, or `"z"` (the difference of
 the two standardised sources, for when the two are not in the same
-units) — and `explicit_channel` decides where in the glyph it goes.
+units). `explicit_channel` then decides where in the glyph it goes.
 
 The default is the eyes, and it is the tidiest option: the eyes already
 exist, they are visually subordinate to the fills, and a big eye reads
@@ -484,7 +487,9 @@ ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
   ggtitle("Eye size = the gap between the two sources")
 ```
 
-![](ggtaichi_files/figure-html/explicit-eye-1.png)
+![The espresso versus matcha grid on one shared scale, with eyes whose
+size grows with the gap between the two sources; cells where they agree
+have no eyes.](ggtaichi_files/figure-html/explicit-eye-1.png)
 
 `explicit_channel = "angle"` is the most *accurate* choice. Direction
 and angle are read far more precisely than shading, so the gap becomes
@@ -504,7 +509,9 @@ ggplot(tilt, aes(x, y)) +
   theme_taichi()
 ```
 
-![](ggtaichi_files/figure-html/explicit-angle-1.png)
+![Five taichi diagrams tilting from left-leaning to right-leaning as the
+difference between the two sources goes from negative to
+positive.](ggtaichi_files/figure-html/explicit-angle-1.png)
 
 The other two channels are `"border"` (outline width) and `"radius"`
 (glyph size, scaled by area rather than diameter, so cells where the
@@ -512,8 +519,7 @@ sources agree shrink). `explicit_range` sets the output range of
 whichever you pick, and the statistic is rescaled across the whole
 layer, so facets stay comparable.
 
-A ratio of a zero or negative value is `NA` with a warning — never
-`Inf`.
+A ratio of a zero or negative value is `NA` with a warning, never `Inf`.
 
 ### The same numbers, as a table and as a heatmap
 
@@ -555,7 +561,9 @@ ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
   ggtitle("matcha - espresso")
 ```
 
-![](ggtaichi_files/figure-html/diff-1.png)
+![A diverging heatmap of matcha minus espresso orders, red where
+espresso leads and blue where matcha
+does.](ggtaichi_files/figure-html/diff-1.png)
 
 Use it *beside* a taichi grid rather than instead of one: the glyphs
 show the levels, the tiles show the gap.
@@ -606,9 +614,9 @@ taichi_check_palette()
 The verdict is honest: the grey yin ramp runs the full way to black
 while the red yang ramp stops around L\* 41, a mismatch of about 41
 units, so the yin fish has always looked heavier at the dark end. **The
-defaults have not been changed** — every existing figure would move —
-but `palette = "balanced"` gives a pair built to be matched, differing
-only in hue:
+defaults have not been changed**, since every existing figure would
+move, but `palette = "balanced"` gives a pair built to be matched,
+differing only in hue:
 
 ``` r
 
@@ -650,12 +658,14 @@ ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
   ggtitle("A luminance-matched pair")
 ```
 
-![](ggtaichi_files/figure-html/balanced-1.png)
+![The espresso versus matcha grid drawn with a luminance-matched blue
+and brick-red palette pair on shared
+limits.](ggtaichi_files/figure-html/balanced-1.png)
 
 The other presets are `"diverging"` (both ramps reaching a shared
 near-white midpoint, so the two fish read as the two arms of one
 diverging scale), `"viridis_pair"`, `"brewer_pair"`, and
-`"greyscale_safe"` — a grey ramp and a hued ramp on the *same* luminance
+`"greyscale_safe"`: a grey ramp and a hued ramp on the *same* luminance
 trajectory, so in colour the two fish are told apart by hue and in
 greyscale they collapse to the same ink, which keeps equal values equal
 in a black-and-white printout.
@@ -665,7 +675,7 @@ returns any of them, and
 builds your own from hue, luminance and chroma.
 
 `shared_legend = TRUE` deserves a mention here too. It paints both fish
-with one ramp, which makes equal values equal ink *by construction* —
+with one ramp, which makes equal values equal ink *by construction*:
 there is no pairing left to get wrong. The cost is that the two sources
 are then distinguished only by their position inside the glyph: yin is
 the top bulb, yang the bottom. When the two sources really are directly
@@ -690,10 +700,12 @@ ggplot(cafes_tg, aes(x = week, y = neighbourhood)) +
   theme_taichi()
 ```
 
-![](ggtaichi_files/figure-html/binned-1.png)
+![The espresso versus matcha grid with both fish filled from four
+discrete colour steps on shared limits rather than a continuous
+ramp.](ggtaichi_files/figure-html/binned-1.png)
 
 `shared_limits` now reaches into the scales you supply, so both fish
-share one set of breaks and equal values land in the same bin — which is
+share one set of breaks and equal values land in the same bin, which is
 the whole point of binning a two-source display. The full family is
 [`scale_taichi_yin_c()`](https://pursuitofdatascience.github.io/ggtaichi/reference/scale_taichi.md)
 / `_d()` / `_binned()` / `_viridis_c()` / `_viridis_d()` and their
@@ -724,7 +736,7 @@ cell’s coordinates. `data_id_by` decides what a hover highlights, and
 the interesting setting is `"source"`: hovering any yin fish lights up
 the yin fish in *every* cell, which turns the superposition display into
 a single-source display for as long as the pointer rests there. That is
-the one thing a static superposition cannot do — it lets the reader take
+the one thing a static superposition cannot do: it lets the reader take
 the comparison apart instead of doing it in their head. `tooltip`,
 `data_id` and `onclick` take a data column when you want to say
 something else.
@@ -741,14 +753,15 @@ ggplot2 4.0 lets a theme set geom defaults through
 them, so the fallback fish, the outlines and both eye colours follow a
 dark theme instead of disappearing into it. On any light theme the
 result is pixel for pixel what it always was. Legend keys are small
-taichi symbols now as well — each fish geom’s key fills its own half —
-with `key_glyph = "rect"` to get the old rectangles back.
+taichi symbols now as well: each fish geom’s key fills its own half and
+carries the layer’s own eye, and `key_glyph = "rect"` gets the old
+rectangles back.
 
 ## When (not) to use taichi
 
 A taichi grid is at its best when *comparing two sources cell by cell*
-is the question — the interlocking fish put both numbers in one glance.
-A few honest caveats:
+is the question: the interlocking fish put both numbers in one glance. A
+few honest caveats:
 
 - **Dense grids become texture.** Past roughly a thousand cells you stop
   reading symbols and start reading fields; that is still useful for

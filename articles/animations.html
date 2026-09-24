@@ -64,10 +64,10 @@ Chicago</span></p>
     
 <blockquote>
 <p><strong>Every animation on this page is really rendered when the
-vignette is built.</strong> Up to 0.3.0 the <code><a href="https://gganimate.com/reference/animate.html" class="external-link">animate()</a></code> calls
-here were commented out for CI, which meant a bug that collapsed every
-transition to a single frame went unnoticed for three releases. See
-<code>NEWS.md</code>.</p>
+vignette is built.</strong> Before 0.3.0 the <code><a href="https://gganimate.com/reference/animate.html" class="external-link">animate()</a></code>
+calls here were commented out for CI, which is how a bug that collapsed
+every transition to a single frame went unnoticed through two releases.
+See <code>NEWS.md</code>.</p>
 </blockquote>
 <div class="section level2">
 <h2 id="why-animate">Why animate?<a class="anchor" aria-label="anchor" href="#why-animate"></a>
@@ -91,7 +91,7 @@ readable taichi.</p>
 </h2>
 <p><code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> returns a pair of layers separated by
 <code><a href="https://eliocamp.github.io/ggnewscale/reference/new_scale.html" class="external-link">ggnewscale::new_scale_fill()</a></code>, so each fish keeps its own
-fill scale and legend. gganimate works at the <em>layer</em> level — it
+fill scale and legend. gganimate works at the <em>layer</em> level: it
 splits every layer’s data by the transition variable and builds one
 frame per state. Because the two fish layers are ordinary
 <code>ggplot2</code> layers, gganimate treats them independently and the
@@ -148,9 +148,9 @@ glyphs fill them evenly. Match the animation dimensions to the grid:</p>
 </h2>
 <p>With the <code>angle</code> argument (see <code><a href="../reference/geom_taichi.html">?geom_taichi</a></code>)
 you can rotate each glyph. Mapping <code>angle</code> to an expression
-of the frame variable and animating produces the iconic “turning taichi”
-— with <code>eyes = TRUE</code> each eye rides around in its own fish’s
-head:</p>
+of the frame variable and animating produces the iconic “turning
+taichi”, and with <code>eyes = TRUE</code> each eye rides around in its
+own fish’s head:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spin</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="fl">1</span>, y <span class="op">=</span> <span class="fl">1</span>, yin <span class="op">=</span> <span class="fl">5</span>, yang <span class="op">=</span> <span class="fl">5</span>,</span>

@@ -3,13 +3,13 @@
 interlocking fish of a taichi symbol per (x, y) cell. They are the
 building blocks that geom_taichi() assembles (together with two fill
 scales and a ggnewscale::new_scale_fill() break); use them directly when
-you want full control — e.g. to bring your own fill scale for a single
-fish, to stack scales differently, or to draw only one source."><meta property="og:description" content="geom_yin_fish() and geom_yang_fish() each draw one of the two
+you want full control: to bring your own fill scale for a single fish, to
+stack scales differently, or to draw only one source."><meta property="og:description" content="geom_yin_fish() and geom_yang_fish() each draw one of the two
 interlocking fish of a taichi symbol per (x, y) cell. They are the
 building blocks that geom_taichi() assembles (together with two fill
 scales and a ggnewscale::new_scale_fill() break); use them directly when
-you want full control — e.g. to bring your own fill scale for a single
-fish, to stack scales differently, or to draw only one source."><meta property="og:image" content="https://pursuitofdatascience.github.io/ggtaichi/logo.png"></head><body>
+you want full control: to bring your own fill scale for a single fish, to
+stack scales differently, or to draw only one source."><meta property="og:image" content="https://pursuitofdatascience.github.io/ggtaichi/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -48,8 +48,8 @@ fish, to stack scales differently, or to draw only one source."><meta property="
 interlocking fish of a taichi symbol per <code>(x, y)</code> cell. They are the
 building blocks that <code><a href="geom_taichi.html">geom_taichi()</a></code> assembles (together with two fill
 scales and a <code><a href="https://eliocamp.github.io/ggnewscale/reference/new_scale.html" class="external-link">ggnewscale::new_scale_fill()</a></code> break); use them directly when
-you want full control — e.g. to bring your own fill scale for a single
-fish, to stack scales differently, or to draw only one source.</p>
+you want full control: to bring your own fill scale for a single fish, to
+stack scales differently, or to draw only one source.</p>
     </div>
 
     <div class="section level2">
@@ -111,7 +111,8 @@ fish, to stack scales differently, or to draw only one source.</p>
 
 
 <dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
-<dd><p>If <code>TRUE</code>, silently removes rows with missing values.</p></dd>
+<dd><p>If <code>TRUE</code>, silently removes rows with missing positions; a
+missing <code>fill</code> is drawn in the scale's <code>na.value</code> instead.</p></dd>
 
 
 <dt id="arg-show-legend">show.legend<a class="anchor" aria-label="anchor" href="#arg-show-legend"></a></dt>

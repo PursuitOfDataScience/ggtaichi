@@ -1,10 +1,10 @@
 # Animating taichi diagrams
 
 > **Every animation on this page is really rendered when the vignette is
-> built.** Up to 0.3.0 the
+> built.** Before 0.3.0 the
 > [`animate()`](https://gganimate.com/reference/animate.html) calls here
-> were commented out for CI, which meant a bug that collapsed every
-> transition to a single frame went unnoticed for three releases. See
+> were commented out for CI, which is how a bug that collapsed every
+> transition to a single frame went unnoticed through two releases. See
 > `NEWS.md`.
 
 ## Why animate?
@@ -34,7 +34,7 @@ library(gganimate)
 returns a pair of layers separated by
 [`ggnewscale::new_scale_fill()`](https://eliocamp.github.io/ggnewscale/reference/new_scale.html),
 so each fish keeps its own fill scale and legend. gganimate works at the
-*layer* level — it splits every layer’s data by the transition variable
+*layer* level: it splits every layer’s data by the transition variable
 and builds one frame per state. Because the two fish layers are ordinary
 `ggplot2` layers, gganimate treats them independently and the two fill
 scales continue to apply frame-by-frame. In short: **the ggnewscale
@@ -103,7 +103,7 @@ show_animation(p_fixed, nframes = 24, width = 560, height = 420)
 With the `angle` argument (see
 [`?geom_taichi`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md))
 you can rotate each glyph. Mapping `angle` to an expression of the frame
-variable and animating produces the iconic “turning taichi” — with
+variable and animating produces the iconic “turning taichi”, and with
 `eyes = TRUE` each eye rides around in its own fish’s head:
 
 ``` r

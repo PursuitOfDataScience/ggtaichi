@@ -70,14 +70,15 @@ geom_taichi_diff(
 
 - na.value:
 
-  Colour for cells whose statistic is missing — which includes every
+  Colour for cells whose statistic is missing, which includes every
   non-positive cell under `"ratio"` and `"log_ratio"`.
 
 - ...:
 
   Further arguments passed to
   [`ggplot2::geom_tile()`](https://ggplot2.tidyverse.org/reference/geom_tile.html),
-  for example `width`, `height`, `colour` or `linewidth`.
+  for example `width`, `height`, `colour` or `linewidth`. A `data` given
+  here is also what the symmetric limits are computed from.
 
 ## Value
 
@@ -92,7 +93,7 @@ It is the explicit-encoding companion to
 [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md):
 same data, same grid, same statistics, but the relationship itself is on
 the page instead of being left to the reader's eye. Use it beside a
-taichi grid, not instead of one — the glyph shows the levels, this shows
+taichi grid, not instead of one: the glyph shows the levels, this shows
 the gap.
 
 ## See also

@@ -7,8 +7,8 @@ package up to date with ggplot2 4.x. A taichi grid is a *superposition*
 comparison: it shows two sources in one position, which is what makes
 spatial patterns directly comparable, and which is also why it can say
 “which is bigger here?” but not “by how much?”. 0.3.0 answers the second
-question three ways — as a third channel of the glyph, as a companion
-heatmap, and as a table — and adds the two things a colour-encoded chart
+question three ways (as a third channel of the glyph, as a companion
+heatmap, and as a table) and adds the two things a colour-encoded chart
 needs to be trustworthy: an interactive route to the exact values, and a
 way to check that its two colour ramps are a fair pair.
 
@@ -16,8 +16,8 @@ Nothing about the default appearance changes.
 
 ### Explicit encoding: the relationship, not just the two levels
 
-- **`explicit =` computes a third channel** from the two sources —
-  `"difference"`, `"ratio"`, `"log_ratio"` or `"z"` — and
+- **`explicit =` computes a third channel** from the two sources
+  (`"difference"`, `"ratio"`, `"log_ratio"` or `"z"`), and
   **`explicit_channel =`** decides where it goes:
   - `"eye_size"` (the default) puts the gap in the eyes, which already
     exist and are visually subordinate to the fills. Cells where the two
@@ -28,22 +28,23 @@ Nothing about the default appearance changes.
     upright means the sources agree, and the lean shows which way and
     how far.
   - `"border"` puts it in the outline width, and `"radius"` in the
-    glyph’s size, scaled by area (radius proportional to the square root
-    of the statistic) rather than by diameter. `explicit_range =` sets
-    the output range. The statistic is rescaled across the whole layer,
-    so facets stay comparable, and driving the same channel by hand as
-    well is an error rather than a silent override.
+    glyph’s size, scaled by area rather than by diameter (with the
+    perceptual correction described under `radius_exponent` below).
+    `explicit_range =` sets the output range. The statistic is rescaled
+    across the whole layer, so facets stay comparable, and driving the
+    same channel by hand as well is an error rather than a silent
+    override.
 - **[`geom_taichi_diff()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi_diff.md)**
   draws the same statistic as a diverging heatmap, with limits symmetric
   about “the two sources agree”. Sometimes the right chart for “how much
   bigger?” is not a glyph, and the package would rather say so than
   insist.
 - **[`taichi_summary()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_summary.md)**
-  returns the numbers per cell — both values, the difference, the ratio,
+  returns the numbers per cell: both values, the difference, the ratio,
   the log ratio, the standardised difference, which source dominates,
   and the cell’s rank by the size of the gap.
-- A ratio of a zero or negative value is `NA` with a warning, never
-  `Inf`, in all three.
+- A ratio of a zero or negative value is `NA`, never `Inf`, in all
+  three, and the two geoms warn when that happens.
 
 ### Interactivity
 
@@ -56,8 +57,8 @@ Nothing about the default appearance changes.
   encoding. The default tooltip carries both values, their difference
   and the cell’s coordinates.
 - **`data_id_by =`** decides what a hover highlights: `"cell"` (both
-  fish of one glyph, the default), `"fish"`, or `"source"` — which
-  lights up every fish of one source at once, temporarily turning the
+  fish of one glyph, the default), `"fish"`, or `"source"`, which lights
+  up every fish of one source at once, temporarily turning the
   superposition display into a single-source one. That is the one thing
   a static superposition cannot do.
 - `tooltip`, `data_id` and `onclick` take a data column to override any
@@ -74,14 +75,14 @@ Nothing about the default appearance changes.
 
 - **[`taichi_check_palette()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_check_palette.md)**
   measures a pair of ramps: per-step luminance and chroma, the largest
-  luminance mismatch, whether each ramp is monotone, and — with
-  **colorspace** installed — how far apart the two stay under
+  luminance mismatch, whether each ramp is monotone, and (with
+  **colorspace** installed) how far apart the two stay under
   deuteranopia, protanopia and tritanopia, against a normal-vision
   baseline. Run on the package’s own defaults it returns **FAIL**: the
   grey yin ramp spans the full luminance range while the red yang ramp
   stops around L\* 41, a mismatch of about 41 units, so equal values
   have never read as equal ink. That is documented rather than quietly
-  fixed — see below.
+  fixed; see below.
 - **[`taichi_palette_pair()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_palette_pair.md)**
   builds a pair that differs only in hue, sharing one luminance and one
   chroma trajectory, so step for step the two fish carry the same visual
@@ -141,8 +142,8 @@ Nothing about the default appearance changes.
   4.0.0 is a 1.0.0 decision.
 - **[`draw_key_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/draw_key_taichi.md)**:
   legend keys are now small taichi symbols with the layer’s own fish
-  filled, rather than plain rectangles — and they grow eyes when the
-  layer has them. `key_glyph = "rect"` restores the old keys, and
+  filled, rather than plain rectangles, and they grow the layer’s own
+  eyes when it has them. `key_glyph = "rect"` restores the old keys, and
   `key_glyph` is a new argument of
   [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md),
   [`geom_yin_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
@@ -176,13 +177,14 @@ outline width in mm, overriding `linewidth`), and `tooltip` / `data_id`
   this package has ever been able to produce was static. gganimate
   tracks which rows belong to which frame by encoding the frame into the
   `group` column, as a `"<id>"` suffix; the geom’s `setup_data()` reset
-  `group` to `seq_len(nrow(data))` and threw that away, so
+  `group` to `seq_len(nrow(data))` whenever it held duplicates, which
+  every transition produces, and threw that away, so
   [`transition_states()`](https://gganimate.com/reference/transition_states.html),
   [`transition_manual()`](https://gganimate.com/reference/transition_manual.html)
   and the rest all rendered one frame. The rewrite was dead code from
-  the package’s first commit — nothing in the draw path reads `group`,
+  the package’s first commit (nothing in the draw path reads `group`,
   since each panel is batched into one polygon that numbers its own
-  vertices — and removing it changes no static output (every vdiffr
+  vertices), and removing it changes no static output (every vdiffr
   snapshot is unchanged). It went unnoticed because
   [`vignette("animations")`](https://pursuitofdatascience.github.io/ggtaichi/articles/animations.md)
   builds the `gganim` object but leaves every
@@ -199,6 +201,27 @@ outline width in mm, overriding `linewidth`), and `tooltip` / `data_id`
   white (and a transparent `ink` to black), which also stops the
   fallback fill being mixed towards transparency instead of towards the
   page.
+- **Glyphs turned upside down under a reversed coord.**
+  `coord_cartesian(reverse = "y")` and `coord_transform(y = "reverse")`
+  hand the cells over with their maximum below their minimum, and the
+  negative size rotated every glyph by 180 degrees (yin eye at the
+  bottom) and let the longer cell side set the radius, so glyphs could
+  overflow their cells.
+  ([`scale_y_reverse()`](https://ggplot2.tidyverse.org/reference/scale_continuous.html)
+  was never affected.)
+- **`theme_taichi(base_size =)` left the main text at its default
+  size.** The axis titles, tick labels and plot title were fixed point
+  sizes; they now scale with `base_size`. At the default of 11 nothing
+  changes.
+- **`yin_name` / `yang_name` were ignored for a scale object** passed as
+  `yin_scale` / `yang_scale` (a constructor always got them). They now
+  title it unless it names itself, and `shared_legend` gives it the
+  joint title.
+- **[`geom_yin_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
+  /
+  [`geom_yang_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
+  ignored a mistyped flag**: `eyes = "yes"` quietly meant no eyes.
+  `eyes` and `interactive` must now be `TRUE` or `FALSE`.
 
 ### Fixes and corrections in this cycle
 
@@ -214,12 +237,16 @@ rather than breaking changes.
   references had in fact recorded the wrong order, which is how it was
   found. Yin is now pinned before yang, matching the argument order and
   every example in the documentation. An explicit `guide` passed through
-  `...` still wins, and `shared_legend` still drops the yang guide.
+  `...` still wins, and `shared_legend` still drops the yang guide. A
+  supplied `yin_scale` / `yang_scale` is pinned the same way unless it
+  asks for an order itself: left alone, the two legends were sorted by a
+  hash of their contents, and the committed binned snapshot had recorded
+  yang first.
 - **[`vignette("animations")`](https://pursuitofdatascience.github.io/ggtaichi/articles/animations.md)
   now really renders its animations.** Every
   [`animate()`](https://gganimate.com/reference/animate.html) call in it
   was commented out, because gifski is not installed on every check
-  machine — and since building a `gganim` object succeeds whether or not
+  machine, and since building a `gganim` object succeeds whether or not
   the transition works, nothing ever noticed that the geom was
   collapsing every animation to a single frame. The calls now execute
   through
@@ -234,8 +261,8 @@ rather than breaking changes.
   because the preset is new in this cycle and has never been released.
 - **`explicit_channel = "radius"` gains `radius_exponent`, defaulting to
   0.57.** The radius was scaled by
-  [`sqrt()`](https://rdrr.io/r/base/MathFun.html) — strict area scaling
-  — which was a silent choice. Cartography’s answer for proportional
+  [`sqrt()`](https://rdrr.io/r/base/MathFun.html), strict area scaling,
+  which was a silent choice. Cartography’s answer for proportional
   symbols is the apparent-magnitude (Flannery) exponent of about 0.57,
   because readers systematically underestimate the area ratio between
   large and small circles. `radius_exponent = 0.5` restores the previous
@@ -253,6 +280,65 @@ rather than breaking changes.
   palette asserts an ordering, which suits an ordered factor and
   overstates an unordered one; and putting time on `x` encodes the
   series in fill rather than position, so slope is not encoded at all.
+- **A scale object passed as `yin_scale` / `yang_scale` was modified in
+  place.** Scales are shared by reference, so the shared limits and the
+  dropped yang guide followed the object into every other plot it was
+  used in. They now go on a copy.
+- **Reusing one `interactive = TRUE` object in a second plot broke the
+  first**: filling in the default tooltip wrote into layers the two
+  plots shared.
+- **Tooltips.** Under `shared_legend` the yin value was labelled with
+  the joint legend title (`matcha / espresso: 35`); each source is now
+  named by its own column. A category or cell label containing `<` or
+  `&` is now escaped like a column name, instead of breaking the
+  tooltip’s markup.
+- **[`scale_taichi_yin_d()`](https://pursuitofdatascience.github.io/ggtaichi/reference/scale_taichi.md)
+  /
+  [`scale_taichi_yang_d()`](https://pursuitofdatascience.github.io/ggtaichi/reference/scale_taichi.md)**
+  treated an explicit `colors` vector as a ramp, so `c("red", "blue")`
+  came out purple and blue; it is now used as given, as in
+  [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md).
+  They also failed outright on ggplot2 3.4, the supported floor, which
+  still requires
+  [`discrete_scale()`](https://ggplot2.tidyverse.org/reference/discrete_scale.html)’s
+  `scale_name`.
+- **Legend key eyes** were always white and black at the default size. A
+  single-fish key now takes its layer’s eye colour and constant eye
+  size, so the key matches the plot and follows a dark theme.
+- **`explicit`** warned twice about a non-positive ratio (once per
+  fish), and now warns once. A `border` missing from some cells keeps
+  the layer’s `linewidth` there instead of dropping to 0.1, a
+  non-numeric mapped `border` is an error, and the deprecated `size`
+  counts as `linewidth` when checking for a clash with
+  `explicit_channel = "border"`. When every cell agrees, the `angle`
+  channel now sits at the middle of a custom `explicit_range`, where the
+  signed mapping puts agreement.
+- **[`taichi_summary()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_summary.md)**
+  failed (“factor level is duplicated”) when a column was compared with
+  itself or was called `tie`, and gave a missing value in a constant
+  column a `z` of 0 rather than `NA`.
+- **[`geom_taichi_diff()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi_diff.md)**
+  took its symmetric limits from the plot’s data even when the tiles had
+  a `data` of their own, and its `"z"` legend read `z( a ) - z( b )`.
+- **Messages.** A misspelt `palette =` preset was reported as a bad
+  `name`, an argument the caller never passed;
+  [`geom_taichi_diff()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi_diff.md)’s
+  palette error now names its three-colour form;
+  [`taichi_check_palette()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_check_palette.md)
+  checks `tolerance`.
+- **Checks without the suggested packages.** An example and two tests
+  used ggiraph or colorspace unguarded, which fails wherever those
+  Suggests are absent, and one test only matched ggplot2 4’s wording of
+  an error.
+- **Documentation.** The README misread its Pittsburgh grid (Covid is
+  dark in both halves, not pale pink); the vignette’s one-cell anatomy
+  plot drew both fish mid-ramp whatever their values;
+  `explicit_channel = "radius"` was still described as square-root
+  scaling; the claim that a non-positive ratio warns in all three places
+  is corrected
+  ([`taichi_summary()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_summary.md)
+  does not); and the animations vignette counted three releases where
+  there were two.
 
 ### Deprecations and notes
 
@@ -293,8 +379,8 @@ CRAN release: 2026-08-24
   [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
   inspects the plot data at `+` time and auto-selects
   [`scale_fill_manual()`](https://ggplot2.tidyverse.org/reference/scale_manual.html)
-  for discrete (factor / character / logical) `yin` / `yang` values —
-  including computed expressions such as `factor(week)` — and
+  for discrete (factor / character / logical) `yin` / `yang` values,
+  including computed expressions such as `factor(week)`, and
   [`scale_fill_gradientn()`](https://ggplot2.tidyverse.org/reference/scale_gradient.html)
   for continuous ones. With the default color vectors, discrete
   categories sample the ramp evenly while skipping its palest end, so no
@@ -305,10 +391,10 @@ CRAN release: 2026-08-24
 - **Shared scales** for directly comparable sources
   ([\#4](https://github.com/PursuitOfDataScience/ggtaichi/issues/4)b):
   - `shared_limits = TRUE` gives both auto-built fill scales common
-    limits — the union range of the two sources (or the union of levels
-    when both are discrete) — so equal values read as equal ink.
-    Explicit `limits` passed through `...` still win, and mixing a
-    discrete with a continuous source warns and ignores the flag.
+    limits (the union range of the two sources, or the union of levels
+    when both are discrete), so equal values read as equal ink. Explicit
+    `limits` passed through `...` still win, and mixing a discrete with
+    a continuous source warns and ignores the flag.
   - `shared_legend = TRUE` treats the sources as one measure: it implies
     shared limits, paints both fish with `yin_colors`, drops the
     duplicate yang guide, and titles the single legend “`yin` / `yang`”
@@ -326,7 +412,7 @@ CRAN release: 2026-08-24
   type from the plot it is added to; the explicit `"c"` / `"d"`
   arguments remain as overrides.
 - **New dataset `cafes_tg`**: a small, clearly synthetic (seeded)
-  espresso vs. matcha dataset whose two columns share units — an
+  espresso vs. matcha dataset whose two columns share units: an
   evergreen demo for the shared-scale features and a break from the
   COVID-era examples. The generating script ships in `data-raw/`.
 - `yin` and `yang` also accept strings naming a column
@@ -342,8 +428,9 @@ CRAN release: 2026-08-24
   [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
   composes with gganimate
   ([`transition_states()`](https://gganimate.com/reference/transition_states.html),
-  spin animations via `angle`, export recipes) — verified frame-by-frame
-  against gganimate 1.0.11. gganimate is a Suggests-only dependency.
+  spin animations via `angle`, export recipes), said to be verified
+  frame-by-frame against gganimate 1.0.11 (it was not; see 0.3.0).
+  gganimate is a Suggests-only dependency.
 
 ### Performance
 
@@ -367,7 +454,7 @@ CRAN release: 2026-08-24
   because `0` is excluded from the documented `(0, 0.5]` pass-through
   range, a single “no eye here” zero made every other value in an
   otherwise-proportional column go through the `[0.05, 0.3]` rescale
-  instead — `c(0, 0.2, 0.4)` drew eyes of `0, 0.175, 0.3`. Zeros are
+  instead: `c(0, 0.2, 0.4)` drew eyes of `0, 0.175, 0.3`. Zeros are
   markers rather than measurements, so they no longer take part in that
   decision; the column now draws `0, 0.2, 0.4`, and the two documented
   rules compose as intended.
@@ -471,7 +558,8 @@ CRAN release: 2026-08-24
   [`?geom_taichi`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md):
   `alpha`, `colour`, `linewidth` and `linetype` are layer-wide constants
   there (each has a concrete default, so it is always forwarded as a
-  layer parameter and outranks an inherited mapping) — map those through
+  layer parameter and outranks an inherited mapping), so map those
+  through
   [`geom_yin_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
   /
   [`geom_yang_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
@@ -479,8 +567,8 @@ CRAN release: 2026-08-24
   when supplied, so a plot-level `aes(width = ...)` does size the cells
   per row.
 - [`?theme_taichi`](https://pursuitofdatascience.github.io/ggtaichi/reference/theme_taichi.md)
-  now spells out its two surprising choices — the blanked y axis title
-  (so `labs(y = )` has no effect) and the 90-degree legend text —
+  now spells out its two surprising choices (the blanked y axis title,
+  so `labs(y = )` has no effect, and the 90-degree legend text),
   together with the
   [`theme()`](https://ggplot2.tidyverse.org/reference/theme.html) calls
   that put either back.
@@ -502,8 +590,8 @@ CRAN release: 2026-08-24
   rotation, eyes, discrete-scale selection, grob-level rendering checks)
   plus **vdiffr** visual-regression snapshots.
 - Two gaps in that suite are closed. It now covers **non-square cells**
-  — the per-cell box following `width` on x and `height` on y, and the
-  glyph radius coming from the shorter cell side — which every
+  (the per-cell box following `width` on x and `height` on y, and the
+  glyph radius coming from the shorter cell side), which every
   [`coord_fixed()`](https://ggplot2.tidyverse.org/reference/coord_fixed.html)
   snapshot is blind to. It also pins the **direction** of all three
   places rotation is applied (`taichi_fish()`, the vectorised body

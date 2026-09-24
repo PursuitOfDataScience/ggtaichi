@@ -6,9 +6,9 @@ building blocks that
 [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
 assembles (together with two fill scales and a
 [`ggnewscale::new_scale_fill()`](https://eliocamp.github.io/ggnewscale/reference/new_scale.html)
-break); use them directly when you want full control — e.g. to bring
-your own fill scale for a single fish, to stack scales differently, or
-to draw only one source.
+break); use them directly when you want full control: to bring your own
+fill scale for a single fish, to stack scales differently, or to draw
+only one source.
 
 ## Usage
 
@@ -70,7 +70,8 @@ geom_yang_fish(
 
 - na.rm:
 
-  If `TRUE`, silently removes rows with missing values.
+  If `TRUE`, silently removes rows with missing positions; a missing
+  `fill` is drawn in the scale's `na.value` instead.
 
 - show.legend:
 

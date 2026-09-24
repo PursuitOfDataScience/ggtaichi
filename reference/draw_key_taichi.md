@@ -27,7 +27,9 @@ draw_key_taichi(data, params, size, fish = "both")
 - params:
 
   The layer's parameters, supplied by ggplot2. `eyes = TRUE` is
-  honoured, so a plot drawn with eyes gets keys with eyes.
+  honoured, so a plot drawn with eyes gets keys with eyes. For a
+  single-fish key the eye takes the layer's own eye colour and
+  (constant) eye size, so it matches the eyes on the plot.
 
 - size:
 
@@ -37,9 +39,10 @@ draw_key_taichi(data, params, size, fish = "both")
 
 - fish:
 
-  Which fish carries `data$fill`: `"yin"`, `"yang"`, or `"both"` — the
+  Which fish carries `data$fill`: `"yin"`, `"yang"`, or `"both"`. The
   last fills the yin fish with the key colour and the yang fish with a
-  pale version of it, for a decorative complete symbol.
+  pale version of it, for a decorative complete symbol with the classic
+  white and black eyes.
 
 ## Value
 

@@ -28,7 +28,7 @@ A data frame with 270 rows and 6 columns:
 
 - week_start:
 
-  The Monday date of the week started.
+  The date of the Monday the week starts on.
 
 - category:
 

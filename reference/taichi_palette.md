@@ -33,7 +33,7 @@ A list of two character vectors of hex colours, `yin` and `yang`.
 
 - `"default"`:
 
-  The package's own grey yin / seal-red yang ramps — the look of every
+  The package's own grey yin / seal-red yang ramps, the look of every
   ggtaichi release so far. It is *not* luminance matched (the grey ramp
   spans the full range, the red one does not); run
   [`taichi_check_palette()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_check_palette.md)
@@ -60,7 +60,7 @@ A list of two character vectors of hex colours, `yin` and `yang`.
   from the same generator and are close to luminance matched, and each
   ramp on its own stays ordered under colour-vision deficiency. The two
   are harder to tell apart from *each other* under red-green deficiency
-  than `"balanced"` is, though — run
+  than `"balanced"` is, though, so run
   `taichi_check_palette(palette = "viridis_pair")` and look at the
   protan row before choosing it.
 
@@ -73,13 +73,13 @@ A list of two character vectors of hex colours, `yin` and `yang`.
 
   A grey yin ramp and a hued yang ramp on the *same* luminance
   trajectory. In colour the two fish are told apart by hue; in greyscale
-  they collapse to the same ink, so equal values still read as equal —
-  the two sources are then distinguished by their position in the glyph
-  (yin is the top bulb, yang the bottom). The right choice for a journal
-  figure that may be printed in black and white. Note the promise
-  precisely: it is about **greyscale**, not about the CMYK gamut. A hued
-  ramp can still shift when converted for offset printing; if that
-  matters, soft-proof the figure.
+  they collapse to the same ink, so equal values still read as equal,
+  and the two sources are then distinguished by their position in the
+  glyph (yin is the top bulb, yang the bottom). The right choice for a
+  journal figure that may be printed in black and white. Note the
+  promise precisely: it is about **greyscale**, not about the CMYK
+  gamut. A hued ramp can still shift when converted for offset printing;
+  if that matters, soft-proof the figure.
 
 ## See also
 

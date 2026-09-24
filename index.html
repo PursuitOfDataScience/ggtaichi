@@ -68,7 +68,7 @@
 <div class="section level2">
 <h2 id="one-glyph-two-numbers">One glyph, two numbers<a class="anchor" aria-label="anchor" href="#one-glyph-two-numbers"></a>
 </h2>
-<p>Yin takes one source, yang the other. No decoration – every drop of ink is data.</p>
+<p>Yin takes one source, yang the other. No decoration: every drop of ink is data.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pursuitofdatascience.github.io/ggtaichi/">ggtaichi</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
@@ -91,7 +91,7 @@
 <span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">Twitter</span>, yang <span class="op">=</span> <span class="va">Google</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-pitts-1.png" alt="A six-week grid of taichi diagrams for nine Pittsburgh COVID categories, the yang fish shaded red by Google and the yin fish grey by Twitter." style="display: block; margin: auto;"></p>
-<p><code>Covid</code> and <code>Masks</code> lean dark – lots of Twitter – while staying pink, so only moderate Google.</p>
+<p><code>Covid</code> runs dark in both halves, heavy on Twitter and Google alike. <code>Masks</code> darkens on Twitter but stays pale pink: little Google.</p>
 </div>
 <div class="section level2">
 <h2 id="the-eyes-are-data-too">The eyes are data too<a class="anchor" aria-label="anchor" href="#the-eyes-are-data-too"></a>
@@ -113,7 +113,7 @@
 <div class="section level2">
 <h2 id="spin-it">Spin it<a class="anchor" aria-label="anchor" href="#spin-it"></a>
 </h2>
-<p><code>angle</code> takes a constant or a column – a seventh channel.</p>
+<p><code>angle</code> takes a constant or a column: a seventh channel.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, y <span class="op">=</span> <span class="fl">1</span>, yin <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, yang <span class="op">=</span> <span class="fl">4</span><span class="op">:</span><span class="fl">1</span>,</span>
 <span>                  turn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">45</span>, <span class="fl">90</span>, <span class="fl">135</span><span class="op">)</span><span class="op">)</span></span>
@@ -182,7 +182,7 @@
 <p><img src="reference/figures/README-shared-1.png" alt="A 12-week by 8-neighbourhood grid of taichi diagrams comparing espresso and matcha orders on one shared grey scale with a single legend." style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
-<h2 id="bigger-sure--but-by-how-much">Bigger, sure – but by how much?<a class="anchor" aria-label="anchor" href="#bigger-sure--but-by-how-much"></a>
+<h2 id="bigger-sure-but-by-how-much">Bigger, sure. But by how much?<a class="anchor" aria-label="anchor" href="#bigger-sure-but-by-how-much"></a>
 </h2>
 <p>Two fish in one spot tell you <em>which</em>. <code>explicit</code> computes the gap and shows you <em>how much</em>. Cells where the two agree get no eye at all.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -223,7 +223,7 @@
 <code class="sourceCode R"><span><span class="fu"><a href="reference/taichi_check_palette.html">taichi_check_palette</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   largest luminance mismatch : 40.6 L* (tolerance 5.0)</span></span>
 <span><span class="co">#&gt;   Verdict: FAIL</span></span></code></pre></div>
-<p>Yes – the defaults fail their own check, and are kept only so old figures don’t move. <code>palette = "balanced"</code> passes.</p>
+<p>Yes: the defaults fail their own check, and are kept only so old figures don’t move. <code>palette = "balanced"</code> passes.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">week</span>, <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>,</span>

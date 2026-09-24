@@ -78,7 +78,7 @@ cannot answer for.</p></dd>
 <code><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">ggplot2::scale_x_continuous()</a></code> / <code><a href="https://ggplot2.tidyverse.org/reference/scale_discrete.html" class="external-link">ggplot2::scale_x_discrete()</a></code> (and y)
 calls. They go to <em>both</em> scales, so when the two axes are of different
 types only arguments that continuous and discrete scales share (<code>name</code>,
-<code>breaks</code>, <code>labels</code>, <code>guide</code>, ...) can be used here — a continuous-only
+<code>breaks</code>, <code>labels</code>, <code>guide</code>, ...) can be used here: a continuous-only
 argument such as <code>n.breaks</code> would be rejected by the discrete scale with
 an "unused argument" error. For per-axis options, add your own
 <code>scale_x_*(expand = c(0, 0))</code> call instead.</p></dd>

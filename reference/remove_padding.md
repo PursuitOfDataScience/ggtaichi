@@ -34,7 +34,7 @@ remove_padding(x = NULL, y = NULL, ...)
   [`ggplot2::scale_x_discrete()`](https://ggplot2.tidyverse.org/reference/scale_discrete.html)
   (and y) calls. They go to *both* scales, so when the two axes are of
   different types only arguments that continuous and discrete scales
-  share (`name`, `breaks`, `labels`, `guide`, ...) can be used here — a
+  share (`name`, `breaks`, `labels`, `guide`, ...) can be used here: a
   continuous-only argument such as `n.breaks` would be rejected by the
   discrete scale with an "unused argument" error. For per-axis options,
   add your own `scale_x_*(expand = c(0, 0))` call instead.

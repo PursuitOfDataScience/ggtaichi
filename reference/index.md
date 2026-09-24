@@ -18,7 +18,7 @@ The main layer, and the two fish it is assembled from.
 
 A taichi grid shows two sources in one position, which answers “which is
 bigger here?” and not “by how much?”. These compute the second
-question’s answer – inside the glyph, as a table, or as a heatmap of its
+question’s answer: inside the glyph, as a table, or as a heatmap of its
 own.
 
 - [`taichi_summary()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_summary.md)

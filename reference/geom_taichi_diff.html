@@ -111,13 +111,14 @@ Set it to <code>FALSE</code> to use the plain data range.</p></dd>
 
 
 <dt id="arg-na-value">na.value<a class="anchor" aria-label="anchor" href="#arg-na-value"></a></dt>
-<dd><p>Colour for cells whose statistic is missing — which
+<dd><p>Colour for cells whose statistic is missing, which
 includes every non-positive cell under <code>"ratio"</code> and <code>"log_ratio"</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Further arguments passed to <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">ggplot2::geom_tile()</a></code>, for example
-<code>width</code>, <code>height</code>, <code>colour</code> or <code>linewidth</code>.</p></dd>
+<code>width</code>, <code>height</code>, <code>colour</code> or <code>linewidth</code>. A <code>data</code> given here is also
+what the symmetric limits are computed from.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -131,7 +132,7 @@ own.</p>
     <p>It is the explicit-encoding companion to <code><a href="geom_taichi.html">geom_taichi()</a></code>: same data, same
 grid, same statistics, but the relationship itself is on the page instead
 of being left to the reader's eye. Use it beside a taichi grid, not instead
-of one — the glyph shows the levels, this shows the gap.</p>
+of one: the glyph shows the levels, this shows the gap.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

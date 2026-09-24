@@ -84,9 +84,9 @@ and</li>
 dimensions at once: <code>x</code>, <code>y</code>, <code>yin</code>,
 and <code>yang</code>. The two sources keep their own color scales and
 legends, so they can be read independently while still being compared
-side by side. By default there are no decorative eyes or markers – every
-drop of ink on the plot is mapped to data – and when you do switch the
-classic eyes on (<code>eyes = TRUE</code>, new in v0.2.0), they can
+side by side. By default there are no decorative eyes or markers, so
+every drop of ink on the plot is mapped to data; and when you do switch
+the classic eyes on (<code>eyes = TRUE</code>, new in v0.2.0), they can
 carry data too, taking a single glyph up to <strong>six</strong>
 dimensions.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -104,13 +104,16 @@ gradient, so a lighter or darker shade is a smaller or larger value.</p>
 <code class="sourceCode R"><span><span class="va">one</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span>, y <span class="op">=</span> <span class="fl">1</span>, google <span class="op">=</span> <span class="fl">7</span>, twitter <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">one</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">twitter</span>, yang <span class="op">=</span> <span class="va">google</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">twitter</span>, yang <span class="op">=</span> <span class="va">google</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="ggtaichi_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="A single large taichi diagram, its red yang fish reading a high value and its grey yin fish a low value." width="540" style="display: block; margin: auto;"></p>
 <p>Here the yang (red) fish reads <code>7</code> and the yin (grey) fish
-reads <code>3</code>; the deeper the ink, the larger the number relative
-to the rest of the data.</p>
+reads <code>3</code>; the deeper the ink, the larger the number. A
+single cell has no range of its own to shade against, so
+<code>limits = c(0, 10)</code> gives both scales one: without it, each
+fill scale would be trained on one value and draw it at the middle of
+its ramp.</p>
 </div>
 <div class="section level2">
 <h2 id="the-example-data">The example data<a class="anchor" aria-label="anchor" href="#the-example-data"></a>
@@ -134,8 +137,8 @@ records the 30-week COVID-related Google and Twitter incidence rates for
 measurements across four states, and <code>pitts_emojis</code> holds the
 most popular weekly emoji per category. Since v0.2.0 the package also
 bundles <code>cafes_tg</code>, a small <em>synthetic</em>
-espresso-vs-matcha dataset whose two columns share the same units —
-handy for the shared-scale features shown later. See
+espresso-vs-matcha dataset whose two columns share the same units, which
+makes it handy for the shared-scale features shown later. See
 <code><a href="../reference/pitts_tg.html">?pitts_tg</a></code>, <code><a href="../reference/states_tg.html">?states_tg</a></code>,
 <code><a href="../reference/pitts_emojis.html">?pitts_emojis</a></code>, and <code><a href="../reference/cafes_tg.html">?cafes_tg</a></code> for the full
 descriptions.</p>
@@ -144,8 +147,8 @@ descriptions.</p>
 <h2 id="a-first-taichi-grid">A first taichi grid<a class="anchor" aria-label="anchor" href="#a-first-taichi-grid"></a>
 </h2>
 <p>The two value columns are passed to the <code>yin</code> and
-<code>yang</code> arguments. Everything else – the
-<code>x</code>/<code>y</code> mapping, faceting, titles – is plain
+<code>yang</code> arguments. Everything else (the
+<code>x</code>/<code>y</code> mapping, faceting, titles) is plain
 <code>ggplot2</code>. The legend titles default to the column names you
 supplied (<code>Twitter</code> and <code>Google</code> here).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -195,9 +198,9 @@ extra argument in <code>...</code> is forwarded to <em>both</em>
 auto-built fill scales, so you can, for example, set common
 <code>limits</code> so the two legends share a range, or pass an
 <code>na.value</code>. When the two fish need <em>different</em> scale
-options – or an entirely different scale type – hand a scale object or
+options, or an entirely different scale type, hand a scale object or
 constructor to <code>yin_scale</code> / <code>yang_scale</code> and it
-is used verbatim.</p>
+replaces the automatic one.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">pitts_small</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">category</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span></span>
@@ -214,7 +217,7 @@ is used verbatim.</p>
 </h2>
 <p><code>ggplot2</code> leaves a margin around discrete and continuous
 scales, which can make a taichi grid look like it is floating.
-<code><a href="../reference/remove_padding.html">remove_padding()</a></code> trims it — as of v0.2.0 it detects each
+<code><a href="../reference/remove_padding.html">remove_padding()</a></code> trims it. As of v0.2.0 it detects each
 axis’s scale type by itself, and you can still spell it out with
 <code>"c"</code> (continuous) / <code>"d"</code> (discrete) when you
 want to override the detection.</p>
@@ -310,7 +313,7 @@ looks exactly like the traditional symbol.</p>
 <code>yang_eye_size</code>, <code>yin_eye_colour</code>, and
 <code>yang_eye_colour</code> all accept either a constant <em>or an
 unquoted column name</em>, so the two dots can encode up to two further
-variables – a <strong>fifth and sixth dimension</strong> on top of
+variables: a <strong>fifth and sixth dimension</strong> on top of
 <code>x</code>, <code>y</code>, and the two fills. A mapped size column
 is rescaled to eye radii between 5% and 30% of the glyph radius (values
 already between 0 and 0.5 are used as exact proportions, and an
@@ -334,10 +337,10 @@ already between 0 and 0.5 are used as exact proportions, and an
 </h3>
 <p><code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> now automatically detects whether the
 <code>yin</code> / <code>yang</code> columns are numeric or discrete
-(factor / character / logical) and picks the appropriate scale –
-computed expressions such as <code>factor(week)</code> work too. With
-the default palettes the discrete colors are sampled from the ramp
-skipping its palest end, so every category stays visible.</p>
+(factor / character / logical) and picks the appropriate scale; computed
+expressions such as <code>factor(week)</code> work too. With the default
+palettes the discrete colors are sampled from the ramp skipping its
+palest end, so every category stays visible.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">disc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
@@ -351,8 +354,8 @@ skipping its palest end, so every category stays visible.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="ggtaichi_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="Taichi grid with discrete category fills: methods A to C on the yin fish and win or loss on the yang fish." width="840" style="display: block; margin: auto;"></p>
-<p>For full control, hand any fill scale – an object or a constructor
-function – to <code>yin_scale</code> / <code>yang_scale</code>; it
+<p>For full control, hand any fill scale (an object or a constructor
+function) to <code>yin_scale</code> / <code>yang_scale</code>; it
 overrides the auto-detection and the <code>*_colors</code> vectors
 entirely:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
@@ -410,8 +413,8 @@ of both fill scales (the union range of the two columns, or the union of
 levels for two discrete sources), so equal values carry equal ink.
 <code>shared_legend = TRUE</code> goes further: both fish use the yin
 palette and only one legend is shown. The synthetic
-<code>cafes_tg</code> data is the natural demo — espresso and matcha
-orders per 100 customers:</p>
+<code>cafes_tg</code> data, espresso and matcha orders per 100
+customers, is the natural demo:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">cafes_tg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">week</span>, y <span class="op">=</span> <span class="va">neighbourhood</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/geom_taichi.html">geom_taichi</a></span><span class="op">(</span>yin <span class="op">=</span> <span class="va">matcha</span>, yang <span class="op">=</span> <span class="va">espresso</span>,</span>
@@ -423,14 +426,14 @@ orders per 100 customers:</p>
 <p><img src="ggtaichi_files/figure-html/unnamed-chunk-16-1.png" class="r-plt" alt="A 12-week by 8-neighbourhood taichi grid of espresso versus matcha orders sharing one grey fill scale and a single legend." width="840" style="display: block; margin: auto;"></p>
 <p>For diverging data (values around 0), pass a diverging palette to
 both color arguments and symmetric limits through <code>...</code>, e.g.
-<code>limits = c(-5, 5)</code> — both fish then hinge on the same
+<code>limits = c(-5, 5)</code>, and both fish then hinge on the same
 midpoint.</p>
 </div>
 <div class="section level3">
 <h3 id="the-fish-geoms-are-exported">The fish geoms are exported<a class="anchor" aria-label="anchor" href="#the-fish-geoms-are-exported"></a>
 </h3>
-<p><code><a href="../reference/geom_yin_fish.html">geom_yin_fish()</a></code> and <code><a href="../reference/geom_yin_fish.html">geom_yang_fish()</a></code> — the
-layers <code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> is built from — are now exported and
+<p><code><a href="../reference/geom_yin_fish.html">geom_yin_fish()</a></code> and <code><a href="../reference/geom_yin_fish.html">geom_yang_fish()</a></code>, the
+layers <code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> is built from, are now exported and
 documented. Reach for them when you want one fish only, or full manual
 control over scales and <code><a href="https://eliocamp.github.io/ggnewscale/reference/new_scale.html" class="external-link">ggnewscale::new_scale_fill()</a></code>
 stacking. See <code><a href="../reference/geom_yin_fish.html">?geom_yin_fish</a></code>.</p>
@@ -455,13 +458,13 @@ a <em>superposition</em> design. Its strength is that the two sources
 are in the same place, so spatial patterns line up and “are these
 similar?” is answered at a glance. Its weakness is precise: it can say
 <em>which</em> is bigger, but not <em>by how much</em>. For that, the
-relationship has to be computed and drawn — what the same literature
+relationship has to be computed and drawn, which the same literature
 calls <strong>explicit encoding</strong>.</p>
-<p><code>explicit</code> does that. It takes one of four statistics —
+<p><code>explicit</code> does that. It takes one of four statistics:
 <code>"difference"</code> (<code>yin - yang</code>),
 <code>"ratio"</code>, <code>"log_ratio"</code>, or <code>"z"</code> (the
 difference of the two standardised sources, for when the two are not in
-the same units) — and <code>explicit_channel</code> decides where in the
+the same units). <code>explicit_channel</code> then decides where in the
 glyph it goes.</p>
 <p>The default is the eyes, and it is the tidiest option: the eyes
 already exist, they are visually subordinate to the fills, and a big eye
@@ -476,7 +479,7 @@ reads as “look here”. Cells where the two sources agree exactly get
 <span>  <span class="fu"><a href="../reference/remove_padding.html">remove_padding</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Eye size = the gap between the two sources"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ggtaichi_files/figure-html/explicit-eye-1.png" class="r-plt" alt="" width="840" style="display: block; margin: auto;"></p>
+<p><img src="ggtaichi_files/figure-html/explicit-eye-1.png" class="r-plt" alt="The espresso versus matcha grid on one shared scale, with eyes whose size grows with the gap between the two sources; cells where they agree have no eyes." width="840" style="display: block; margin: auto;"></p>
 <p><code>explicit_channel = "angle"</code> is the most <em>accurate</em>
 choice. Direction and angle are read far more precisely than shading, so
 the gap becomes legible to a precision the fills can never reach:
@@ -491,14 +494,14 @@ is a choice rather than the default.</p>
 <span>              explicit <span class="op">=</span> <span class="st">"difference"</span>, explicit_channel <span class="op">=</span> <span class="st">"angle"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ggtaichi_files/figure-html/explicit-angle-1.png" class="r-plt" alt="" width="840" style="display: block; margin: auto;"></p>
+<p><img src="ggtaichi_files/figure-html/explicit-angle-1.png" class="r-plt" alt="Five taichi diagrams tilting from left-leaning to right-leaning as the difference between the two sources goes from negative to positive." width="840" style="display: block; margin: auto;"></p>
 <p>The other two channels are <code>"border"</code> (outline width) and
 <code>"radius"</code> (glyph size, scaled by area rather than diameter,
 so cells where the sources agree shrink). <code>explicit_range</code>
 sets the output range of whichever you pick, and the statistic is
 rescaled across the whole layer, so facets stay comparable.</p>
-<p>A ratio of a zero or negative value is <code>NA</code> with a warning
-— never <code>Inf</code>.</p>
+<p>A ratio of a zero or negative value is <code>NA</code> with a
+warning, never <code>Inf</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="the-same-numbers-as-a-table-and-as-a-heatmap">The same numbers, as a table and as a heatmap<a class="anchor" aria-label="anchor" href="#the-same-numbers-as-a-table-and-as-a-heatmap"></a>
@@ -531,7 +534,7 @@ really is the middle:</p>
 <span>  <span class="fu"><a href="../reference/remove_padding.html">remove_padding</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"matcha - espresso"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ggtaichi_files/figure-html/diff-1.png" class="r-plt" alt="" width="840" style="display: block; margin: auto;"></p>
+<p><img src="ggtaichi_files/figure-html/diff-1.png" class="r-plt" alt="A diverging heatmap of matcha minus espresso orders, red where espresso leads and blue where matcha does." width="840" style="display: block; margin: auto;"></p>
 <p>Use it <em>beside</em> a taichi grid rather than instead of one: the
 glyphs show the levels, the tiles show the gap.</p>
 </div>
@@ -577,9 +580,9 @@ measures the package’s own defaults:</p>
 <p>The verdict is honest: the grey yin ramp runs the full way to black
 while the red yang ramp stops around L* 41, a mismatch of about 41
 units, so the yin fish has always looked heavier at the dark end.
-<strong>The defaults have not been changed</strong> — every existing
-figure would move — but <code>palette = "balanced"</code> gives a pair
-built to be matched, differing only in hue:</p>
+<strong>The defaults have not been changed</strong>, since every
+existing figure would move, but <code>palette = "balanced"</code> gives
+a pair built to be matched, differing only in hue:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/taichi_check_palette.html">taichi_check_palette</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"balanced"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;ggtaichi palette check&gt;</span></span>
@@ -614,11 +617,11 @@ built to be matched, differing only in hue:</p>
 <span>  <span class="fu"><a href="../reference/remove_padding.html">remove_padding</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"A luminance-matched pair"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ggtaichi_files/figure-html/balanced-1.png" class="r-plt" alt="" width="840" style="display: block; margin: auto;"></p>
+<p><img src="ggtaichi_files/figure-html/balanced-1.png" class="r-plt" alt="The espresso versus matcha grid drawn with a luminance-matched blue and brick-red palette pair on shared limits." width="840" style="display: block; margin: auto;"></p>
 <p>The other presets are <code>"diverging"</code> (both ramps reaching a
 shared near-white midpoint, so the two fish read as the two arms of one
 diverging scale), <code>"viridis_pair"</code>,
-<code>"brewer_pair"</code>, and <code>"greyscale_safe"</code> — a grey
+<code>"brewer_pair"</code>, and <code>"greyscale_safe"</code>: a grey
 ramp and a hued ramp on the <em>same</em> luminance trajectory, so in
 colour the two fish are told apart by hue and in greyscale they collapse
 to the same ink, which keeps equal values equal in a black-and-white
@@ -627,7 +630,7 @@ printout. <code><a href="../reference/taichi_palette.html">taichi_palette()</a><
 and chroma.</p>
 <p><code>shared_legend = TRUE</code> deserves a mention here too. It
 paints both fish with one ramp, which makes equal values equal ink
-<em>by construction</em> — there is no pairing left to get wrong. The
+<em>by construction</em>: there is no pairing left to get wrong. The
 cost is that the two sources are then distinguished only by their
 position inside the glyph: yin is the top bulb, yang the bottom. When
 the two sources really are directly comparable, that is usually the
@@ -649,10 +652,10 @@ the legend then says exactly which values share a colour.</p>
 <span>              shared_limits <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/remove_padding.html">remove_padding</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ggtaichi_files/figure-html/binned-1.png" class="r-plt" alt="" width="840" style="display: block; margin: auto;"></p>
+<p><img src="ggtaichi_files/figure-html/binned-1.png" class="r-plt" alt="The espresso versus matcha grid with both fish filled from four discrete colour steps on shared limits rather than a continuous ramp." width="840" style="display: block; margin: auto;"></p>
 <p><code>shared_limits</code> now reaches into the scales you supply, so
-both fish share one set of breaks and equal values land in the same bin
-— which is the whole point of binning a two-source display. The full
+both fish share one set of breaks and equal values land in the same bin,
+which is the whole point of binning a two-source display. The full
 family is <code><a href="../reference/scale_taichi.html">scale_taichi_yin_c()</a></code> / <code>_d()</code> /
 <code>_binned()</code> / <code>_viridis_c()</code> /
 <code>_viridis_d()</code> and their <code>yang</code> counterparts; see
@@ -678,7 +681,7 @@ highlights, and the interesting setting is <code>"source"</code>:
 hovering any yin fish lights up the yin fish in <em>every</em> cell,
 which turns the superposition display into a single-source display for
 as long as the pointer rests there. That is the one thing a static
-superposition cannot do — it lets the reader take the comparison apart
+superposition cannot do: it lets the reader take the comparison apart
 instead of doing it in their head. <code>tooltip</code>,
 <code>data_id</code> and <code>onclick</code> take a data column when
 you want to say something else.</p>
@@ -695,16 +698,17 @@ this package draws.</p>
 now reads them, so the fallback fish, the outlines and both eye colours
 follow a dark theme instead of disappearing into it. On any light theme
 the result is pixel for pixel what it always was. Legend keys are small
-taichi symbols now as well — each fish geom’s key fills its own half —
-with <code>key_glyph = "rect"</code> to get the old rectangles back.</p>
+taichi symbols now as well: each fish geom’s key fills its own half and
+carries the layer’s own eye, and <code>key_glyph = "rect"</code> gets
+the old rectangles back.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="when-not-to-use-taichi">When (not) to use taichi<a class="anchor" aria-label="anchor" href="#when-not-to-use-taichi"></a>
 </h2>
 <p>A taichi grid is at its best when <em>comparing two sources cell by
-cell</em> is the question — the interlocking fish put both numbers in
-one glance. A few honest caveats:</p>
+cell</em> is the question: the interlocking fish put both numbers in one
+glance. A few honest caveats:</p>
 <ul>
 <li>
 <strong>Dense grids become texture.</strong> Past roughly a thousand

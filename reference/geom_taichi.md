@@ -58,7 +58,7 @@ geom_taichi(
 
   The unquoted column name (or a literal string naming a column) for the
   yin (dark) fish of the taichi symbol. To pass a name held in a
-  variable, use `.data[[nm]]` or `!!rlang::sym(nm)` — a bare variable
+  variable, use `.data[[nm]]` or `!!rlang::sym(nm)`; a bare variable
   would be mapped as a constant fill, exactly as it would be inside
   [`aes()`](https://ggplot2.tidyverse.org/reference/aes.html).
 
@@ -70,12 +70,14 @@ geom_taichi(
 - yin_name:
 
   The label name (in quotes) for the legend of the yin rendering.
-  Default is `NULL` (uses the column name).
+  Default is `NULL` (uses the column name). It titles a supplied
+  `yin_scale` too, unless that scale object names itself.
 
 - yang_name:
 
   The label name (in quotes) for the legend of the yang rendering.
-  Default is `NULL` (uses the column name).
+  Default is `NULL` (uses the column name). It titles a supplied
+  `yang_scale` too, unless that scale object names itself.
 
 - yin_colors:
 
@@ -135,7 +137,7 @@ geom_taichi(
 
   Colour of each eye dot: a constant, an unquoted data column containing
   colour strings, or `NULL` (the default) to take the colour from the
-  theme — the yin eye from the theme's `paper` and the yang eye from its
+  theme: the yin eye from the theme's `paper` and the yang eye from its
   `ink`, which is white and black on every light theme and swaps on a
   dark one. On ggplot2 before 4.0.0, where themes cannot set geom
   defaults, `NULL` falls back to the literal "white" and "black".
@@ -152,9 +154,9 @@ geom_taichi(
 
   Where the computed statistic goes: `"eye_size"` (the default),
   `"angle"`, `"border"` or `"radius"`. Ignored when `explicit = "none"`.
-  The chosen channel cannot also be set by hand — e.g.
-  `explicit_channel = "angle"` together with an `angle` argument is an
-  error rather than a silent override.
+  The chosen channel cannot also be set by hand:
+  `explicit_channel = "angle"` together with an `angle` argument, for
+  example, is an error rather than a silent override.
 
 - explicit_range:
 
@@ -196,10 +198,10 @@ geom_taichi(
 - shared_limits:
 
   If `TRUE` and both sources are of the same type (both continuous, or
-  both discrete), the two auto-built fill scales share common limits —
-  the union range (or union of levels) of `yin` and `yang` — so equal
-  values read as equal ink. Explicit `limits` passed through `...` take
-  precedence. As of 0.3.0 the shared limits are also pushed into a
+  both discrete), the two auto-built fill scales share common limits
+  (the union range, or the union of levels, of `yin` and `yang`), so
+  equal values read as equal ink. Explicit `limits` passed through `...`
+  take precedence. As of 0.3.0 the shared limits are also pushed into a
   custom `yin_scale` / `yang_scale` that does not set limits of its own,
   so a supplied binned scale shares breaks too. Default `FALSE`.
 
@@ -213,10 +215,10 @@ geom_taichi(
   directly comparable: one ramp means equal values are equal ink by
   construction, with no palette pairing to get wrong (see the Palettes
   section). The cost is that the sources are then told apart only by
-  their position inside the glyph — yin is the top bulb, yang the
-  bottom. When a custom `yang_scale` is supplied it is used as given, so
-  making the two palettes agree is then your business; the duplicate
-  yang guide is dropped either way.
+  their position inside the glyph: yin is the top bulb, yang the bottom.
+  When a custom `yang_scale` is supplied it is used as given, so making
+  the two palettes agree is then your business; the duplicate yang guide
+  is dropped either way.
 
 - width, height:
 
@@ -229,7 +231,9 @@ geom_taichi(
 
 - na.rm:
 
-  If `TRUE`, silently removes rows with missing values.
+  If `TRUE`, silently removes rows with missing positions (a missing
+  fill is drawn in the scale's `na.value`; see the Missing values
+  section).
 
 - colour:
 
@@ -258,7 +262,7 @@ geom_taichi(
   fish default to a small taichi with their own half filled (see
   [`draw_key_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/draw_key_taichi.md));
   pass `"rect"` for the plain ggplot2 rectangles of earlier versions.
-  Keys only appear for discrete fills — a continuous fill gets a
+  Keys only appear for discrete fills; a continuous fill gets a
   colourbar.
 
 - ...:
@@ -266,12 +270,12 @@ geom_taichi(
   Additional arguments passed to *both* auto-built fill scales (e.g.,
   shared `limits` or `na.value`). Because they go to both, an argument
   that suits only one kind of scale will be rejected by the other when
-  `yin` and `yang` are of different types — for instance a numeric
-  `limits` draws ggplot2's "Continuous limits supplied to discrete
+  `yin` and `yang` are of different types: a numeric `limits`, for
+  instance, draws ggplot2's "Continuous limits supplied to discrete
   scale" warning from the discrete fish. For per-fish scale options,
   supply `yin_scale` / `yang_scale` instead. The scale arguments
-  `geom_taichi()` fills in itself — `name`, `values` and `colors` /
-  `colours` — are not accepted here; use `yin_name` / `yang_name` and
+  `geom_taichi()` fills in itself (`name`, `values` and `colors` /
+  `colours`) are not accepted here; use `yin_name` / `yang_name` and
   `yin_colors` / `yang_colors`.
 
 ## Value
@@ -314,8 +318,8 @@ Because the choice is made when the layer is added, replacing the plot's
 data afterwards keeps the scales picked for the original data. Swapping
 in data of the same types is fine; if the new `yin` / `yang` columns are
 of the *other* kind, ggplot2 reports a "Discrete value supplied to a
-continuous scale" (or the reverse) at draw time — rebuild the plot
-rather than substituting its data.
+continuous scale" (or the reverse) at draw time. Rebuild the plot rather
+than substituting its data.
 
 ## Eyes
 
@@ -328,8 +332,8 @@ and 0.3 of the glyph radius, unless all its non-zero values already lie
 in `(0, 0.5]`, in which case they are used directly as radius
 proportions. Cells whose eye size is `NA` or `0` are drawn without an
 eye, so a column may mix proportions with zeros to suppress individual
-eyes. A column whose values are all equal gets the midpoint radius,
-0.175.
+eyes. A column whose values are all equal, and not already proportions,
+gets the midpoint radius, 0.175.
 
 ## Styling
 
@@ -361,7 +365,7 @@ it), while `na.rm = TRUE` silently drops rows with missing positions.
 
 Putting time on `x` makes each row of the grid a time series drawn as a
 row of discrete glyphs, and the series is then encoded in *fill* rather
-than in position — so slope is not encoded at all, and a reader infers a
+than in position, so slope is not encoded at all and a reader infers a
 trend by comparing the shade of neighbouring cells. That is a poor
 substitute for a line. Use a taichi grid for the question *which series
 differ from each other, and where*; put a line chart or a horizon plot
@@ -371,8 +375,8 @@ beside it for *what is the trend*.
 
 Two fish sharing one position is a *superposition* comparison. It is
 very good at "are these similar?" and "which is bigger here?", and it
-cannot answer "by how much?" — that needs the relationship itself to be
-computed and drawn. `explicit` does exactly that, turning one of
+cannot answer "by how much?", because that needs the relationship itself
+to be computed and drawn. `explicit` does exactly that, turning one of
 `"difference"` (`yin - yang`), `"ratio"`, `"log_ratio"` or `"z"` into a
 third channel of the glyph. The statistics are the ones
 [`taichi_summary()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_summary.md)
@@ -402,16 +406,17 @@ tabulates, including its rule that a ratio of a non-positive value is
 - `"border"`:
 
   Outline width. Unobtrusive, and it composes with everything else, but
-  the least precise of the four. Because the default `colour` is `NA` —
-  no outline at all — this channel gives the outline a visible colour
+  the least precise of the four. Because the default `colour` is `NA`
+  (no outline at all), this channel gives the outline a visible colour
   unless you set `colour` yourself.
 
 - `"radius"`:
 
-  Glyph size, scaled by area (radius proportional to the square root of
-  the statistic) so that the eye's area-based reading is the correct
-  one. Cells where the sources agree shrink; use it when the interesting
-  thing is *where* they disagree.
+  Glyph size, scaled by area rather than by diameter so that the eye's
+  area-based reading is the correct one: the radius follows the
+  statistic raised to `radius_exponent`, a touch above the square root
+  that strict area scaling would use. Cells where the sources agree
+  shrink; use it when the interesting thing is *where* they disagree.
 
 `explicit_range` sets the channel's output range; each channel has a
 sensible default (`c(0, 0.3)` of the glyph radius for eyes, `c(-45, 45)`
@@ -434,8 +439,8 @@ data says the sources are level. The default grey-and-red pair is *not*
 matched (run
 [`taichi_check_palette()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_check_palette.md)
 with no arguments to see the numbers) and is kept only for continuity.
-`palette` selects a matched pair instead — `"balanced"` is the
-recommended one — and also accepts the output of
+`palette` selects a matched pair instead (`"balanced"` is the
+recommended one), and it also accepts the output of
 [`taichi_palette_pair()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_palette_pair.md).
 It is a shorthand for setting `yin_colors` and `yang_colors` together,
 so passing both is an error.
@@ -456,16 +461,16 @@ passed to
 The default tooltip carries both values, their difference, and the
 cell's coordinates. `data_id_by` decides what a hover highlights:
 `"cell"` (the default) lights up both fish of one glyph, `"fish"` one
-fish at a time, and `"source"` every fish of one source at once — which
-turns the superposition display into a single-source display for as long
-as the pointer rests there, letting a reader decompose the comparison
-instead of doing it in their head. `tooltip`, `data_id` and `onclick`
-take a data column to override any of it.
+fish at a time, and `"source"` every fish of one source at once. That
+last one turns the superposition display into a single-source display
+for as long as the pointer rests there, letting a reader decompose the
+comparison instead of doing it in their head. `tooltip`, `data_id` and
+`onclick` take a data column to override any of it.
 
 The static rendering is unchanged: with `interactive = FALSE` the
 package does not touch ggiraph at all, and with it `TRUE` the same
 geometry is drawn, only in grobs that carry the extra attributes. plotly
-is not and will not be supported — `ggplotly()` cannot translate custom
+is not and will not be supported: `ggplotly()` cannot translate custom
 grobs, which is exactly what this package draws.
 
 ## Examples

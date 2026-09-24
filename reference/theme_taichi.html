@@ -58,7 +58,8 @@ reminiscent of rice paper.</p>
 
 
 <dl><dt id="arg-base-size">base_size<a class="anchor" aria-label="anchor" href="#arg-base-size"></a></dt>
-<dd><p>base font size</p></dd>
+<dd><p>base font size; every text size in the theme scales with
+it</p></dd>
 
 
 <dt id="arg-base-family">base_family<a class="anchor" aria-label="anchor" href="#arg-base-family"></a></dt>
@@ -85,7 +86,7 @@ ggplot, in the same way as <code><a href="https://ggplot2.tidyverse.org/referenc
 <p>Two of the theme's settings surprise people often enough to be worth
 spelling out. The y axis <em>title</em> is blanked, on the assumption that the
 y axis of a taichi grid is a list of category names that already reads as a
-label — so <code>labs(y = "...")</code> has no visible effect under this theme.
+label, so <code>labs(y = "...")</code> has no visible effect under this theme.
 Legend text is rotated 90 degrees, which keeps a wide continuous legend from
 running off the bottom of the plot. Both are ordinary theme elements, so add
 a <code><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme()</a></code> call afterwards to put them back:</p><div class="sourceCode"><pre><code><span>  <span class="op">+</span> <span class="fu"><a href="../reference/theme_taichi.html">theme_taichi</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.title.y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span><span class="op">)</span>,</span>

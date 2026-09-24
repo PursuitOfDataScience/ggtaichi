@@ -4,8 +4,7 @@ The two fish of a taichi symbol are compared *against each other*, so
 the two fill ramps have to be matched: if one ramp spans a wider
 luminance range than the other, equal values do not produce equal visual
 weight and one fish systematically appears to dominate. That makes
-palette pairing a correctness problem rather than a matter of taste —
-see
+palette pairing a correctness problem rather than a matter of taste: see
 [`taichi_check_palette()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_check_palette.md)
 for the measurement and
 [`vignette("ggtaichi")`](https://pursuitofdatascience.github.io/ggtaichi/articles/ggtaichi.md)
@@ -40,7 +39,7 @@ taichi_palette_pair(
   The two ends of the shared luminance trajectory as `c(dark, light)`,
   on the CIE L\\ scale from 0 (black) to 100 (white). Both ramps run
   from the light end to the dark end, so the first colour belongs to the
-  lowest value — the same convention as `yin_colors` / `yang_colors`.
+  lowest value, the same convention as `yin_colors` / `yang_colors`.
 
 - chroma:
 
@@ -48,7 +47,7 @@ taichi_palette_pair(
   towards the light end, because a very light colour cannot also be
   saturated; both ramps taper identically. Values above about 80 will be
   clipped to the sRGB gamut, and clipping is hue-dependent, which is
-  exactly what breaks the match — keep it moderate and verify with
+  exactly what breaks the match. Keep it moderate and verify with
   [`taichi_check_palette()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_check_palette.md).
 
 ## Value

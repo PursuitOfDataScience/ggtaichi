@@ -89,7 +89,9 @@ scale_taichi_yang_viridis_d(name = ggplot2::waiver(), ...)
 
 - colors, colours:
 
-  An explicit colour vector, used instead of `palette`.
+  An explicit colour vector, used instead of `palette`. The discrete
+  scales use it as given, one colour per level in order, and interpolate
+  only when there are more levels than colours.
 
 - ...:
 
@@ -104,8 +106,9 @@ scale_taichi_yang_viridis_d(name = ggplot2::waiver(), ...)
 
 - n:
 
-  For the discrete scales, how many colours to draw from the ramp before
-  interpolating; defaults to the ramp's own length.
+  For the discrete scales, how many colours to take from a preset
+  `palette` before interpolating; defaults to 5, the length of the
+  built-in ramps. Not used with a list `palette` or with `colors`.
 
 ## Value
 
@@ -124,11 +127,15 @@ half of the palette pair they take.
 
 - `scale_taichi_yin_d()`, `scale_taichi_yang_d()`:
 
-  Discrete scales that sample the ramp for however many levels the data
-  has, skipping its palest end so no category is invisible on a white
-  panel — matching what
+  Discrete scales that sample the palette's ramp for however many levels
+  the data has, skipping its palest end so no category is invisible on a
+  white panel: the rule
   [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
-  does for factor, character and logical sources.
+  applies to its default colours for factor, character and logical
+  sources. An explicit `colors` vector is used as given instead, again
+  as in
+  [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md),
+  so a qualitative palette keeps its own colours.
 
 - `scale_taichi_yin_binned()`, `scale_taichi_yang_binned()`:
 
@@ -146,8 +153,8 @@ Reading a value off a continuous luminance ramp is the least accurate
 perceptual task there is, and it gets worse as a grid grows. Matching a
 patch to one of five labelled bins is much closer to a categorical
 lookup, and the legend then tells the reader exactly which values share
-a colour. On any grid too dense to compare cell by cell — roughly, once
-the glyphs are smaller than a few millimetres — binning both fish is the
+a colour. On any grid too dense to compare cell by cell (roughly, once
+the glyphs are smaller than a few millimetres), binning both fish is the
 single cheapest thing you can do for readability:
 
       geom_taichi(yin = matcha, yang = espresso,

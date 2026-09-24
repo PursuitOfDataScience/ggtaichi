@@ -3,13 +3,13 @@
 two fill ramps have to be matched: if one ramp spans a wider luminance
 range than the other, equal values do not produce equal visual weight and
 one fish systematically appears to dominate. That makes palette pairing a
-correctness problem rather than a matter of taste — see
+correctness problem rather than a matter of taste: see
 taichi_check_palette() for the measurement and vignette("ggtaichi")
 for the discussion.'><meta property="og:description" content='The two fish of a taichi symbol are compared against each other, so the
 two fill ramps have to be matched: if one ramp spans a wider luminance
 range than the other, equal values do not produce equal visual weight and
 one fish systematically appears to dominate. That makes palette pairing a
-correctness problem rather than a matter of taste — see
+correctness problem rather than a matter of taste: see
 taichi_check_palette() for the measurement and vignette("ggtaichi")
 for the discussion.'><meta property="og:image" content="https://pursuitofdatascience.github.io/ggtaichi/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -50,7 +50,7 @@ for the discussion.'><meta property="og:image" content="https://pursuitofdatasci
 two fill ramps have to be matched: if one ramp spans a wider luminance
 range than the other, equal values do not produce equal visual weight and
 one fish systematically appears to dominate. That makes palette pairing a
-correctness problem rather than a matter of taste — see
+correctness problem rather than a matter of taste: see
 <code><a href="taichi_check_palette.html">taichi_check_palette()</a></code> for the measurement and <code><a href="../articles/ggtaichi.html">vignette("ggtaichi")</a></code>
 for the discussion.</p>
     </div>
@@ -84,7 +84,7 @@ the built-in <code>yin_colors</code> / <code>yang_colors</code> vectors.</p></dd
 <dd><p>The two ends of the shared luminance trajectory as
 <code>c(dark, light)</code>, on the CIE L\* scale from 0 (black) to 100 (white).
 Both ramps run from the light end to the dark end, so the first colour
-belongs to the lowest value — the same convention as <code>yin_colors</code> /
+belongs to the lowest value, the same convention as <code>yin_colors</code> /
 <code>yang_colors</code>.</p></dd>
 
 
@@ -93,7 +93,7 @@ belongs to the lowest value — the same convention as <code>yin_colors</code> /
 tapers towards the light end, because a very light colour cannot also be
 saturated; both ramps taper identically. Values above about 80 will be
 clipped to the sRGB gamut, and clipping is hue-dependent, which is
-exactly what breaks the match — keep it moderate and verify with
+exactly what breaks the match. Keep it moderate and verify with
 <code><a href="taichi_check_palette.html">taichi_check_palette()</a></code>.</p></dd>
 
 </dl></div>

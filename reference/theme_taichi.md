@@ -19,7 +19,7 @@ theme_taichi(
 
 - base_size:
 
-  base font size
+  base font size; every text size in the theme scales with it
 
 - base_family:
 
@@ -44,9 +44,9 @@ that can be added to any ggplot, in the same way as
 Two of the theme's settings surprise people often enough to be worth
 spelling out. The y axis *title* is blanked, on the assumption that the
 y axis of a taichi grid is a list of category names that already reads
-as a label — so `labs(y = "...")` has no visible effect under this
-theme. Legend text is rotated 90 degrees, which keeps a wide continuous
-legend from running off the bottom of the plot. Both are ordinary theme
+as a label, so `labs(y = "...")` has no visible effect under this theme.
+Legend text is rotated 90 degrees, which keeps a wide continuous legend
+from running off the bottom of the plot. Both are ordinary theme
 elements, so add a
 [`theme()`](https://ggplot2.tidyverse.org/reference/theme.html) call
 afterwards to put them back:
