@@ -72,13 +72,13 @@ taichi_summary <- function(data, yin, yang, x = NULL, y = NULL) {
   x_quo <- as_column_quo(rlang::enquo(x))
   y_quo <- as_column_quo(rlang::enquo(y))
 
-  pull <- function(quo, arg) {
+  pull <- function(quo, arg, call = rlang::caller_env()) {
     vals <- tryCatch(rlang::eval_tidy(quo, data), error = function(e) e)
     if (inherits(vals, "error")) {
       rlang::abort(paste0(
         "Column `", rlang::as_label(quo), "` (supplied to `", arg,
         "`) was not found in `data`."
-      ))
+      ), call = call)
     }
     vals
   }
@@ -210,9 +210,9 @@ geom_taichi_diff <- function(yin, yang,
 
   cols <- diverging_colours(palette)
   if (is.null(midpoint)) {
-    midpoint <- if (method == "ratio") 1 else 0
+    midpoint <- explicit_agreement(method)
   }
-  if (!is.numeric(midpoint) || length(midpoint) != 1 || is.na(midpoint)) {
+  if (!is.numeric(midpoint) || length(midpoint) != 1 || !is.finite(midpoint)) {
     rlang::abort("`midpoint` must be a single number.")
   }
   if (is.null(name)) {
@@ -221,7 +221,8 @@ geom_taichi_diff <- function(yin, yang,
   }
 
   stat_quo <- rlang::quo(
-    taichi_explicit_stat(!!yin_quo, !!yang_quo, !!method)
+    taichi_explicit_stat(!!yin_quo, !!yang_quo, !!method,
+                         what = "`geom_taichi_diff()`")
   )
 
   result <- list(
@@ -243,7 +244,7 @@ geom_taichi_diff <- function(yin, yang,
 #' @export
 print.ggtaichi_diff <- function(x, ...) {
   cat("<ggtaichi> difference tiles for a ggplot\n")
-  cat("  statistic: ", x$name, "\n", sep = "")
+  cat("  statistic: ", label_text(x$name), "\n", sep = "")
   cat("  midpoint : ", x$midpoint, "\n", sep = "")
   cat("Add it to a plot: ggplot(data, aes(x, y)) + geom_taichi_diff(...)\n")
   invisible(x)
@@ -290,6 +291,10 @@ ggplot_add.ggtaichi_diff <- function(object, plot, ...) {
     na.value = object$na.value
   )
 
+  # Laid over a taichi grid (or any other fill layer), the diverging scale
+  # would replace the fill scale already there and repaint that layer, as
+  # geom_taichi() used to do to a layer before it; start a fresh one.
+  if (plot_uses_fill(plot)) plot <- plot + ggnewscale::new_scale_fill()
   plot + object$layer + scale
 }
 
@@ -305,12 +310,14 @@ explicit_channels <- c("eye_size", "angle", "border", "radius")
 # The raw explicit statistic for one pair of source columns. Called from
 # inside an aes() quosure, so it runs on whatever data the layer is given,
 # including replaced data. `warn = FALSE` is for the second of two layers
-# computing the same statistic, so that a problem is reported once.
+# computing the same statistic, so that a problem is reported once. `what`
+# names the caller's own argument or function in the error, since
+# geom_taichi_diff() has no `explicit` argument to blame.
 taichi_explicit_stat <- function(yin, yang, method = "difference",
-                                 warn = TRUE) {
+                                 warn = TRUE, what = "`explicit`") {
   if (!is.numeric(yin) || !is.numeric(yang)) {
     rlang::abort(paste0(
-      "`explicit` needs numeric `yin` and `yang` columns; a computed ",
+      what, " needs numeric `yin` and `yang` columns; a computed ",
       "difference between non-numeric sources is not defined."
     ))
   }
@@ -370,6 +377,13 @@ rank_by_gap <- function(diff) {
   out
 }
 
+# The value of each statistic at which the two sources agree: a ratio of 1,
+# a gap of 0 for everything else. The glyph channels and the heatmap's
+# midpoint are both measured from here.
+explicit_agreement <- function(method) {
+  if (identical(method, "ratio")) 1 else 0
+}
+
 explicit_label <- function(method, yin_lab, yang_lab) {
   switch(method,
     difference = paste(yin_lab, "-", yang_lab),
@@ -395,35 +409,42 @@ explicit_default_range <- function(channel) {
 
 # Turn the raw statistic into channel units.
 #
-# The signed channel (angle) maps zero to the middle of the range so that an
-# upright glyph means agreement; the magnitude channels use the absolute
-# statistic, because the sign is already legible from which fish is darker.
+# Every channel reads the statistic's distance from `agreement` (see
+# explicit_agreement()): 1 for a ratio, 0 for the rest. Measured from zero
+# instead, a ratio is always positive, so a cell where the two sources were
+# equal got a mid-sized eye, or a tilt, where it should have got none.
+#
+# The signed channel (angle) maps agreement to the middle of the range so that
+# an upright glyph means agreement; the magnitude channels use the absolute
+# distance, because the sign is already legible from which fish is darker.
 # `radius` is the one channel where the eye reads area rather than extent, so
 # it is scaled as an area (the standard fix for the area-versus-diameter error
 # of bubble charts), with a perceptual correction on top; see below.
-rescale_explicit <- function(x, channel, range = NULL, exponent = NULL) {
+rescale_explicit <- function(x, channel, range = NULL, exponent = NULL,
+                             agreement = 0) {
   range <- range %||% explicit_default_range(channel)
   exponent <- exponent %||% 0.57
-  if (!is.numeric(range) || length(range) != 2 || anyNA(range)) {
+  if (!is.numeric(range) || length(range) != 2 || !all(is.finite(range))) {
     rlang::abort("`explicit_range` must be two numbers, or NULL.")
   }
   if (!is.numeric(x)) {
     rlang::abort("The computed `explicit` statistic must be numeric.")
   }
 
+  x <- x - agreement
   finite <- x[is.finite(x)]
   signed <- channel == "angle"
   m <- if (length(finite) == 0) 0 else max(abs(finite))
 
   if (m == 0) {
-    # Nothing to show: every cell agrees (or nothing is finite). Return the
-    # channel's neutral value rather than dividing by zero: no tilt (the
-    # middle of the range, where the signed mapping below puts agreement), no
-    # eye, the thinnest border, the full radius.
-    neutral <- switch(channel,
-      eye_size = 0, angle = mean(range), border = min(range),
-      radius = max(range)
-    )
+    # Nothing to show: every cell agrees (or nothing is finite). Give every
+    # cell the value the mapping below gives an agreeing cell, rather than
+    # dividing by zero: the middle of the range for the signed channel, the
+    # first end for the others. This used to be the full radius, which on the
+    # radius channel means the widest gap, so an all-agreeing grid drew every
+    # glyph at the size of total disagreement, and one disagreeing cell
+    # shrank all the others to 0.4.
+    neutral <- if (signed) mean(range) else range[1]
     out <- rep(neutral, length(x))
     out[!is.finite(x)] <- if (channel == "eye_size") NA_real_ else neutral
     return(out)
@@ -452,9 +473,9 @@ rescale_explicit <- function(x, channel, range = NULL, exponent = NULL) {
 # low / mid / high for geom_taichi_diff(): a length-3 colour vector is used
 # verbatim, anything else comes from a palette pair, with yang low and yin
 # high so the tile's colours agree with the glyph's fish.
-diverging_colours <- function(palette) {
+diverging_colours <- function(palette, call = rlang::caller_env()) {
   if (is.character(palette) && length(palette) == 3) {
-    check_colours(palette, "palette")
+    check_colours(palette, "palette", call = call)
     return(palette)
   }
   # Name all three accepted forms: the palette-pair message alone would leave
@@ -467,9 +488,9 @@ diverging_colours <- function(palette) {
       paste0("\"", taichi_palette_names, "\"", collapse = ", "),
       ", a list with `yin` and `yang` colour vectors, or exactly three ",
       "colours (low, mid, high)."
-    ))
+    ), call = call)
   }
-  pair <- as_palette_pair(palette, "palette")
+  pair <- as_palette_pair(palette, "palette", call = call)
   c(pair$yang[length(pair$yang)],
     mix_ink(pair$yin[1], pair$yang[1], 0.5),
     pair$yin[length(pair$yin)])

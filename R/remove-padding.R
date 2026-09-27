@@ -8,6 +8,11 @@
 #' override the detection, e.g. when the axis mapping is a computed
 #' expression the plot data cannot answer for.
 #'
+#' A continuous axis holding dates, date-times or `hms` times gets the
+#' matching scale ([ggplot2::scale_x_date()], [ggplot2::scale_x_datetime()],
+#' [ggplot2::scale_x_time()]) rather than [ggplot2::scale_x_continuous()], so
+#' its labels stay dates instead of turning into day or second counts.
+#'
 #' @param x,y `NULL` (the default) to auto-detect the scale type of that axis
 #'   from the plot's data and mapping, `"c"` for a continuous axis, or `"d"`
 #'   for a discrete one. Auto-detection reads the *plot's* mapping, so name the
@@ -43,31 +48,50 @@
 #'   remove_padding(x = "c", y = "d")
 remove_padding <- function(x = NULL, y = NULL, ...) {
 
-  check_axis <- function(value, arg) {
+  check_axis <- function(value, arg, call = rlang::caller_env()) {
     if (!is.null(value) && !(identical(value, "c") || identical(value, "d"))) {
-      rlang::abort(paste0("Argument `", arg, "` only takes `c` or `d`."))
+      rlang::abort(paste0("Argument `", arg, "` only takes `c` or `d`."),
+                   call = call)
     }
   }
   check_axis(x, "x")
   check_axis(y, "y")
 
-  if (is.null(x) || is.null(y)) {
-    out <- list(x = x, y = y, dots = list(...))
-    class(out) <- c("taichi_padding", "list")
-    return(out)
-  }
-
-  padding_scales(x, y, list(...))
+  # Always resolved at `+` time, even when both types are given: a "c" axis
+  # still has to see its data to pick the date or time scale for it.
+  out <- list(x = x, y = y, dots = list(...))
+  class(out) <- c("taichi_padding", "list")
+  out
 }
 
 
-padding_scales <- function(x, y, dots) {
-  scale_x <- if (x == "c") ggplot2::scale_x_continuous else ggplot2::scale_x_discrete
-  scale_y <- if (y == "c") ggplot2::scale_y_continuous else ggplot2::scale_y_discrete
+padding_scales <- function(x, y, dots, x_vals = NULL, y_vals = NULL) {
+  args <- c(list(expand = c(0, 0)), dots)
   list(
-    do.call(scale_x, c(list(expand = c(0, 0)), dots)),
-    do.call(scale_y, c(list(expand = c(0, 0)), dots))
+    do_call_quoted(padding_scale("x", x, x_vals), args),
+    do_call_quoted(padding_scale("y", y, y_vals), args)
   )
+}
+
+
+# The scale constructor for one padding-free axis. "d" is the discrete scale.
+# "c" is continuous, and a date, date-time or hms axis is continuous too, but
+# scale_x_continuous() on one would print the raw day or second counts instead
+# of dates, so those get the scale ggplot2 itself would have picked.
+padding_scale <- function(axis, type, vals = NULL) {
+  kind <- if (identical(type, "d")) {
+    "discrete"
+  } else if (inherits(vals, "Date")) {
+    "date"
+  } else if (inherits(vals, "POSIXt")) {
+    "datetime"
+  } else if (inherits(vals, "hms")) {
+    "time"
+  } else {
+    "continuous"
+  }
+  get(paste0("scale_", axis, "_", kind), envir = asNamespace("ggplot2"),
+      mode = "function")
 }
 
 
@@ -77,14 +101,18 @@ ggplot_add.taichi_padding <- function(object, plot, ...) {
   data <- plot$data
   if (!is.data.frame(data)) data <- NULL
 
-  detect_axis <- function(axis, given) {
+  axis_values <- function(axis) {
+    tryCatch(rlang::eval_tidy(plot$mapping[[axis]], data),
+             error = function(e) NULL)
+  }
+  detect_axis <- function(vals, given) {
     if (!is.null(given)) return(given)
-    vals <- tryCatch(rlang::eval_tidy(plot$mapping[[axis]], data),
-                     error = function(e) NULL)
     if (is.factor(vals) || is.character(vals) || is.logical(vals)) "d" else "c"
   }
 
-  plot + padding_scales(detect_axis("x", object$x),
-                        detect_axis("y", object$y),
-                        object$dots)
+  x_vals <- axis_values("x")
+  y_vals <- axis_values("y")
+  plot + padding_scales(detect_axis(x_vals, object$x),
+                        detect_axis(y_vals, object$y),
+                        object$dots, x_vals, y_vals)
 }

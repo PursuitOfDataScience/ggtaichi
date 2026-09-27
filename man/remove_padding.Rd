@@ -36,6 +36,12 @@ discrete; pass \code{"c"} (continuous) or \code{"d"} (discrete) explicitly to
 override the detection, e.g. when the axis mapping is a computed
 expression the plot data cannot answer for.
 }
+\details{
+A continuous axis holding dates, date-times or \code{hms} times gets the
+matching scale (\code{\link[ggplot2:scale_date]{ggplot2::scale_x_date()}}, \code{\link[ggplot2:scale_date]{ggplot2::scale_x_datetime()}},
+\code{\link[ggplot2:scale_date]{ggplot2::scale_x_time()}}) rather than \code{\link[ggplot2:scale_continuous]{ggplot2::scale_x_continuous()}}, so
+its labels stay dates instead of turning into day or second counts.
+}
 \examples{
 library(ggplot2)
 d <- data.frame(x = 1:3, y = c("a", "b", "c"), yin = 1:3, yang = 3:1)

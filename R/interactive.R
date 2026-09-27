@@ -12,13 +12,13 @@ ggiraph_installed <- function() {
   requireNamespace("ggiraph", quietly = TRUE)
 }
 
-check_ggiraph <- function() {
+check_ggiraph <- function(call = rlang::caller_env()) {
   if (!ggiraph_installed()) {
     rlang::abort(paste0(
       "`interactive = TRUE` needs the ggiraph package.\n",
       "Install it with install.packages(\"ggiraph\"), or leave ",
       "`interactive = FALSE` for the static plot."
-    ))
+    ), call = call)
   }
   invisible(TRUE)
 }
@@ -34,11 +34,7 @@ taichi_tooltip <- function(yin, yang, yin_name = "yin", yang_name = "yang",
                            x_name = NULL, y_name = NULL) {
   n <- max(length(yin), length(yang), 1L)
   fmt <- function(v) {
-    if (is.numeric(v)) {
-      formatC(v, format = "g", digits = 4, width = 1)
-    } else {
-      html_escape(v)
-    }
+    if (is.numeric(v)) tooltip_number(v) else html_escape(v)
   }
   parts <- paste0(
     "<b>", html_escape(yin_name), "</b>: ", fmt(yin), "<br/>",
@@ -52,6 +48,21 @@ taichi_tooltip <- function(yin, yang, yin_name = "yin", yang_name = "yang",
     parts <- paste0(head, "<br/>", parts)
   }
   rep_len(parts, n)
+}
+
+# Four significant digits, in fixed notation over the range real data lives
+# in. formatC(format = "g") switches to scientific notation from five integer
+# digits on, so an order count of 12000 read "1.2e+04" and 123456 lost two of
+# its digits as "1.235e+05": a tooltip that exists to give the exact value
+# should not do that. Only magnitudes where fixed notation would be a string of
+# zeros stay scientific.
+tooltip_number <- function(v) {
+  # trimws(): "fg" pads a value with fewer significant digits than asked for
+  v <- as.double(v)
+  out <- trimws(formatC(v, format = "fg", digits = 4))
+  extreme <- is.finite(v) & v != 0 & (abs(v) >= 1e15 | abs(v) < 1e-4)
+  out[extreme] <- trimws(formatC(v[extreme], format = "g", digits = 4))
+  out
 }
 
 taichi_cell_label <- function(x, y, x_name, y_name, n) {

@@ -28,6 +28,29 @@ has_themed_aes <- function() {
     "from_theme" %in% getNamespaceExports("ggplot2")
 }
 
+# A legend title as plain text. ggplot2 takes an expression or a call
+# (plotmath, e.g. `bquote(mu * g)`) as a title, and cat(), paste() and a
+# tooltip take neither: cat() refuses an expression outright, and a call
+# injected into a tooltip quosure would be evaluated rather than shown.
+label_text <- function(x) {
+  if (is.expression(x) || is.language(x)) {
+    parts <- if (is.expression(x)) as.list(x) else list(x)
+    return(paste(vapply(parts, function(e) paste(deparse(e), collapse = " "),
+                        character(1)), collapse = "; "))
+  }
+  paste(as.character(x), collapse = " ")
+}
+
+# do.call() evaluates any symbol or call among its arguments, so a plotmath
+# title such as `yin_name = bquote(mu * g)` would be run instead of passed on.
+# Quote just those; every other argument goes through as the value it already
+# is. (quote = TRUE would do the same, but then every argument reads
+# `base::quote(...)` in any error message the callee raises.)
+do_call_quoted <- function(what, args) {
+  args <- lapply(args, function(a) if (is.language(a)) call("quote", a) else a)
+  do.call(what, args)
+}
+
 # TRUE or FALSE and nothing else. isTRUE() reads anything else as FALSE, which
 # is how a mistyped flag (`eyes = "yes"`) switches a feature off without a
 # word.

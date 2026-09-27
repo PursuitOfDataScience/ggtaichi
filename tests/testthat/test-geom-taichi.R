@@ -1000,3 +1000,156 @@ test_that("the yin guide comes first with supplied scales too", {
                 yin_scale = scale_fill_viridis_c(guide = guide_colourbar(order = 5)))
   expect_equal(guide_order(own)[1], 5)
 })
+
+# ------------------------------------------------------------------
+# Coordinate systems the glyph cannot be drawn in
+# ------------------------------------------------------------------
+
+test_that("a polar coord is refused with a clear error, not drawn wrongly", {
+  # coord_polar() transforms the cell centres but not the cell boxes, so the
+  # boxes arrived in data units and one oversized glyph filled a corner
+  d <- data.frame(x = rep(1:3, 3), y = rep(1:3, each = 3), a = 1:9, b = 9:1)
+  p <- ggplot(d, aes(x, y)) + geom_taichi(yin = a, yang = b)
+  expect_error(ggplotGrob(p + coord_polar()), "cannot be drawn in `coord_polar()`",
+               fixed = TRUE)
+  expect_error(ggplotGrob(ggplot(d, aes(x, y)) + geom_yang_fish(aes(fill = b)) +
+                            coord_polar(theta = "y")),
+               "coord_polar()", fixed = TRUE)
+  if (exists("coord_radial", asNamespace("ggplot2"))) {
+    expect_error(ggplotGrob(p + ggplot2::coord_radial()), "coord_radial()",
+                 fixed = TRUE)
+  }
+  # every Cartesian coord still draws
+  for (co in list(coord_cartesian(), coord_fixed(), coord_flip())) {
+    expect_no_error(ggplotGrob(p + co))
+  }
+})
+
+# ------------------------------------------------------------------
+# Plotmath legend titles
+# ------------------------------------------------------------------
+
+test_that("an expression or a call works as a legend title", {
+  # A call (bquote(), quote()) went through do.call() and was evaluated
+  # instead of passed on, and print() could not cat() an expression.
+  d <- data.frame(x = 1:2, y = 1, a = 1:2, b = 2:1)
+  obj <- geom_taichi(yin = a, yang = b, yin_name = expression(alpha[1]),
+                     yang_name = bquote(mu * g))
+  out <- capture.output(print(obj))
+  expect_true(any(grepl("yin  : alpha[1]", out, fixed = TRUE)))
+  expect_true(any(grepl("yang : mu * g", out, fixed = TRUE)))
+  b <- ggplot_build(ggplot(d, aes(x, y)) + obj)
+  fills <- Filter(function(s) any(grepl("^fill", s$aesthetics)),
+                  b$plot$scales$scales)
+  expect_identical(fills[[2]]$name, bquote(mu * g))
+  expect_no_error(ggplotGrob(ggplot(d, aes(x, y)) + obj))
+  # also when the name goes to a supplied constructor, or to a discrete fish
+  expect_no_error(ggplotGrob(ggplot(d, aes(x, y)) +
+    geom_taichi(yin = a, yang = b, yin_name = quote(beta),
+                yin_scale = scale_fill_viridis_c)))
+  expect_no_error(ggplotGrob(ggplot(d, aes(x, y)) +
+    geom_taichi(yin = factor(a), yang = b, yin_name = quote(beta))))
+  dobj <- geom_taichi_diff(yin = a, yang = b, name = expression(Delta))
+  expect_true(any(grepl("statistic: Delta", capture.output(print(dobj)),
+                        fixed = TRUE)))
+})
+
+# ------------------------------------------------------------------
+# Composing with other fill layers
+# ------------------------------------------------------------------
+
+test_that("a taichi added over another fill layer leaves that layer's scale alone", {
+  # The yin scale used to replace the plot's existing fill scale ("Scale for
+  # fill is already present"), so the earlier layer was drawn in the yin ramp
+  # and both were trained on one range
+  d <- data.frame(x = 1:3, y = 1, a = c(1, 5, 9), b = c(9, 5, 1),
+                  z = c(10, 20, 30))
+  # what is drawn, not the built data: ggnewscale renames the fill column of
+  # every layer before a break
+  fish_fills <- function(p) {
+    lapply(collect_grobs(forced_scene(p), "polygon"),
+           function(pg) as.character(pg$gp$fill))
+  }
+  alone <- fish_fills(ggplot(d, aes(x, y)) + geom_taichi(yin = a, yang = b))
+  tile <- ggplot_build(ggplot(d, aes(x, y)) +
+    geom_tile(aes(fill = z)) + scale_fill_viridis_c())$data[[1]]$fill
+  expect_no_message(
+    p <- ggplot(d, aes(x, y)) + geom_tile(aes(fill = z)) +
+      scale_fill_viridis_c() + geom_taichi(yin = a, yang = b)
+  )
+  rects <- collect_grobs(forced_scene(p), "rect")
+  expect_true(any(vapply(rects, function(r) {
+    identical(toupper(as.character(r$gp$fill)), toupper(tile))
+  }, logical(1))))
+  expect_equal(fish_fills(p), alone)
+  # a plot-level fill mapping counts too, with or without a layer using it
+  expect_equal(fish_fills(ggplot(d, aes(x, y, fill = z)) + geom_tile() +
+                            geom_taichi(yin = a, yang = b)), alone)
+  expect_equal(fish_fills(ggplot(d, aes(x, y, fill = z)) +
+                            geom_taichi(yin = a, yang = b)), alone)
+  # and a second geom_taichi() keeps the first one's scales
+  both <- fish_fills(ggplot(d, aes(x, y)) + geom_taichi(yin = a, yang = b) +
+    geom_taichi(yin = b, yang = a, width = 0.5, height = 0.5))
+  expect_equal(both[1:2], alone)
+  # (the second one swaps the columns, so each ramp runs the other way)
+  expect_equal(both[3:4], lapply(alone, rev))
+  # a plot with no fill anywhere gets no extra scale break
+  expect_false(ggtaichi:::plot_uses_fill(ggplot(d, aes(x, y)) + geom_point()))
+  plain <- ggplot(d, aes(x, y)) + geom_taichi(yin = a, yang = b)
+  expect_length(plain$layers, 2)
+  expect_length(Filter(function(s) any(grepl("^fill", s$aesthetics)),
+                       plain$scales$scales), 2)
+})
+
+test_that("drop = FALSE keeps unused levels without running out of colours", {
+  # the manual palette was sized from the levels present, so a scale asked to
+  # keep an unused level aborted with "Insufficient values in manual scale"
+  f <- data.frame(x = 1:2, y = 1,
+                  g = factor(c("a", "b"), levels = c("a", "b", "c")))
+  fills <- function(...) {
+    Filter(function(s) any(grepl("^fill", s$aesthetics)),
+           ggplot_build(ggplot(f, aes(x, y)) +
+                          geom_taichi(yin = g, yang = g, ...))$plot$scales$scales)
+  }
+  s <- expect_no_error(fills(drop = FALSE))
+  expect_equal(s[[1]]$get_limits(), c("a", "b", "c"))
+  # and shared limits keep them too, rather than dropping back to "a", "b"
+  s2 <- fills(drop = FALSE, shared_limits = TRUE)
+  expect_equal(s2[[1]]$get_limits(), c("a", "b", "c"))
+  expect_equal(fills()[[1]]$get_limits(), c("a", "b"))
+})
+
+test_that("a guide passed through ... keeps yin before yang", {
+  # the same order-less guide for both fish reopened the unstable tie-break
+  d <- data.frame(x = rep(1:3, 3), y = rep(1:3, each = 3), yin = 1:9, yang = 9:1)
+  guide_order <- function(p) {
+    fills <- Filter(function(s) any(grepl("^fill", s$aesthetics)),
+                    ggplot_build(p)$plot$scales$scales)
+    vapply(fills, function(s) {
+      g <- s$guide
+      if (is.character(g)) NA_real_ else (g$params$order %||% g$order %||% NA_real_)
+    }, numeric(1))
+  }
+  for (gd in list("colourbar", guide_colourbar(reverse = TRUE))) {
+    expect_equal(guide_order(ggplot(d, aes(x, y)) +
+      geom_taichi(yin = yin, yang = yang, guide = gd)), c(1, 2))
+  }
+  # a guide that names its own order keeps it
+  own <- guide_order(ggplot(d, aes(x, y)) +
+    geom_taichi(yin = yin, yang = yang, guide = guide_colourbar(order = 3)))
+  expect_equal(own, c(3, 3))
+})
+
+test_that("a bad yin_colors / yang_colors is named when geom_taichi() is called", {
+  # it used to surface at print time as farver's "Unknown colour name"
+  expect_error(geom_taichi(yin = a, yang = b, yin_colors = "notacolour"),
+               "`yin_colors` is not a valid colour vector")
+  expect_error(geom_taichi(yin = a, yang = b, yang_colors = c("red", "nope")),
+               "`yang_colors` is not a valid colour vector")
+  expect_error(geom_taichi(yin = a, yang = b, yin_colors = character(0)),
+               "`yin_colors` must contain at least one colour")
+  # everything the scales accept still goes through
+  expect_no_error(geom_taichi(yin = a, yang = b, yin_colors = 1:3))
+  expect_no_error(geom_taichi(yin = a, yang = b,
+                              yang_colors = c("#F00", NA, "#FF000080")))
+})

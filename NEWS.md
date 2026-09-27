@@ -176,6 +176,39 @@ arguments.
 - **`geom_yin_fish()` / `geom_yang_fish()` ignored a mistyped flag**:
   `eyes = "yes"` quietly meant no eyes. `eyes` and `interactive` must now be
   `TRUE` or `FALSE`.
+- **`remove_padding()` turned a date axis into day counts.** A `Date`
+  column counts as continuous, so the axis was rebuilt with
+  `scale_x_continuous()`, which threw the date labels away and printed the
+  raw numbers (`18420`) in their place; every bundled data set carries such a
+  column. A date, date-time or `hms` axis now keeps `scale_x_date()`,
+  `scale_x_datetime()` or `scale_x_time()`, with the padding removed. As a
+  result `remove_padding(x = "c", y = "d")` is resolved when it is added to
+  the plot, like the auto-detecting form, instead of returning two scales
+  straight away.
+- **`geom_taichi()` took over a fill scale already on the plot.** Added after
+  another fill layer (`geom_tile(aes(fill = z)) + scale_fill_viridis_c()`),
+  its yin scale replaced that layer's scale, so the tiles were drawn in the
+  grey yin ramp and both were trained on one range, washing the fish out; a
+  plot-level `aes(fill = )` did the same to the yin fish on its own, and a
+  second `geom_taichi()` repainted the first one's yang fish. It now starts a
+  fresh fill scale first whenever the plot already uses fill, and so does
+  `geom_taichi_diff()`, whose diverging scale laid over a taichi grid
+  repainted the yang fish.
+- **`drop = FALSE` crashed a factor fill with an unused level**
+  ("Insufficient values in manual scale"): the palette was sized from the
+  levels present, not from the levels the scale was asked to keep. With
+  `shared_limits`, the unused levels are now kept in the shared set as well.
+- **`coord_polar()` drew one oversized glyph in a corner.** It moves the cell
+  centres but not the cell boxes the glyph is drawn in, so the boxes stayed in
+  data units. `coord_polar()`, `coord_radial()` and `coord_map()` are now an
+  error naming the coords that work, rather than a wrong picture.
+- **A plotmath legend title broke the plot.** `yin_name = bquote(mu * g)` (or
+  any call or symbol) was evaluated by the `do.call()` that builds the scales
+  instead of being passed on, and `print()` of a `geom_taichi()` or
+  `geom_taichi_diff()` object failed on an `expression()` title.
+- **An error inside a supplied scale constructor was misreported** as "the
+  supplied scale declares no aesthetics". It is now reported as itself, under
+  "`yin_scale` failed to build a fill scale".
 
 ## Fixes and corrections in this cycle
 
@@ -183,6 +216,13 @@ Found by auditing 0.3.0 against its own documentation before release. None of
 these has appeared in a CRAN release, so all are corrections rather than
 breaking changes.
 
+- **Only the first glyph of each fish layer was interactive.** ggiraph reads
+  the attributes of an id-batched polygon at each polygon's first vertex,
+  and the fish handed it one value per cell, so in the widget every glyph
+  after the first had no tooltip and no `data_id`: hovering it showed
+  nothing and highlighted nothing (the eyes were unaffected). The attributes
+  now go in one per vertex, and a test reads them back out of `girafe()`'s
+  SVG rather than off the grob.
 - **The yin and yang legends could swap places between sessions.** Both
   auto-built fill guides were left at ggplot2's default `order`, and the tie
   was broken by something that is not stable across R sessions: the same plot,
@@ -190,7 +230,8 @@ breaking changes.
   yang first in the next. One of the committed vdiffr references had in fact
   recorded the wrong order, which is how it was found. Yin is now pinned
   before yang, matching the argument order and every example in the
-  documentation. An explicit `guide` passed through `...` still wins, and
+  documentation. An explicit `guide` passed through `...` still wins (and
+  is pinned the same way unless it asks for an order itself), and
   `shared_legend` still drops the yang guide. A supplied `yin_scale` /
   `yang_scale` is pinned the same way unless it asks for an order itself:
   left alone, the two legends were sorted by a hash of their contents, and
@@ -267,6 +308,61 @@ breaking changes.
   described as square-root scaling; the claim that a non-positive ratio warns
   in all three places is corrected (`taichi_summary()` does not); and the
   animations vignette counted three releases where there were two.
+- **`explicit = "ratio"` measured the gap from 0.** A ratio's agreement point
+  is 1, and every ratio is positive, so a cell where the two sources were
+  equal got a mid-sized eye (or a tilt, a thicker border, a larger glyph)
+  where the documentation promises none. Every channel now measures the
+  distance from agreement, 1 for `"ratio"` and 0 for the other statistics.
+- **An all-agreeing grid drew every glyph at full size on the radius
+  channel**, which on that channel means the widest gap, and a single
+  disagreeing cell then shrank all the others; a custom `explicit_range` was
+  likewise ignored there for the eyes and the border. Every cell now gets the
+  channel's agreement end, as it would next to a disagreeing one.
+- **`shared_limits` put a transformed scale object on the wrong limits.** A
+  continuous scale keeps its limits in transformed units, and the shared
+  limits were written into a supplied object in raw units, so on a
+  `transform = "log10"` scale most cells fell below the lower limit and were
+  painted `na.value`. A constructor was never affected.
+- **Tooltip numbers went scientific from five digits on**: an order count of
+  12000 read `1.2e+04` and 123456 lost two digits as `1.235e+05`. They now
+  stay in fixed notation (four significant digits) except at magnitudes where
+  that would be a run of zeros, and a plotmath legend title reaches the
+  tooltip as text instead of being evaluated.
+- **Errors name the function the user called.** Several reported an internal
+  helper instead (`Error in pull()`, `resolve_values()`, `check_colours()`,
+  `as_palette_pair()`), and `geom_taichi_diff()` blamed an `explicit`
+  argument it does not have. A bad `yin_colors` / `yang_colors` is named
+  when `geom_taichi()` is called instead of surfacing at print time as an
+  anonymous "Unknown colour name". Infinite values are now refused wherever a
+  finite number is needed (`n`, `hues`, `chroma`, `luminance`, which must also
+  lie between 0 and 100, `explicit_range`, `radius_exponent`, `midpoint` and a
+  constant eye size): `chroma = Inf` used to return a ramp of `NA` colours
+  without a word.
+- **`palette =` gave a discrete fill the palest steps of its ramp.** A preset
+  was taken verbatim, like an explicit colour vector, so a three-level factor
+  got the first three of the preset's five colours: the light half of the
+  ramp, the first level close to invisible on a white panel. A palette is now
+  sampled as the ramp it is, palest end skipped, as the built-in colours are
+  and as `scale_taichi_yin_d(palette = )` already did. Explicit
+  `yin_colors` / `yang_colors` are still used as given.
+- **The single legend `shared_legend` keeps now fills both halves of its
+  keys.** It governs both fish, and a key with only the yin half filled read
+  as a legend for the top fish alone. An explicit `key_glyph` still wins.
+- **`vignette("animations")` recommended `enter_grow()` for a grow-in
+  reveal**, which has no visible effect on the glyphs. It now says what the
+  enter and exit effects do here: cells pop in and out, `enter_drift()`
+  moves them, and `enter_fade()` / `enter_recolour()` stop with an error on
+  any plot with a ggnewscale break (a gganimate limitation that plain
+  `geom_tile()` layers share).
+- **`?geom_taichi` says what the default hover ids do under facets**: they
+  name a cell by its `x` and `y`, so the same cell lights up in every panel.
+- **Running the tests without vdiffr deleted the committed visual
+  references.** At the end of a full local run testthat removes every snapshot
+  file that no test announced, and a skipped `expect_doppelganger()`
+  announces nothing. Each visual test now announces its reference before any
+  skip, and the visual tests also skip themselves on a ggplot2 older than the
+  one the references were drawn with, where every comparison would fail for
+  reasons that have nothing to do with ggtaichi.
 
 ## Deprecations and notes
 

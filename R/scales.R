@@ -15,8 +15,9 @@
 #'   \item{`scale_taichi_yin_d()`, `scale_taichi_yang_d()`}{Discrete scales
 #'     that sample the palette's ramp for however many levels the data has,
 #'     skipping its palest end so no category is invisible on a white panel:
-#'     the rule [geom_taichi()] applies to its default colours for factor,
-#'     character and logical sources. An explicit `colors` vector is used as
+#'     the rule [geom_taichi()] applies to its default colours and to a
+#'     `palette` for factor, character and logical sources. An explicit
+#'     `colors` vector is used as
 #'     given instead, again as in [geom_taichi()], so a qualitative palette
 #'     keeps its own colours.}
 #'   \item{`scale_taichi_yin_binned()`, `scale_taichi_yang_binned()`}{Binned
@@ -87,13 +88,15 @@ NULL
 
 # The colour vector a scale constructor should use: an explicit one wins,
 # otherwise the requested half of a palette pair.
-scale_colours <- function(fish, palette, colors, colours, n = 5) {
+scale_colours <- function(fish, palette, colors, colours, n = 5,
+                          call = rlang::caller_env()) {
   cols <- colors %||% colours
   if (!is.null(cols)) {
-    check_colours(cols, if (is.null(colors)) "colours" else "colors")
+    check_colours(cols, if (is.null(colors)) "colours" else "colors",
+                  call = call)
     return(cols)
   }
-  as_palette_pair(palette, "palette", n = n)[[fish]]
+  as_palette_pair(palette, "palette", n = n, call = call)[[fish]]
 }
 
 #' @rdname scale_taichi
@@ -138,9 +141,10 @@ scale_taichi_yang_d <- function(name = ggplot2::waiver(), palette = "default",
 # choice of colours (often a qualitative one, for unordered levels), so, as in
 # geom_taichi(), it is used as given rather than treated as a ramp.
 taichi_discrete_scale <- function(fish, name, palette, colors, colours, n,
-                                  ...) {
+                                  ..., call = rlang::caller_env()) {
   explicit <- !is.null(colors %||% colours)
-  cols <- scale_colours(fish, palette, colors, colours, n = n %||% 5)
+  cols <- scale_colours(fish, palette, colors, colours, n = n %||% 5,
+                        call = call)
   pal <- function(k) {
     if (k <= 0) return(character(0))
     if (explicit && k <= length(cols)) return(cols[seq_len(k)])

@@ -111,3 +111,28 @@ test_that("the plot's legend keys carry the plot's eye colours", {
   }))
   expect_setequal(unique(eye_fills), c("red", "blue"))
 })
+
+test_that("the one legend shared_legend keeps fills both halves of its keys", {
+  # That legend governs both fish; a key with only the yin half filled read
+  # as a legend for the top fish alone
+  p <- ggplot(dd, aes(x, y)) + geom_taichi(yin = g, yang = g,
+                                           shared_legend = TRUE)
+  keys <- collect_grobs(forced_scene(p), "taichi_key")
+  expect_length(keys, 3)
+  for (k in keys) {
+    fills <- vapply(collect_grobs(k, "polygon"),
+                    function(pg) as.character(pg$gp$fill), character(1))
+    expect_false(anyNA(fills))
+    expect_true(same_colour(fills[1], fills[2]))
+  }
+  # an explicit key_glyph still wins
+  p_rect <- ggplot(dd, aes(x, y)) +
+    geom_taichi(yin = g, yang = g, shared_legend = TRUE, key_glyph = "rect")
+  expect_length(collect_grobs(forced_scene(p_rect), "taichi_key"), 0)
+  # and without shared_legend each legend still fills its own half only
+  single <- collect_grobs(forced_scene(ggplot(dd, aes(x, y)) +
+    geom_taichi(yin = g, yang = g)), "taichi_key")
+  halves <- vapply(collect_grobs(single[[1]], "polygon"),
+                   function(pg) is.na(pg$gp$fill), logical(1))
+  expect_equal(sum(halves), 1)
+})

@@ -114,8 +114,9 @@ for numeric sources.}
 \item{\code{scale_taichi_yin_d()}, \code{scale_taichi_yang_d()}}{Discrete scales
 that sample the palette's ramp for however many levels the data has,
 skipping its palest end so no category is invisible on a white panel:
-the rule \code{\link[=geom_taichi]{geom_taichi()}} applies to its default colours for factor,
-character and logical sources. An explicit \code{colors} vector is used as
+the rule \code{\link[=geom_taichi]{geom_taichi()}} applies to its default colours and to a
+\code{palette} for factor, character and logical sources. An explicit
+\code{colors} vector is used as
 given instead, again as in \code{\link[=geom_taichi]{geom_taichi()}}, so a qualitative palette
 keeps its own colours.}
 \item{\code{scale_taichi_yin_binned()}, \code{scale_taichi_yang_binned()}}{Binned

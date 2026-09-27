@@ -163,7 +163,7 @@
     Code
       geom_taichi(yin = a, yang = b, palette = 42)
     Condition
-      Error in `as_palette_pair()`:
+      Error in `geom_taichi()`:
       ! `palette` must be one of "default", "balanced", "diverging", "viridis_pair", "brewer_pair", "greyscale_safe", or a list with `yin` and `yang` colour vectors (see `taichi_palette_pair()`).
 
 ---
@@ -204,7 +204,7 @@
     Code
       geom_taichi(yin = a, yang = b, yin_scale = "viridis")
     Condition
-      Error in `check_scale_arg()`:
+      Error in `geom_taichi()`:
       ! `yin_scale` must be a fill scale object (e.g. `scale_fill_viridis_c()`) or a scale constructor function (e.g. `scale_fill_viridis_c`), not character.
 
 ---
@@ -220,7 +220,7 @@
     Code
       ggplot(d, aes(x, y)) + geom_taichi(yin = nope, yang = yang)
     Condition
-      Error in `resolve_values()`:
+      Error in `geom_taichi()`:
       ! Column `nope` (supplied to `yin`) was not found in the plot data.
 
 # mismatched source types warn rather than pretending to share
@@ -254,7 +254,7 @@
     Code
       taichi_summary(d, yin = nope, yang = yang)
     Condition
-      Error in `pull()`:
+      Error in `taichi_summary()`:
       ! Column `nope` (supplied to `yin`) was not found in `data`.
 
 ---
@@ -286,7 +286,7 @@
     Code
       taichi_check_palette("notacolour")
     Condition
-      Error in `check_colours()`:
+      Error in `taichi_check_palette()`:
       ! `yin_colors` is not a valid colour vector: invalid color name 'notacolour'
 
 ---

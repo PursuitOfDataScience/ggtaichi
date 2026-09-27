@@ -27,17 +27,24 @@ test_that("setup_data leaves gganimate's frame encoding in `group` intact", {
 
 skip_if_not_installed("gganimate")
 
-n_frames <- function(p, nframes = 12) {
+# How many frames were rendered, and how many of them differ. The count alone
+# is not enough: a transition that collapses (the pre-0.3.0 bug) can still
+# write the requested number of files, all of them the same picture.
+render_frames <- function(p, nframes = 12) {
   dir <- tempfile("taichi-frames")
   dir.create(dir)
   on.exit(unlink(dir, recursive = TRUE), add = TRUE)
-  files <- gganimate::animate(
+  # transition_manual() fixes its own frame count and says so in a message
+  # ("`nframes` and `fps` adjusted to match transition"); that is gganimate
+  # talking, not something under test
+  files <- suppressMessages(gganimate::animate(
     p,
     nframes = nframes,
     renderer = gganimate::file_renderer(dir, overwrite = TRUE)
-  )
-  length(files)
+  ))
+  list(n = length(files), distinct = length(unique(tools::md5sum(files))))
 }
+n_frames <- function(p, nframes = 12) render_frames(p, nframes)$n
 
 anim_data <- local({
   d <- expand.grid(x = 1:3, f = 1:6)
@@ -45,6 +52,7 @@ anim_data <- local({
   d$yin <- d$x
   d$yang <- 4 - d$x
   d$turn <- (d$f - 1) * 15
+  d$level <- d$f
   d
 })
 
@@ -56,10 +64,13 @@ test_that("transition_manual gives one frame per state", {
 })
 
 test_that("transition_states tweens across frames", {
+  # the fills change from state to state, so the tweened frames must differ
   p <- ggplot(anim_data, aes(x, y)) +
-    geom_taichi(yin = yin, yang = yang, limits = c(0, 4)) +
+    geom_taichi(yin = level, yang = 7 - level, limits = c(0, 7)) +
     gganimate::transition_states(f, transition_length = 1, state_length = 0)
-  expect_equal(n_frames(p, nframes = 12), 12L)
+  fr <- render_frames(p, nframes = 12)
+  expect_equal(fr$n, 12L)
+  expect_gte(fr$distinct, 6L)
 })
 
 test_that("a rotating glyph animates, which is the package's own demo", {
@@ -67,12 +78,17 @@ test_that("a rotating glyph animates, which is the package's own demo", {
     geom_taichi(yin = yin, yang = yang, angle = turn, eyes = TRUE,
                 limits = c(0, 4)) +
     gganimate::transition_manual(f)
-  expect_equal(n_frames(p), 6L)
+  fr <- render_frames(p)
+  expect_equal(fr$n, 6L)
+  # one angle per state, so six different pictures
+  expect_equal(fr$distinct, 6L)
 })
 
 test_that("the individual fish geoms animate too", {
   p <- ggplot(anim_data, aes(x, y)) +
     geom_yin_fish(aes(fill = yin, angle = turn)) +
     gganimate::transition_manual(f)
-  expect_equal(n_frames(p), 6L)
+  fr <- render_frames(p)
+  expect_equal(fr$n, 6L)
+  expect_equal(fr$distinct, 6L)
 })

@@ -132,3 +132,54 @@ test_that("the discrete scales use an explicit colour vector as given", {
   # a palette is still sampled as a ramp, palest end skipped
   expect_false(scale_taichi_yin_d()$palette(2)[1] == "#FFFFFF")
 })
+
+test_that("shared limits reach a transformed scale object in its own units", {
+  # A continuous scale stores its limits transformed. Written in raw, a shared
+  # c(1, 500) on a log10 scale meant 10 to 10^500, and every value below 10
+  # was censored to na.value.
+  dl <- data.frame(x = rep(1:3, 3), y = rep(1:3, each = 3),
+                   a = c(1, 2, 5, 10, 20, 50, 100, 200, 500))
+  dl$b <- rev(dl$a)
+  build <- function(yin_scale, yang_scale) {
+    ggplot_build(ggplot(dl, aes(x, y)) +
+      geom_taichi(yin = a, yang = b, yin_scale = yin_scale,
+                  yang_scale = yang_scale, shared_limits = TRUE))
+  }
+  # ggplot2 3.5 renamed `trans` to `transform`
+  log_viridis <- function(...) {
+    arg <- if (utils::packageVersion("ggplot2") >= "3.5.0") "transform" else "trans"
+    do.call(scale_fill_viridis_c, c(stats::setNames(list("log10"), arg),
+                                    list(...)))
+  }
+  obj <- build(log_viridis(), log_viridis())
+  fills <- Filter(function(s) any(grepl("^fill", s$aesthetics)),
+                  obj$plot$scales$scales)
+  for (s in fills) expect_equal(s$get_limits(), log10(c(1, 500)))
+  expect_false(anyNA(obj$data[[1]]$fill))
+  expect_false(any(obj$data[[1]]$fill == "grey50"))
+  # the same as a constructor, which always got it right
+  ctor <- build(log_viridis, log_viridis)
+  expect_equal(obj$data[[1]]$fill, ctor$data[[1]]$fill)
+  expect_equal(obj$data[[2]]$fill, ctor$data[[2]]$fill)
+})
+
+test_that("an error inside a supplied scale constructor is reported as itself", {
+  # it used to be caught while checking the aesthetics and reported as
+  # "the supplied scale declares no aesthetics"
+  expect_error(
+    ggplot(d, aes(x, y)) +
+      geom_taichi(yin = yin, yang = yang,
+                  yin_scale = function(...) stop("boom from the scale")),
+    "boom from the scale"
+  )
+  # a constructor that cannot take the shared limits says so
+  no_limits <- function(name) scale_fill_viridis_c(name = name)
+  err <- tryCatch(
+    ggplot(d, aes(x, y)) +
+      geom_taichi(yin = yin, yang = yang, yin_scale = no_limits,
+                  shared_limits = TRUE),
+    error = function(e) e
+  )
+  expect_match(conditionMessage(err), "`yin_scale` failed to build a fill scale")
+  expect_match(conditionMessage(err$parent), "unused argument")
+})

@@ -51,17 +51,23 @@
 #'   geom_taichi(yin = yin, yang = yang, palette = pair, shared_limits = TRUE)
 taichi_palette_pair <- function(n = 5, hues = c(250, 20),
                                 luminance = c(30, 90), chroma = 60) {
-  if (!is.numeric(n) || length(n) != 1 || is.na(n) || n < 2) {
+  # is.finite() throughout, not is.na(): an infinite hue or chroma came back as
+  # a ramp of NA colours without a word, and an infinite n as a coercion
+  # warning followed by a base error.
+  if (!is.numeric(n) || length(n) != 1 || !is.finite(n) || n < 2) {
     rlang::abort("`n` must be a single number of 2 or more.")
   }
   n <- as.integer(n)
-  if (!is.numeric(hues) || length(hues) != 2 || anyNA(hues)) {
+  if (!is.numeric(hues) || length(hues) != 2 || !all(is.finite(hues))) {
     rlang::abort("`hues` must be two numbers, `c(yin, yang)`.")
   }
-  if (!is.numeric(luminance) || length(luminance) != 2 || anyNA(luminance)) {
-    rlang::abort("`luminance` must be two numbers, `c(dark, light)`.")
+  if (!is.numeric(luminance) || length(luminance) != 2 ||
+      !all(is.finite(luminance)) || any(luminance < 0 | luminance > 100)) {
+    rlang::abort(paste0(
+      "`luminance` must be two numbers between 0 and 100, `c(dark, light)`."
+    ))
   }
-  if (!is.numeric(chroma) || length(chroma) != 1 || is.na(chroma) ||
+  if (!is.numeric(chroma) || length(chroma) != 1 || !is.finite(chroma) ||
       chroma < 0) {
     rlang::abort("`chroma` must be a single non-negative number.")
   }
@@ -144,7 +150,7 @@ taichi_palette_pair <- function(n = 5, hues = c(250, 20),
 #' }
 taichi_palette <- function(name = "balanced", n = 5) {
   name <- rlang::arg_match0(name, taichi_palette_names, arg_nm = "name")
-  if (!is.numeric(n) || length(n) != 1 || is.na(n) || n < 2) {
+  if (!is.numeric(n) || length(n) != 1 || !is.finite(n) || n < 2) {
     rlang::abort("`n` must be a single number of 2 or more.")
   }
   n <- as.integer(n)
@@ -277,7 +283,7 @@ taichi_check_palette <- function(yin_colors = NULL, yang_colors = NULL,
   yang_colors <- yang_colors %||% taichi_default_yang_colors
   check_colours(yin_colors, "yin_colors")
   check_colours(yang_colors, "yang_colors")
-  if (!is.numeric(n) || length(n) != 1 || is.na(n) || n < 2) {
+  if (!is.numeric(n) || length(n) != 1 || !is.finite(n) || n < 2) {
     rlang::abort("`n` must be a single number of 2 or more.")
   }
   n <- as.integer(n)
@@ -448,7 +454,7 @@ cvd_distances <- function(yin, yang) {
 
 # Accept a preset name, or a two-element list, wherever a palette pair is
 # expected. Anything else is a mistake worth naming.
-as_palette_pair <- function(palette, arg, n = 5) {
+as_palette_pair <- function(palette, arg, n = 5, call = rlang::caller_env()) {
   if (is.character(palette) && length(palette) == 1) {
     # Checked here so that the message names the caller's argument; left to
     # taichi_palette() it would complain about a `name` the caller never
@@ -459,13 +465,13 @@ as_palette_pair <- function(palette, arg, n = 5) {
         paste0("\"", taichi_palette_names, "\"", collapse = ", "),
         ", or a list with `yin` and `yang` colour vectors; not \"",
         palette, "\"."
-      ))
+      ), call = call)
     }
     return(taichi_palette(palette, n = n))
   }
   if (is.list(palette) && all(c("yin", "yang") %in% names(palette))) {
-    check_colours(palette$yin, paste0(arg, "$yin"))
-    check_colours(palette$yang, paste0(arg, "$yang"))
+    check_colours(palette$yin, paste0(arg, "$yin"), call = call)
+    check_colours(palette$yang, paste0(arg, "$yang"), call = call)
     return(list(yin = palette$yin, yang = palette$yang))
   }
   rlang::abort(paste0(
@@ -473,21 +479,22 @@ as_palette_pair <- function(palette, arg, n = 5) {
     paste0("\"", taichi_palette_names, "\"", collapse = ", "),
     ", or a list with `yin` and `yang` colour vectors (see ",
     "`taichi_palette_pair()`)."
-  ))
+  ), call = call)
 }
 
-check_colours <- function(cols, arg) {
+check_colours <- function(cols, arg, call = rlang::caller_env()) {
   if (!is.character(cols) || length(cols) == 0 || anyNA(cols)) {
     rlang::abort(paste0(
       "`", arg, "` must be a non-empty character vector of colours."
-    ))
+    ), call = call)
   }
   bad <- tryCatch({
     grDevices::col2rgb(cols)
     NULL
   }, error = function(e) conditionMessage(e))
   if (!is.null(bad)) {
-    rlang::abort(paste0("`", arg, "` is not a valid colour vector: ", bad))
+    rlang::abort(paste0("`", arg, "` is not a valid colour vector: ", bad),
+                 call = call)
   }
   invisible(cols)
 }

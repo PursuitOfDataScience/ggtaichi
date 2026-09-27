@@ -25,7 +25,7 @@ test_that("both ramps run light to dark, matching yin_colors", {
   expect_true(all(diff(lum(p$yang)) < 0))
   # the vector order of `luminance` does not decide the ramp's direction
   q <- taichi_palette_pair(luminance = c(90, 30))
-  expect_equal(p$yin[1] > "", TRUE)
+  expect_equal(q, taichi_palette_pair(luminance = c(30, 90)))
   expect_true(all(diff(lum(q$yin)) < 0))
 })
 
@@ -191,14 +191,26 @@ test_that("an unusable palette argument is named, not silently ignored", {
                "must be one of")
 })
 
-test_that("a preset's colours are used verbatim for discrete fills", {
-  # the default ramps skip their palest end for discrete data, because it
-  # vanishes on a white panel; an explicit preset is used as given
+test_that("a preset is sampled as a ramp for discrete fills, palest end skipped", {
+  # Taken verbatim, a three-level factor got the first three colours of the
+  # five-step ramp: its palest steps, the first ("#EFF3FF") close to
+  # invisible on a white panel, and never its dark end. A preset is a ramp,
+  # so it is sampled like the built-in one and like scale_taichi_yin_d().
   dd <- data.frame(x = 1:3, y = 1, g = factor(c("a", "b", "c")))
   b <- ggplot_build(ggplot(dd, aes(x, y)) +
     geom_taichi(yin = g, yang = g, palette = "brewer_pair"))
-  used <- b$plot$scales$scales[[1]]$palette(3)
-  expect_equal(used[1], taichi_palette("brewer_pair")$yin[1])
+  ramp <- taichi_palette("brewer_pair")
+  used <- unique(b$data[[1]]$fill)
+  expect_length(used, 3)
+  expect_false(ramp$yin[1] %in% used)
+  # the darkest level reaches the dark end of the ramp
+  expect_equal(toupper(used[3]), toupper(ramp$yin[5]))
+  expect_equal(toupper(unique(b$data[[2]]$fill)[3]), toupper(ramp$yang[5]))
+  # explicit colour vectors are still used as given
+  b2 <- ggplot_build(ggplot(dd, aes(x, y)) +
+    geom_taichi(yin = g, yang = g, yin_colors = ramp$yin,
+                yang_colors = ramp$yang))
+  expect_equal(unique(b2$data[[1]]$fill), ramp$yin[1:3])
 })
 
 test_that("palette = 'default' behaves exactly like no palette at all", {
@@ -237,4 +249,19 @@ test_that("tolerance must be a single non-negative number", {
                  "`tolerance` must be a single non-negative number")
   }
   expect_equal(taichi_check_palette(tolerance = 0)$tolerance, 0)
+})
+
+test_that("infinite or out-of-range palette arguments are refused", {
+  # is.na() let these through: an infinite chroma or hue came back as a ramp
+  # of NA colours, an infinite n as a coercion warning and a base error, and
+  # a luminance above 100 as grDevices' "invalid hcl color"
+  expect_error(taichi_palette_pair(n = Inf), "2 or more")
+  expect_error(taichi_palette_pair(chroma = Inf), "non-negative number")
+  expect_error(taichi_palette_pair(hues = c(Inf, 20)), "two numbers")
+  expect_error(taichi_palette_pair(luminance = c(30, 130)), "between 0 and 100")
+  expect_error(taichi_palette_pair(luminance = c(-Inf, 90)), "between 0 and 100")
+  expect_error(taichi_palette("balanced", n = Inf), "2 or more")
+  expect_error(taichi_check_palette(n = Inf), "2 or more")
+  # the ends of the L* scale themselves are fine
+  expect_silent(taichi_palette_pair(luminance = c(0, 100)))
 })

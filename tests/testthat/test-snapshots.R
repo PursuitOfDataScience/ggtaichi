@@ -18,14 +18,30 @@
 # Run them locally (`devtools::test()`) to review visual changes; the package
 # logic is covered by the non-visual tests.
 
-skip_if_not_installed("vdiffr")
-testthat::skip_on_ci()
-# vdiffr already passes cran = FALSE to expect_snapshot_file(); this makes the
-# same guarantee explicit and independent of that default.
-testthat::skip_on_cran()
-
 library(ggplot2)
 library(ggtaichi)
+
+# Every test starts with this, naming its reference, rather than the file
+# starting with the skips. At the end of a full local run testthat deletes
+# every snapshot file that no test announced, and a skipped
+# expect_doppelganger() announces nothing, so running the suite without
+# vdiffr, or on an older ggplot2, used to wipe _snaps/snapshots/. Announcing
+# the file first keeps it, whichever skip then fires.
+skip_visual <- function(name) {
+  if (exists("announce_snapshot_file", asNamespace("testthat"))) {
+    testthat::announce_snapshot_file(name = paste0(name, ".svg"))
+  }
+  skip_if_not_installed("vdiffr")
+  # The references are drawn with ggplot2 4.x, whose theme and legend
+  # defaults differ from 3.4 / 3.5 in ways that have nothing to do with
+  # ggtaichi; on an older ggplot2 every comparison would fail for that alone.
+  skip_if(utils::packageVersion("ggplot2") < "4.0.0",
+          "the vdiffr references are drawn with ggplot2 4.x")
+  skip_on_ci()
+  # vdiffr already passes cran = FALSE to expect_snapshot_file(); this makes
+  # the same guarantee explicit and independent of that default.
+  skip_on_cran()
+}
 
 # A small, deterministic grid used across several snapshots.
 snap_data <- data.frame(
@@ -36,6 +52,7 @@ snap_data <- data.frame(
 )
 
 test_that("basic taichi grid snapshot", {
+  skip_visual("basic-taichi")
   p <- ggplot(snap_data, aes(x, y)) +
     geom_taichi(yin = yin, yang = yang) +
     coord_fixed()
@@ -43,6 +60,7 @@ test_that("basic taichi grid snapshot", {
 })
 
 test_that("taichi with eyes snapshot", {
+  skip_visual("taichi-eyes")
   p <- ggplot(snap_data, aes(x, y)) +
     geom_taichi(yin = yin, yang = yang, eyes = TRUE) +
     coord_fixed()
@@ -50,6 +68,7 @@ test_that("taichi with eyes snapshot", {
 })
 
 test_that("taichi with data-driven eyes snapshot", {
+  skip_visual("taichi-data-eyes")
   p <- ggplot(snap_data, aes(x, y)) +
     geom_taichi(yin = yin, yang = yang, eyes = TRUE,
                 yin_eye_size = yang, yang_eye_size = yin) +
@@ -58,6 +77,7 @@ test_that("taichi with data-driven eyes snapshot", {
 })
 
 test_that("taichi with rotation snapshot", {
+  skip_visual("taichi-rotated")
   p <- ggplot(snap_data, aes(x, y)) +
     geom_taichi(yin = yin, yang = yang, angle = 45) +
     coord_fixed()
@@ -65,6 +85,7 @@ test_that("taichi with rotation snapshot", {
 })
 
 test_that("taichi with categorical fills snapshot", {
+  skip_visual("taichi-categorical")
   d <- data.frame(
     x = c(1, 2, 1, 2),
     y = c(2, 2, 1, 1),
@@ -78,6 +99,7 @@ test_that("taichi with categorical fills snapshot", {
 })
 
 test_that("taichi with theme_taichi snapshot", {
+  skip_visual("taichi-themed")
   p <- ggplot(snap_data, aes(x, y)) +
     geom_taichi(yin = yin, yang = yang) +
     coord_fixed() +
@@ -86,6 +108,7 @@ test_that("taichi with theme_taichi snapshot", {
 })
 
 test_that("taichi with a shared legend snapshot", {
+  skip_visual("taichi-shared-legend")
   p <- ggplot(snap_data, aes(x, y)) +
     geom_taichi(yin = yin, yang = yang, shared_legend = TRUE) +
     coord_fixed()
@@ -95,6 +118,7 @@ test_that("taichi with a shared legend snapshot", {
 # --- 0.3.0 channels -------------------------------------------------------
 
 test_that("explicit difference as eye size snapshot", {
+  skip_visual("taichi-explicit-eye")
   p <- ggplot(snap_data, aes(x, y)) +
     geom_taichi(yin = yin, yang = yang, explicit = "difference") +
     coord_fixed()
@@ -102,6 +126,7 @@ test_that("explicit difference as eye size snapshot", {
 })
 
 test_that("explicit difference as tilt snapshot", {
+  skip_visual("taichi-explicit-angle")
   p <- ggplot(snap_data, aes(x, y)) +
     geom_taichi(yin = yin, yang = yang, explicit = "difference",
                 explicit_channel = "angle") +
@@ -110,6 +135,7 @@ test_that("explicit difference as tilt snapshot", {
 })
 
 test_that("explicit difference as outline width snapshot", {
+  skip_visual("taichi-explicit-border")
   p <- ggplot(snap_data, aes(x, y)) +
     geom_taichi(yin = yin, yang = yang, explicit = "difference",
                 explicit_channel = "border") +
@@ -118,6 +144,7 @@ test_that("explicit difference as outline width snapshot", {
 })
 
 test_that("explicit difference as glyph radius snapshot", {
+  skip_visual("taichi-explicit-radius")
   p <- ggplot(snap_data, aes(x, y)) +
     geom_taichi(yin = yin, yang = yang, explicit = "difference",
                 explicit_channel = "radius") +
@@ -126,6 +153,7 @@ test_that("explicit difference as glyph radius snapshot", {
 })
 
 test_that("balanced palette snapshot", {
+  skip_visual("taichi-palette-balanced")
   p <- ggplot(snap_data, aes(x, y)) +
     geom_taichi(yin = yin, yang = yang, palette = "balanced",
                 shared_limits = TRUE) +
@@ -134,6 +162,7 @@ test_that("balanced palette snapshot", {
 })
 
 test_that("binned fills snapshot", {
+  skip_visual("taichi-binned")
   p <- ggplot(snap_data, aes(x, y)) +
     geom_taichi(yin = yin, yang = yang,
                 yin_scale = scale_taichi_yin_binned(n.breaks = 4),
@@ -144,6 +173,7 @@ test_that("binned fills snapshot", {
 })
 
 test_that("taichi legend keys snapshot", {
+  skip_visual("taichi-key-glyph")
   d <- data.frame(
     x = c(1, 2, 1, 2),
     y = c(2, 2, 1, 1),
@@ -157,6 +187,7 @@ test_that("taichi legend keys snapshot", {
 })
 
 test_that("difference heatmap snapshot", {
+  skip_visual("taichi-diff-tiles")
   p <- ggplot(snap_data, aes(x, y)) +
     geom_taichi_diff(yin = yin, yang = yang) +
     coord_fixed()

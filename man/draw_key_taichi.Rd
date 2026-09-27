@@ -32,8 +32,10 @@ The legend key glyph used by \code{\link[=geom_yin_fish]{geom_yin_fish()}} and \
 therefore by \code{\link[=geom_taichi]{geom_taichi()}}: a small taichi symbol whose relevant fish is
 filled with the key's colour while the other is left as an outline, so the
 key looks like the mark it describes and says which half of the glyph the
-scale governs. Pass it to a layer's \code{key_glyph} argument to use it
-elsewhere, or use \code{key_glyph = "rect"} for plain ggplot2 rectangles.
+scale governs. Under \code{geom_taichi(shared_legend = TRUE)}, where the one
+legend governs both fish, its keys fill both halves. Pass it to a layer's
+\code{key_glyph} argument to use it elsewhere, or use \code{key_glyph = "rect"} for
+plain ggplot2 rectangles.
 }
 \details{
 Keys only appear for discrete fills. A continuous fill is drawn by

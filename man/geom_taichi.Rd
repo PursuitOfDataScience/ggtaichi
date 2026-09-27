@@ -196,9 +196,10 @@ layer (see the Styling section).}
 
 \item{key_glyph}{The legend key glyph, passed on to
 \code{\link[ggplot2]{layer}()}. Both fish default to a small taichi with
-their own half filled (see \code{\link{draw_key_taichi}()}); pass
-\code{"rect"} for the plain ggplot2 rectangles of earlier versions. Keys
-only appear for discrete fills; a continuous fill gets a colourbar.}
+their own half filled (see \code{\link{draw_key_taichi}()}), and the one
+legend \code{shared_legend} keeps fills both halves; pass \code{"rect"}
+for the plain ggplot2 rectangles of earlier versions. Keys only appear
+for discrete fills; a continuous fill gets a colourbar.}
 
 \item{...}{Additional arguments passed to \emph{both} auto-built fill
 scales (e.g., shared \code{limits} or \code{na.value}). Because they go
@@ -241,11 +242,14 @@ the Explicit encoding section.
 \code{yang_colors}; a factor, character, or logical column (including
 computed expressions such as \code{factor(week)}) gets a discrete
 \code{\link[ggplot2]{scale_fill_manual}} whose palette is interpolated from
-the same color vectors. With the default vectors the discrete palette skips
-the palest end of the ramp so that no category is invisible on a white
-panel; an explicitly supplied color vector is used as-is. Supply
+the same color vectors. With the default vectors, or a \code{palette}, the
+discrete palette samples the ramp and skips its palest end so that no
+category is invisible on a white panel; an explicitly supplied color vector
+is used as-is, one colour per level in order. Supply
 \code{yin_scale} / \code{yang_scale} to override the automatic choice
-entirely.
+entirely. Each fish has its own fill scale, so a fill scale added to the
+plot afterwards (\code{+ scale_fill_viridis_c()}) replaces the yang one
+only; pass it as \code{yang_scale} instead.
 
 The automatic discrete palette samples a \emph{sequential} ramp, which
 implies that the levels are ordered. That suits an ordered factor and
@@ -253,6 +257,11 @@ overstates an unordered one: if your categories have no natural order,
 supply a qualitative palette through \code{yin_colors} / \code{yang_colors}
 or a scale through \code{yin_scale} / \code{yang_scale}, so the fill does
 not assert a ranking the data does not have.
+
+The glyphs are drawn from the plot's own data, the data the scales are
+chosen from, so \code{geom_taichi()} has no \code{data} argument; to draw
+one fish from other data, use \code{\link{geom_yin_fish}()} /
+\code{\link{geom_yang_fish}()}, which take one.
 
 Because the choice is made when the layer is added, replacing the plot's
 data afterwards keeps the scales picked for the original data. Swapping in
@@ -328,6 +337,12 @@ statistics are the ones \code{\link{taichi_summary}()} tabulates, including
 its rule that a ratio of a non-positive value is \code{NA} rather than
 \code{Inf}.
 
+Every channel shows how far the statistic is from agreement, which is 0
+for every statistic except \code{"ratio"}, whose agreement is 1. A ratio
+is measured by its plain distance from 1, so a ratio of 2 reads as a wider
+gap than one of 0.5; use \code{"log_ratio"} when a doubling and a halving
+should look alike.
+
 \code{explicit_channel} chooses where it goes:
 \describe{
 \item{\code{"eye_size"}}{The default, and the tidiest: the eyes already
@@ -374,9 +389,10 @@ sources are level. The default grey-and-red pair is \emph{not} matched
 (run \code{\link{taichi_check_palette}()} with no arguments to see the
 numbers) and is kept only for continuity. \code{palette} selects a
 matched pair instead (\code{"balanced"} is the recommended one), and it
-also accepts the output of \code{\link{taichi_palette_pair}()}. It is a
-shorthand for setting \code{yin_colors} and \code{yang_colors} together,
-so passing both is an error.
+also accepts the output of \code{\link{taichi_palette_pair}()}. It sets
+\code{yin_colors} and \code{yang_colors} together, so passing both is an
+error, and as a ramp: a discrete fill samples it evenly, palest end
+skipped, rather than taking its first colours.
 }
 
 \section{Interactivity}{
@@ -399,7 +415,11 @@ source at once. That last one turns the superposition display into a
 single-source display for as long as the pointer rests there, letting a
 reader decompose the comparison instead of doing it in their head.
 \code{tooltip}, \code{data_id} and \code{onclick} take a data column to
-override any of it.
+override any of it. The default ids name a cell by its \code{x} and
+\code{y} values, so in a faceted plot the same cell lights up in every
+panel at once. To keep the panels apart, give \code{data_id} an expression
+that includes the facet variable, such as
+\code{paste(state, week, category)}.
 
 The static rendering is unchanged: with \code{interactive = FALSE} the
 package does not touch \pkg{ggiraph} at all, and with it \code{TRUE} the

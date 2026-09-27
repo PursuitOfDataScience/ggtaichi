@@ -4,8 +4,10 @@
 #' therefore by [geom_taichi()]: a small taichi symbol whose relevant fish is
 #' filled with the key's colour while the other is left as an outline, so the
 #' key looks like the mark it describes and says which half of the glyph the
-#' scale governs. Pass it to a layer's `key_glyph` argument to use it
-#' elsewhere, or use `key_glyph = "rect"` for plain ggplot2 rectangles.
+#' scale governs. Under `geom_taichi(shared_legend = TRUE)`, where the one
+#' legend governs both fish, its keys fill both halves. Pass it to a layer's
+#' `key_glyph` argument to use it elsewhere, or use `key_glyph = "rect"` for
+#' plain ggplot2 rectangles.
 #'
 #' Keys only appear for discrete fills. A continuous fill is drawn by
 #' [ggplot2::guide_colourbar()], which is a gradient bar rather than a set of
@@ -43,7 +45,14 @@
 #'   geom_yin_fish(aes(fill = grp), key_glyph = "rect")
 draw_key_taichi <- function(data, params, size, fish = "both") {
   fish <- rlang::arg_match0(fish, c("both", "yin", "yang"), arg_nm = "fish")
+  taichi_key(data, params, fish)
+}
 
+# The key itself. `fish` is one of draw_key_taichi()'s three, or "shared": the
+# yin key with the yang half in the same colour, for the single legend that
+# shared_legend leaves, which describes both fish. A key with only the yin
+# half filled would say that legend is about the top fish alone.
+taichi_key <- function(data, params, fish) {
   fill <- data$fill[1] %||% "grey20"
   alpha <- data$alpha[1] %||% NA
   lwd <- (data$linewidth[1] %||% 0.1) * .pt
@@ -54,12 +63,14 @@ draw_key_taichi <- function(data, params, size, fish = "both") {
   yin_fill <- switch(fish,
     yin = alpha(fill, alpha),
     yang = NA,
-    both = alpha(fill, alpha)
+    both = alpha(fill, alpha),
+    shared = alpha(fill, alpha)
   )
   yang_fill <- switch(fish,
     yin = NA,
     yang = alpha(fill, alpha),
-    both = alpha(mix_ink(fill, "white", 0.7), alpha)
+    both = alpha(mix_ink(fill, "white", 0.7), alpha),
+    shared = alpha(fill, alpha)
   )
 
   poly <- function(which, this_fill) {
@@ -93,7 +104,7 @@ draw_key_taichi <- function(data, params, size, fish = "both") {
       )
     }
     eyes <- list()
-    if (fish %in% c("yin", "both")) {
+    if (fish %in% c("yin", "both", "shared")) {
       eyes[[length(eyes) + 1]] <- eye(0.5 + 0.225, own_colour("white"))
     }
     if (fish %in% c("yang", "both")) {
@@ -114,9 +125,13 @@ draw_key_taichi <- function(data, params, size, fish = "both") {
 }
 
 draw_key_yin_fish <- function(data, params, size) {
-  draw_key_taichi(data, params, size, fish = "yin")
+  taichi_key(data, params, "yin")
 }
 
 draw_key_yang_fish <- function(data, params, size) {
-  draw_key_taichi(data, params, size, fish = "yang")
+  taichi_key(data, params, "yang")
+}
+
+draw_key_shared_fish <- function(data, params, size) {
+  taichi_key(data, params, "shared")
 }

@@ -21,11 +21,14 @@
 #' \code{yang_colors}; a factor, character, or logical column (including
 #' computed expressions such as \code{factor(week)}) gets a discrete
 #' \code{\link[ggplot2]{scale_fill_manual}} whose palette is interpolated from
-#' the same color vectors. With the default vectors the discrete palette skips
-#' the palest end of the ramp so that no category is invisible on a white
-#' panel; an explicitly supplied color vector is used as-is. Supply
+#' the same color vectors. With the default vectors, or a \code{palette}, the
+#' discrete palette samples the ramp and skips its palest end so that no
+#' category is invisible on a white panel; an explicitly supplied color vector
+#' is used as-is, one colour per level in order. Supply
 #' \code{yin_scale} / \code{yang_scale} to override the automatic choice
-#' entirely.
+#' entirely. Each fish has its own fill scale, so a fill scale added to the
+#' plot afterwards (\code{+ scale_fill_viridis_c()}) replaces the yang one
+#' only; pass it as \code{yang_scale} instead.
 #'
 #' The automatic discrete palette samples a \emph{sequential} ramp, which
 #' implies that the levels are ordered. That suits an ordered factor and
@@ -33,6 +36,11 @@
 #' supply a qualitative palette through \code{yin_colors} / \code{yang_colors}
 #' or a scale through \code{yin_scale} / \code{yang_scale}, so the fill does
 #' not assert a ranking the data does not have.
+#'
+#' The glyphs are drawn from the plot's own data, the data the scales are
+#' chosen from, so \code{geom_taichi()} has no \code{data} argument; to draw
+#' one fish from other data, use \code{\link{geom_yin_fish}()} /
+#' \code{\link{geom_yang_fish}()}, which take one.
 #'
 #' Because the choice is made when the layer is added, replacing the plot's
 #' data afterwards keeps the scales picked for the original data. Swapping in
@@ -98,6 +106,12 @@
 #' its rule that a ratio of a non-positive value is \code{NA} rather than
 #' \code{Inf}.
 #'
+#' Every channel shows how far the statistic is from agreement, which is 0
+#' for every statistic except \code{"ratio"}, whose agreement is 1. A ratio
+#' is measured by its plain distance from 1, so a ratio of 2 reads as a wider
+#' gap than one of 0.5; use \code{"log_ratio"} when a doubling and a halving
+#' should look alike.
+#'
 #' \code{explicit_channel} chooses where it goes:
 #' \describe{
 #'   \item{\code{"eye_size"}}{The default, and the tidiest: the eyes already
@@ -142,9 +156,10 @@
 #' (run \code{\link{taichi_check_palette}()} with no arguments to see the
 #' numbers) and is kept only for continuity. \code{palette} selects a
 #' matched pair instead (\code{"balanced"} is the recommended one), and it
-#' also accepts the output of \code{\link{taichi_palette_pair}()}. It is a
-#' shorthand for setting \code{yin_colors} and \code{yang_colors} together,
-#' so passing both is an error.
+#' also accepts the output of \code{\link{taichi_palette_pair}()}. It sets
+#' \code{yin_colors} and \code{yang_colors} together, so passing both is an
+#' error, and as a ramp: a discrete fill samples it evenly, palest end
+#' skipped, rather than taking its first colours.
 #'
 #' @section Interactivity:
 #' Fill is the least accurate channel there is, which is why an interactive
@@ -165,7 +180,11 @@
 #' single-source display for as long as the pointer rests there, letting a
 #' reader decompose the comparison instead of doing it in their head.
 #' \code{tooltip}, \code{data_id} and \code{onclick} take a data column to
-#' override any of it.
+#' override any of it. The default ids name a cell by its \code{x} and
+#' \code{y} values, so in a faceted plot the same cell lights up in every
+#' panel at once. To keep the panels apart, give \code{data_id} an expression
+#' that includes the facet variable, such as
+#' \code{paste(state, week, category)}.
 #'
 #' The static rendering is unchanged: with \code{interactive = FALSE} the
 #' package does not touch \pkg{ggiraph} at all, and with it \code{TRUE} the
@@ -296,9 +315,10 @@
 #' @param show.legend Logical. Should the layer be included in the legend?
 #' @param key_glyph The legend key glyph, passed on to
 #'   \code{\link[ggplot2]{layer}()}. Both fish default to a small taichi with
-#'   their own half filled (see \code{\link{draw_key_taichi}()}); pass
-#'   \code{"rect"} for the plain ggplot2 rectangles of earlier versions. Keys
-#'   only appear for discrete fills; a continuous fill gets a colourbar.
+#'   their own half filled (see \code{\link{draw_key_taichi}()}), and the one
+#'   legend \code{shared_legend} keeps fills both halves; pass \code{"rect"}
+#'   for the plain ggplot2 rectangles of earlier versions. Keys only appear
+#'   for discrete fills; a continuous fill gets a colourbar.
 #' @param ... Additional arguments passed to \emph{both} auto-built fill
 #'   scales (e.g., shared \code{limits} or \code{na.value}). Because they go
 #'   to both, an argument that suits only one kind of scale will be rejected by
@@ -455,12 +475,12 @@ geom_taichi <- function(
                                   arg_nm = "data_id_by")
   if (!is.null(explicit_range)) {
     if (!is.numeric(explicit_range) || length(explicit_range) != 2 ||
-        anyNA(explicit_range)) {
+        !all(is.finite(explicit_range))) {
       rlang::abort("`explicit_range` must be two numbers, or NULL.")
     }
   }
   if (!is.numeric(radius_exponent) || length(radius_exponent) != 1 ||
-      is.na(radius_exponent) || radius_exponent <= 0) {
+      !is.finite(radius_exponent) || radius_exponent <= 0) {
     rlang::abort("`radius_exponent` must be a single positive number.")
   }
   if (explicit == "none") {
@@ -527,7 +547,7 @@ geom_taichi <- function(
 
   # A custom scale is either used as-is or called to build one, so anything
   # else would only surface as a do.call() error much later.
-  check_scale_arg <- function(value, arg) {
+  check_scale_arg <- function(value, arg, call = rlang::caller_env()) {
     if (is.null(value) || is.function(value) || inherits(value, "Scale")) {
       return(invisible())
     }
@@ -535,7 +555,7 @@ geom_taichi <- function(
       "`", arg, "` must be a fill scale object (e.g. ",
       "`scale_fill_viridis_c()`) or a scale constructor function (e.g. ",
       "`scale_fill_viridis_c`), not ", class(value)[1], "."
-    ))
+    ), call = call)
   }
   check_scale_arg(yin_scale, "yin_scale")
   check_scale_arg(yang_scale, "yang_scale")
@@ -553,14 +573,36 @@ geom_taichi <- function(
     pair <- as_palette_pair(palette, "palette")
     yin_colors <- pair$yin
     yang_colors <- pair$yang
-    # A preset's colours are used verbatim for discrete fills, exactly as an
-    # explicit colour vector is. The exception is "default": that is the
-    # built-in ramp, and it keeps the built-in ramp's habit of skipping its
-    # palest end.
-    named_default <- is.character(palette) && identical(palette, "default")
-    colors_user <- !named_default
-    yang_colors_user <- !named_default
+    # A palette is a pair of sequential ramps, so a discrete fill samples it
+    # the way it samples the built-in ramps, palest end skipped. Taking its
+    # colours verbatim, as an explicit (often qualitative) vector is taken,
+    # gave a three-level factor the three palest steps of a five-step ramp,
+    # the first of them close to invisible on a white panel, and disagreed
+    # with scale_taichi_yin_d(palette = ), which samples the same ramp.
+    colors_user <- FALSE
+    yang_colors_user <- FALSE
   }
+
+  # Checked here rather than left to the scale, where a bad colour surfaced
+  # only at print time ("Unknown colour name: ...") with no argument named.
+  # farver is what the fill scales decode colours with, so anything it takes
+  # (numbers and NA included) keeps working.
+  check_ramp <- function(cols, arg, call = rlang::caller_env()) {
+    if (length(cols) == 0) {
+      rlang::abort(paste0("`", arg, "` must contain at least one colour."),
+                   call = call)
+    }
+    bad <- tryCatch({
+      farver::decode_colour(cols)
+      NULL
+    }, error = function(e) conditionMessage(e))
+    if (!is.null(bad)) {
+      rlang::abort(paste0("`", arg, "` is not a valid colour vector: ", bad),
+                   call = call)
+    }
+  }
+  check_ramp(yin_colors, "yin_colors")
+  check_ramp(yang_colors, "yang_colors")
 
   # These are supplied to the auto-built scales by geom_taichi() itself, so
   # passing them through `...` would collide; say which per-fish argument to
@@ -635,6 +677,11 @@ geom_taichi <- function(
 
   yin_params <- shared_params
   yang_params <- shared_params
+  # The yin guide is the only one shared_legend keeps, and it governs both
+  # fish, so its keys fill both halves (see taichi_key()).
+  if (shared_legend && is.null(key_glyph)) {
+    yin_params$key_glyph <- draw_key_shared_fish
+  }
 
   # Eye size and colour accept a constant or a data column: constants become
   # layer parameters, columns become per-fish aesthetic mappings. An eye
@@ -734,8 +781,8 @@ geom_taichi <- function(
 #' @export
 print.ggtaichi_plot <- function(x, ...) {
   cat("<ggtaichi> taichi layers for a ggplot\n")
-  cat("  yin  : ", x$yin_name, "\n", sep = "")
-  cat("  yang : ", x$yang_name, "\n", sep = "")
+  cat("  yin  : ", label_text(x$yin_name), "\n", sep = "")
+  cat("  yang : ", label_text(x$yang_name), "\n", sep = "")
   cat("  eyes : ", if (isTRUE(x$eyes)) "on" else "off", "\n", sep = "")
   if (!identical(x$explicit, "none") && !is.null(x$explicit)) {
     cat("  gap  : ", x$explicit, " -> ", x$explicit_channel, "\n", sep = "")
@@ -773,9 +820,12 @@ is_constant_quo <- function(quo) {
   rlang::is_syntactic_literal(rlang::quo_get_expr(quo))
 }
 
-check_eye_size <- function(value, arg) {
-  if (!is.numeric(value) || length(value) != 1 || is.na(value)) {
-    rlang::abort(paste0("`", arg, "` must be a single number or a data column."))
+check_eye_size <- function(value, arg, call = rlang::caller_env()) {
+  if (!is.numeric(value) || length(value) != 1 || !is.finite(value)) {
+    rlang::abort(
+      paste0("`", arg, "` must be a single number or a data column."),
+      call = call
+    )
   }
   value
 }
@@ -791,8 +841,9 @@ fill_kind <- function(v) {
 # Common fill limits for the two sources: the union range when both are
 # continuous, the union of levels when both are discrete, NULL when the two
 # are of incompatible types (or nothing is known about them yet), or when
-# there is no finite value or level to share.
-shared_fill_limits <- function(yin_vals, yang_vals) {
+# there is no finite value or level to share. `drop = FALSE` (passed through
+# `...` to keep unused factor levels) keeps them in the union too.
+shared_fill_limits <- function(yin_vals, yang_vals, drop = TRUE) {
   disc <- function(v) is.factor(v) || is.character(v) || is.logical(v)
   if (is.numeric(yin_vals) && is.numeric(yang_vals)) {
     vals <- c(yin_vals, yang_vals)
@@ -802,7 +853,11 @@ shared_fill_limits <- function(yin_vals, yang_vals) {
   }
   if (disc(yin_vals) && disc(yang_vals)) {
     as_lvls <- function(v) {
-      if (is.factor(v)) levels(droplevels(v)) else unique(as.character(v[!is.na(v)]))
+      if (is.factor(v)) {
+        levels(if (drop) droplevels(v) else v)
+      } else {
+        unique(as.character(v[!is.na(v)]))
+      }
     }
     lvls <- union(as_lvls(yin_vals), as_lvls(yang_vals))
     if (length(lvls) == 0) return(NULL)
@@ -831,6 +886,9 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
   if (!is.data.frame(data)) data <- NULL
 
   scale_dots <- object$scale_dots %||% list()
+  # These errors happen at `+` time, inside this method and its helpers, but
+  # they are about arguments the user gave geom_taichi(), so they say so.
+  call <- quote(geom_taichi())
 
   # Evaluate the fill quosure against the plot data so that discrete columns,
   # including computed expressions such as factor(week), can be detected.
@@ -847,7 +905,7 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
         rlang::abort(paste0(
           "Column `", as.character(expr), "` (supplied to `", arg,
           "`) was not found in the plot data."
-        ))
+        ), call = call)
       }
       return(NULL)
     }
@@ -868,7 +926,7 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
       }
       rlang::abort(paste0(
         "`", arg, "` must be a scale for the `fill` aesthetic; ", governs, "."
-      ))
+      ), call = call)
     }
     scale
   }
@@ -888,25 +946,33 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
         scale <- check_fill_scale(custom_scale, arg)$clone()
         if (inherits(scale$name, "waiver")) scale$name <- name
         if (!is.null(extra$limits) && is.null(scale$limits)) {
-          scale$limits <- extra$limits
+          scale$limits <- limits_in_scale_units(scale, extra$limits)
         }
         # `shared_legend` means "one legend", so the yang guide goes whatever
         # the supplied scale asked for; that is the request, not an accident.
         if (identical(extra$guide, "none")) scale$guide <- "none"
         return(pin_guide_order(scale, order))
       }
-      scale <- check_fill_scale(
-        do.call(custom_scale, c(
+      # Built first and checked second: check_fill_scale() reads the result
+      # inside a tryCatch(), and a constructor error evaluated lazily in there
+      # was reported as "the supplied scale declares no aesthetics".
+      scale <- tryCatch(
+        do_call_quoted(custom_scale, c(
           list(name = name), extra,
           scale_dots[setdiff(names(scale_dots), names(extra))]
         )),
-        arg
+        error = function(e) {
+          rlang::abort(paste0("`", arg, "` failed to build a fill scale."),
+                       parent = e, call = call)
+        }
       )
+      scale <- check_fill_scale(scale, arg)
       return(pin_guide_order(scale, order))
     }
     # Options ggtaichi computes for this fish (shared limits, the dropped yang
     # guide) win over the same name in `...`, which otherwise both reach
-    # do.call() and abort.
+    # do.call() and abort. The scales are built with do_call_quoted(), so
+    # that a plotmath title (a call) is passed on rather than evaluated.
     dots <- c(extra, scale_dots[setdiff(names(scale_dots), names(extra))])
     is_disc <- is.factor(vals) || is.character(vals) || is.logical(vals)
     if (is_disc) {
@@ -918,10 +984,13 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
       if (!is.character(lims) && !is.numeric(lims) && !is.logical(lims)) {
         lims <- NULL
       }
+      # `drop = FALSE` keeps a factor's unused levels in the scale, and the
+      # palette has to cover them too, or scale_fill_manual() aborts with
+      # "Insufficient values in manual scale".
       n_vals <- if (length(lims) > 0) {
         length(lims)
       } else if (is.factor(vals)) {
-        nlevels(droplevels(vals))
+        if (isFALSE(dots$drop)) nlevels(vals) else nlevels(droplevels(vals))
       } else {
         length(unique(vals[!is.na(vals)]))
       }
@@ -936,11 +1005,17 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
         scale_col <- grDevices::colorRampPalette(colors)(n_vals)
       }
       dots$guide <- dots$guide %||% ggplot2::guide_legend(order = order)
-      do.call(ggplot2::scale_fill_manual, c(list(name = name, values = scale_col), dots))
+      scale <- do_call_quoted(ggplot2::scale_fill_manual,
+                              c(list(name = name, values = scale_col), dots))
     } else {
       dots$guide <- dots$guide %||% ggplot2::guide_colourbar(order = order)
-      do.call(ggplot2::scale_fill_gradientn, c(list(name = name, colors = colors), dots))
+      scale <- do_call_quoted(ggplot2::scale_fill_gradientn,
+                              c(list(name = name, colors = colors), dots))
     }
+    # A guide passed through `...` is the same object for both fish and asks
+    # for no order, which left the two legends to ggplot2's unstable tie-break
+    # again; it keeps its type and gets yin's or yang's place.
+    pin_guide_order(scale, order)
   }
 
   yin_vals <- resolve_values(object$yin_mapping, "yin")
@@ -950,7 +1025,8 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
   yang_extra <- list()
 
   if (isTRUE(object$shared_limits) && is.null(scale_dots$limits)) {
-    lims <- shared_fill_limits(yin_vals, yang_vals)
+    lims <- shared_fill_limits(yin_vals, yang_vals,
+                               drop = !isFALSE(scale_dots$drop))
     if (!is.null(lims)) {
       yin_extra$limits <- lims
       yang_extra$limits <- lims
@@ -988,12 +1064,55 @@ ggplot_add.ggtaichi_plot <- function(object, plot, ...) {
     yang_layer <- add_interactive_aes(yang_layer, object, plot, "yang")
   }
 
+  # A plot that already paints something by fill has a fill scale the yin
+  # fish would otherwise take over: ggplot2 replaced it with the yin scale,
+  # drew the earlier layer in the yin ramp and trained both on one range. A
+  # fresh fill scale first keeps them apart, which is what ggnewscale is for.
+  # A plot-level aes(fill = ) needs it even with no layer yet: the break
+  # between the fish renames that mapping, the yang layer inherits the renamed
+  # copy, and its values then trained the yin scale.
+  if (plot_uses_fill(plot)) plot <- plot + ggnewscale::new_scale_fill()
+
   plot +
     yin_layer +
     yin_scale_obj +
     ggnewscale::new_scale_fill() +
     yang_layer +
     yang_scale_obj
+}
+
+
+# Does anything already on the plot use the fill aesthetic: a fill scale, a
+# plot-level fill mapping, a layer mapping fill, or a stat that computes one
+# (after_stat() in its defaults, as geom_bin_2d() does)?
+plot_uses_fill <- function(plot) {
+  if (isTRUE(plot$scales$has_scale("fill"))) return(TRUE)
+  if ("fill" %in% names(plot$mapping)) return(TRUE)
+  for (layer in plot$layers) {
+    if ("fill" %in% names(layer$mapping)) return(TRUE)
+    stat_fill <- layer$stat$default_aes$fill
+    if (!is.null(stat_fill) && !is.atomic(stat_fill)) return(TRUE)
+  }
+  FALSE
+}
+
+
+# A continuous (or binned) scale keeps its limits in transformed units:
+# continuous_scale() transforms and sorts `limits` on the way in. Limits written
+# straight into an existing scale object have to go through the same step, or a
+# log10 scale reads a shared c(1, 500) as 10 to 10^500 and censors most of the
+# data to na.value. Discrete limits are levels and pass through untouched.
+limits_in_scale_units <- function(scale, limits) {
+  if (!is.numeric(limits)) return(limits)
+  transformation <- if (is.function(scale$get_transformation)) {
+    scale$get_transformation()
+  } else {
+    scale$trans
+  }
+  if (is.null(transformation)) return(limits)
+  limits <- transformation$transform(limits)
+  if (!anyNA(limits)) limits <- sort(limits)
+  limits
 }
 
 
@@ -1060,8 +1179,8 @@ add_interactive_aes <- function(layer, object, plot, fish) {
   if (!isTRUE(object$has_tooltip)) {
     mapping$tooltip <- rlang::quo(taichi_tooltip(
       !!yin_quo, !!yang_quo,
-      !!(object$yin_label %||% object$yin_name),
-      !!(object$yang_label %||% object$yang_name),
+      !!label_text(object$yin_label %||% object$yin_name),
+      !!label_text(object$yang_label %||% object$yang_name),
       !!x_quo, !!y_quo, !!x_lab, !!y_lab
     ))
   }
@@ -1257,8 +1376,12 @@ makeContent.taichi_cells <- function(x) {
     )
   )
   fish_grob <- if (isTRUE(x$interactive) && ggiraph_installed()) {
-    do.call(ggiraph::interactive_polygon_grob,
-            c(poly_args, x$ipar %||% list()))
+    # ggiraph reads an id-batched polygon's attributes at the row of each
+    # polygon's first vertex, so they go in one value per vertex. Handed one
+    # value per cell, polygon 2 read row m + 1, which does not exist: only the
+    # first glyph of each layer had a tooltip or a data_id in the widget.
+    vertex_ipar <- lapply(x$ipar %||% list(), rep, each = m)
+    do.call(ggiraph::interactive_polygon_grob, c(poly_args, vertex_ipar))
   } else {
     do.call(grid::polygonGrob, poly_args)
   }
@@ -1298,6 +1421,27 @@ makeContent.taichi_cells <- function(x) {
 }
 
 
+# Each glyph is drawn in its cell's bounding box, so the coord has to transform
+# xmin / xmax / ymin / ymax as well as x / y. The Cartesian family and
+# coord_transform() do; coord_polar(), coord_radial() and coord_map() move the
+# cell centres only, which left the boxes in data units and drew one oversized
+# glyph in a corner of the panel. Say so instead of drawing that.
+check_taichi_coord <- function(coord) {
+  unsupported <- c(CoordPolar = "coord_polar()", CoordRadial = "coord_radial()",
+                   CoordMap = "coord_map()")
+  hit <- Filter(function(cl) inherits(coord, cl), names(unsupported))
+  if (length(hit) > 0) {
+    rlang::abort(paste0(
+      "The taichi glyphs cannot be drawn in `", unsupported[[hit[1]]], "`: ",
+      "each one fills a rectangular cell, and that coordinate system moves ",
+      "only the cell centres. Use a Cartesian coord such as ",
+      "`coord_cartesian()`, `coord_fixed()` or `coord_flip()`."
+    ), call = NULL)
+  }
+  invisible(coord)
+}
+
+
 # Shared setup: convert (x, y) cell centers into a bounding box, and rescale
 # mapped eye sizes (the eye_size column only exists here when it was mapped;
 # constants arrive later as aesthetic parameters and are used verbatim).
@@ -1327,7 +1471,8 @@ taichi_setup_data <- function(data, params) {
   if (!is.null(channel_col) && !is.null(data[[channel_col]])) {
     data[[channel_col]] <- rescale_explicit(data[[channel_col]], channel,
                                             params$explicit_range,
-                                            params$radius_exponent)
+                                            params$radius_exponent,
+                                            explicit_agreement(params$explicit))
   }
 
   if (!identical(channel, "eye_size") &&
@@ -1396,6 +1541,7 @@ GeomYinFish <- ggplot2::ggproto("GeomYinFish", ggplot2::Geom,
 
   draw_panel = function(data, panel_params, coord, eyes = FALSE,
                         interactive = FALSE) {
+    check_taichi_coord(coord)
     coords <- coord$transform(data, panel_params)
     draw_taichi(coords, "yin", eyes = eyes, interactive = interactive)
   },
@@ -1517,6 +1663,7 @@ GeomYangFish <- ggplot2::ggproto("GeomYangFish", GeomYinFish,
 
   draw_panel = function(data, panel_params, coord, eyes = FALSE,
                         interactive = FALSE) {
+    check_taichi_coord(coord)
     coords <- coord$transform(data, panel_params)
     draw_taichi(coords, "yang", eyes = eyes, interactive = interactive)
   },
