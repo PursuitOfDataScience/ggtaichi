@@ -169,9 +169,14 @@ own fish’s head:</p>
 <p>Note the <code>state_length = 1</code> with
 <code>transition_length = 0</code>: each frame <em>is</em> a state, so
 the rotation advances in crisp steps (at least one of the two lengths
-must be positive, or gganimate cannot allocate frames). For a grow-in
-reveal instead, keep a positive <code>transition_length</code> and add
-<code><a href="https://gganimate.com/reference/enter_exit.html" class="external-link">enter_grow()</a></code> to the plot.</p>
+must be positive, or gganimate cannot allocate frames).</p>
+<p>A cell that appears or disappears between states pops in and out
+whole. <code><a href="https://gganimate.com/reference/enter_exit.html" class="external-link">enter_grow()</a></code> and <code><a href="https://gganimate.com/reference/enter_exit.html" class="external-link">exit_shrink()</a></code> have no
+visible effect, because they scale a size the glyph does not have, and
+<code><a href="https://gganimate.com/reference/enter_exit.html" class="external-link">enter_fade()</a></code> and <code><a href="https://gganimate.com/reference/enter_exit.html" class="external-link">enter_recolour()</a></code> stop with an
+error on any plot that uses a <code><a href="https://eliocamp.github.io/ggnewscale/reference/new_scale.html" class="external-link">ggnewscale::new_scale_fill()</a></code>
+break, which every <code><a href="../reference/geom_taichi.html">geom_taichi()</a></code> plot does.
+<code><a href="https://gganimate.com/reference/enter_exit.html" class="external-link">enter_drift()</a></code> does move an entering glyph in.</p>
 </div>
 <div class="section level2">
 <h2 id="export-helpers">Export helpers<a class="anchor" aria-label="anchor" href="#export-helpers"></a>

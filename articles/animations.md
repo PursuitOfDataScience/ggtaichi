@@ -128,9 +128,21 @@ show_animation(p_spin, nframes = 36, fps = 12, width = 300, height = 300)
 Note the `state_length = 1` with `transition_length = 0`: each frame
 *is* a state, so the rotation advances in crisp steps (at least one of
 the two lengths must be positive, or gganimate cannot allocate frames).
-For a grow-in reveal instead, keep a positive `transition_length` and
-add [`enter_grow()`](https://gganimate.com/reference/enter_exit.html) to
-the plot.
+
+A cell that appears or disappears between states pops in and out whole.
+[`enter_grow()`](https://gganimate.com/reference/enter_exit.html) and
+[`exit_shrink()`](https://gganimate.com/reference/enter_exit.html) have
+no visible effect, because they scale a size the glyph does not have,
+and [`enter_fade()`](https://gganimate.com/reference/enter_exit.html)
+and
+[`enter_recolour()`](https://gganimate.com/reference/enter_exit.html)
+stop with an error on any plot that uses a
+[`ggnewscale::new_scale_fill()`](https://eliocamp.github.io/ggnewscale/reference/new_scale.html)
+break, which every
+[`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
+plot does.
+[`enter_drift()`](https://gganimate.com/reference/enter_exit.html) does
+move an entering glyph in.
 
 ## Export helpers
 

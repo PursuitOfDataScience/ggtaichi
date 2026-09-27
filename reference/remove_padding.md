@@ -44,6 +44,17 @@ remove_padding(x = NULL, y = NULL, ...)
 An object that, added to a ggplot, replaces both position scales with
 padding-free ones.
 
+## Details
+
+A continuous axis holding dates, date-times or `hms` times gets the
+matching scale
+([`ggplot2::scale_x_date()`](https://ggplot2.tidyverse.org/reference/scale_date.html),
+[`ggplot2::scale_x_datetime()`](https://ggplot2.tidyverse.org/reference/scale_date.html),
+[`ggplot2::scale_x_time()`](https://ggplot2.tidyverse.org/reference/scale_date.html))
+rather than
+[`ggplot2::scale_x_continuous()`](https://ggplot2.tidyverse.org/reference/scale_continuous.html),
+so its labels stay dates instead of turning into day or second counts.
+
 ## Examples
 
 ``` r

@@ -131,9 +131,9 @@ half of the palette pair they take.
   the data has, skipping its palest end so no category is invisible on a
   white panel: the rule
   [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md)
-  applies to its default colours for factor, character and logical
-  sources. An explicit `colors` vector is used as given instead, again
-  as in
+  applies to its default colours and to a `palette` for factor,
+  character and logical sources. An explicit `colors` vector is used as
+  given instead, again as in
   [`geom_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_taichi.md),
   so a qualitative palette keeps its own colours.
 

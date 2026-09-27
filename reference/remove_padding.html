@@ -89,6 +89,13 @@ an "unused argument" error. For per-axis options, add your own
     <p>An object that, added to a ggplot, replaces both position scales
 with padding-free ones.</p>
     </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>A continuous axis holding dates, date-times or <code>hms</code> times gets the
+matching scale (<code><a href="https://ggplot2.tidyverse.org/reference/scale_date.html" class="external-link">ggplot2::scale_x_date()</a></code>, <code><a href="https://ggplot2.tidyverse.org/reference/scale_date.html" class="external-link">ggplot2::scale_x_datetime()</a></code>,
+<code><a href="https://ggplot2.tidyverse.org/reference/scale_date.html" class="external-link">ggplot2::scale_x_time()</a></code>) rather than <code><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">ggplot2::scale_x_continuous()</a></code>, so
+its labels stay dates instead of turning into day or second counts.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

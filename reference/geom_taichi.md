@@ -260,10 +260,10 @@ geom_taichi(
   The legend key glyph, passed on to
   [`layer()`](https://ggplot2.tidyverse.org/reference/layer.html). Both
   fish default to a small taichi with their own half filled (see
-  [`draw_key_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/draw_key_taichi.md));
-  pass `"rect"` for the plain ggplot2 rectangles of earlier versions.
-  Keys only appear for discrete fills; a continuous fill gets a
-  colourbar.
+  [`draw_key_taichi()`](https://pursuitofdatascience.github.io/ggtaichi/reference/draw_key_taichi.md)),
+  and the one legend `shared_legend` keeps fills both halves; pass
+  `"rect"` for the plain ggplot2 rectangles of earlier versions. Keys
+  only appear for discrete fills; a continuous fill gets a colourbar.
 
 - ...:
 
@@ -302,10 +302,13 @@ column (including computed expressions such as `factor(week)`) gets a
 discrete
 [`scale_fill_manual`](https://ggplot2.tidyverse.org/reference/scale_manual.html)
 whose palette is interpolated from the same color vectors. With the
-default vectors the discrete palette skips the palest end of the ramp so
-that no category is invisible on a white panel; an explicitly supplied
-color vector is used as-is. Supply `yin_scale` / `yang_scale` to
-override the automatic choice entirely.
+default vectors, or a `palette`, the discrete palette samples the ramp
+and skips its palest end so that no category is invisible on a white
+panel; an explicitly supplied color vector is used as-is, one colour per
+level in order. Supply `yin_scale` / `yang_scale` to override the
+automatic choice entirely. Each fish has its own fill scale, so a fill
+scale added to the plot afterwards (`+ scale_fill_viridis_c()`) replaces
+the yang one only; pass it as `yang_scale` instead.
 
 The automatic discrete palette samples a *sequential* ramp, which
 implies that the levels are ordered. That suits an ordered factor and
@@ -313,6 +316,14 @@ overstates an unordered one: if your categories have no natural order,
 supply a qualitative palette through `yin_colors` / `yang_colors` or a
 scale through `yin_scale` / `yang_scale`, so the fill does not assert a
 ranking the data does not have.
+
+The glyphs are drawn from the plot's own data, the data the scales are
+chosen from, so `geom_taichi()` has no `data` argument; to draw one fish
+from other data, use
+[`geom_yin_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md)
+/
+[`geom_yang_fish()`](https://pursuitofdatascience.github.io/ggtaichi/reference/geom_yin_fish.md),
+which take one.
 
 Because the choice is made when the layer is added, replacing the plot's
 data afterwards keeps the scales picked for the original data. Swapping
@@ -383,6 +394,12 @@ third channel of the glyph. The statistics are the ones
 tabulates, including its rule that a ratio of a non-positive value is
 `NA` rather than `Inf`.
 
+Every channel shows how far the statistic is from agreement, which is 0
+for every statistic except `"ratio"`, whose agreement is 1. A ratio is
+measured by its plain distance from 1, so a ratio of 2 reads as a wider
+gap than one of 0.5; use `"log_ratio"` when a doubling and a halving
+should look alike.
+
 `explicit_channel` chooses where it goes:
 
 - `"eye_size"`:
@@ -442,8 +459,9 @@ with no arguments to see the numbers) and is kept only for continuity.
 `palette` selects a matched pair instead (`"balanced"` is the
 recommended one), and it also accepts the output of
 [`taichi_palette_pair()`](https://pursuitofdatascience.github.io/ggtaichi/reference/taichi_palette_pair.md).
-It is a shorthand for setting `yin_colors` and `yang_colors` together,
-so passing both is an error.
+It sets `yin_colors` and `yang_colors` together, so passing both is an
+error, and as a ramp: a discrete fill samples it evenly, palest end
+skipped, rather than taking its first colours.
 
 ## Interactivity
 
@@ -465,7 +483,11 @@ fish at a time, and `"source"` every fish of one source at once. That
 last one turns the superposition display into a single-source display
 for as long as the pointer rests there, letting a reader decompose the
 comparison instead of doing it in their head. `tooltip`, `data_id` and
-`onclick` take a data column to override any of it.
+`onclick` take a data column to override any of it. The default ids name
+a cell by its `x` and `y` values, so in a faceted plot the same cell
+lights up in every panel at once. To keep the panels apart, give
+`data_id` an expression that includes the facet variable, such as
+`paste(state, week, category)`.
 
 The static rendering is unchanged: with `interactive = FALSE` the
 package does not touch ggiraph at all, and with it `TRUE` the same
